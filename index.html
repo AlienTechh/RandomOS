@@ -80,21 +80,33 @@
         
         .home-bar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; background: rgba(255,255,255,0.8); border-radius: 10px; z-index: 3500; cursor: pointer; }
 
-        /* Multitasking Styles */
+        /* Multitasking System */
+        .multitasking-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 80; display: none; }
+        .recents-view .multitasking-overlay { display: block; }
+
         .recents-view .app { 
-            transform: scale(0.6) translateY(-50px) !important; 
+            transform: scale(0.65) translateY(-40px) !important; 
             opacity: 1 !important; 
-            pointer-events: auto !important;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            pointer-events: none !important; /* Prevents clicking items inside settings */
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
         }
-        .recents-view .wallpaper { transform: scale(0.9) !important; filter: blur(10px); }
-        .close-app-btn { 
-            position: absolute; top: -20px; right: -20px; width: 40px; height: 40px; 
-            background: #ff3b30; color: white; border-radius: 50%; 
+        .recents-view .app-card-trigger { 
+            position: absolute; top: 10%; left: 15%; width: 70%; height: 70%; 
+            z-index: 110; display: none; cursor: pointer; 
+        }
+        .recents-view .app-card-trigger { display: block; }
+
+        .recents-view .wallpaper { transform: scale(0.9) !important; filter: blur(15px); }
+        
+        /* Close All Button */
+        #closeAllBtn { 
+            position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); 
+            width: 50px; height: 50px; background: rgba(255,255,255,0.2); 
+            backdrop-filter: blur(10px); border-radius: 50%; color: white; 
             display: none; justify-content: center; align-items: center; 
-            font-weight: bold; cursor: pointer; z-index: 1000;
+            font-size: 20px; font-weight: bold; border: 1px solid rgba(255,255,255,0.3); z-index: 3600; 
         }
-        .recents-view .close-app-btn { display: flex; }
+        .recents-view #closeAllBtn { display: flex; }
 
         .is-unlocked .wallpaper { transform: scale(1); }
         .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
@@ -108,6 +120,9 @@
     <div class="phone" id="phone" ondblclick="handleDoubleTap(event)">
         <div class="brightness-overlay"></div>
         <div class="punch-hole"></div>
+        
+        <div class="multitasking-overlay" onclick="exitRecentsToHome()"></div>
+
         <div class="status-bar">
             <span id="st-time">12:00</span>
             <div class="battery-section" onclick="toggleCC(true)">
@@ -158,8 +173,8 @@
 
         <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
 
+        <div class="app-card-trigger" onclick="exitRecentsToApp()"></div>
         <div class="app" id="settingsApp">
-            <div class="close-app-btn" onclick="killApp()">✕</div>
             <div id="p1" class="page">
                 <div class="header">Settings</div>
                 <div class="item" onclick="showPage(6)">Screen Lock <span>›</span></div>
@@ -181,6 +196,8 @@
             </div>
         </div>
 
+        <div id="closeAllBtn" onclick="killAllApps()">✕</div>
+
         <div class="home-bar" id="bottomBar" 
              onmousedown="handleHomeStart()" onmouseup="handleHomeEnd()"
              ontouchstart="handleHomeStart()" ontouchend="handleHomeEnd()"></div>
@@ -194,10 +211,10 @@
         // MULTITASKING LOGIC
         function handleHomeStart() {
             homeTimer = setTimeout(() => {
-                if (isPowerOn && phone.classList.contains('is-unlocked')) {
+                if (isPowerOn && phone.classList.contains('is-unlocked') && phone.classList.contains('open')) {
                     phone.classList.add('recents-view');
                 }
-            }, 600); // Click and hold for 600ms
+            }, 600);
         }
 
         function handleHomeEnd() {
@@ -207,7 +224,16 @@
             }
         }
 
-        function killApp() {
+        function exitRecentsToApp() {
+            phone.classList.remove('recents-view');
+        }
+
+        function exitRecentsToHome() {
+            phone.classList.remove('recents-view');
+            phone.classList.remove('open');
+        }
+
+        function killAllApps() {
             phone.classList.remove('open');
             phone.classList.remove('recents-view');
         }
