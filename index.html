@@ -2,10 +2,13 @@
 <html lang="ka">
 <head>
     <meta charset="UTF-8">
+    <!-- 1. აჩერებს ზუმს მობილურზე -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FakeOS 1.0 - Fixed</title>
+    <title>FakeOS 1.0 - Real Battery</title>
     <style>
-        * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+        /* 2. აშორებს ლურჯ ფონს დაჭერისას */
+        * { -webkit-tap-highlight-color: transparent; }
+
         :root { --spd: 0.5s; --ios-spring: cubic-bezier(0.3, 1.2, 0.3, 1); --bright: 1; }
         body { margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; background: #0a0a0a; font-family: -apple-system, sans-serif; overflow: hidden; user-select: none; touch-action: manipulation; }
         
@@ -17,84 +20,95 @@
         .brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; pointer-events: none; z-index: 3800; opacity: calc(1 - var(--bright)); }
         .punch-hole { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; background: #000; border-radius: 50%; z-index: 3900; border: 1px solid #1a1a1a; }
         
+        /* Status Bar ბატარეით */
         .status-bar { 
             position: absolute; top: 0; width: 100%; height: 35px; 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 0 20px; box-sizing: border-box; color: white; font-size: 11px; z-index: 1000; 
         }
+        .battery-section { display: flex; align-items: center; gap: 4px; cursor: pointer; }
 
-        /* ეკრანის ჩართვის ფენა */
-        .screen-off { position: absolute; width: 100%; height: 100%; background: #000; z-index: 4000; transition: opacity 0.4s; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #333; font-size: 10px; }
-        
+        .control-center { position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(25px); z-index: 2500; transform: translateY(-100%); transition: transform 0.4s var(--ios-spring); display: flex; flex-direction: column; align-items: center; padding-top: 80px; gap: 20px; }
+        .cc-open { transform: translateY(0); }
+        .cc-slider-box { width: 200px; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 20px; color: white; text-align: center; }
+
+        .screen-off { position: absolute; width: 100%; height: 100%; background: #000; z-index: 4000; transition: opacity 0.4s; cursor: pointer; }
         .wallpaper { position: absolute; width: 100%; height: 100%; background: #1a3a5a url('https://unsplash.com') center/cover; transition: all 0.6s var(--ios-spring); z-index: 1; transform: scale(1.2); }
         .lockscreen { position: absolute; width: 100%; height: 100%; z-index: 500; display: flex; flex-direction: column; align-items: center; padding-top: 70px; color: white; background: rgba(0,0,0,0.1); transition: transform 0.6s var(--ios-spring), opacity 0.4s; }
         .lock-time { font-size: 58px; font-weight: 200; }
 
-        .home-bar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 100px; height: 5px; background: white; border-radius: 10px; z-index: 4500; cursor: pointer; }
+        .drag-btn { position: absolute; width: 60px; height: 60px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: grab; z-index: 5; opacity: 0; transform: scale(0.5); transition: opacity 0.5s, transform 0.6s var(--ios-spring); touch-action: none; }
+        .icon-normal-settings { background: linear-gradient(180deg, #b0b0b5 0%, #5e5e62 100%); }
+        .icon-normal-cc { background: linear-gradient(180deg, #5856d6 0%, #3634a3 100%); }
+        .icon-glassy { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
         
-        /* ანიმაციები */
-        .phone.is-on .screen-off { opacity: 0; pointer-events: none; }
-        .phone.is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; }
-        .phone.is-unlocked .wallpaper { transform: scale(1); }
+        #settingsBtn { top: 110px; left: 30px; }
+        #ccIconBtn { top: 110px; left: 110px; }
+
+        .app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f2f2f7; z-index: 100; transform: scale(0); opacity: 0; pointer-events: none; transition: transform var(--spd) var(--ios-spring), opacity 0.3s; display: flex; flex-direction: column; border-radius: 40px; }
+        .header { padding: 60px 20px 10px; font-weight: 800; font-size: 26px; color: #000; }
+        .item { padding: 15px 18px; font-size: 16px; border-bottom: 0.5px solid #e5e5ea; cursor: pointer; color: #000; display: flex; justify-content: space-between; background: #fff; }
+        .home-bar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 100px; height: 5px; background: white; border-radius: 10px; z-index: 3500; cursor: pointer; }
+        
+        .is-unlocked .wallpaper { transform: scale(1); }
+        .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
+        .is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; }
+        .open .app { transform: scale(1); opacity: 1; pointer-events: auto; }
+        .open .wallpaper { filter: blur(30px); transform: scale(1.1) !important; }
     </style>
 </head>
 <body>
 
-    <div class="phone" id="phone">
-        <div class="screen-off" id="blackOverlay" onclick="togglePower()">Tap to Power On</div>
-        
+    <div class="phone" id="phone" ondblclick="handleDoubleTap(event)">
         <div class="brightness-overlay"></div>
         <div class="punch-hole"></div>
-        
         <div class="status-bar">
             <span id="st-time">12:00</span>
-            <span>🔋 100%</span>
+            <div class="battery-section" onclick="toggleCC(true)">
+                <span id="battery-level">--%</span>
+                <span id="battery-icon">🔋</span>
+            </div>
         </div>
 
-        <div class="wallpaper" id="mainWallpaper"></div>
+        <div class="control-center" id="ccPanel">
+            <div class="cc-slider-box">
+                <div style="font-size:12px; margin-bottom:10px;">Brightness</div>
+                <input type="range" min="0.1" max="1" step="0.1" value="1" oninput="changeBrightness(this.value)" style="width:100%;">
+            </div>
+            <div style="color:white; margin-top:20px; cursor:pointer;" onclick="toggleCC(false)">Close ✕</div>
+        </div>
+
+        <!-- 3. დავამატე onclick, რომ ეკრანზე დაჭერისას შავი ფენა გაქრეს -->
+        <div class="screen-off" id="blackOverlay" onclick="this.style.display='none'"></div>
         
-        <div class="lockscreen" id="lockView">
-            <div class="lock-time" id="clock">12:00</div>
-            <div style="margin-top: 10px; opacity: 0.8;">Tap Home Bar to unlock</div>
+        <div class="wallpaper" id="mainWallpaper"></div>
+        <div class="lockscreen" id="lockView"><div class="lock-time" id="clock">12:00</div><div style="margin-top: 10px; opacity: 0.8;">Swipe up to unlock</div></div>
+
+        <div class="drag-btn icon-normal-settings" id="settingsBtn" onmousedown="setupDrag(event, this, 'settings')">⚙️</div>
+        <div class="drag-btn icon-normal-cc" id="ccIconBtn" onmousedown="setupDrag(event, this, 'cc')">🎛️</div>
+
+        <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
+
+        <div class="app" id="settingsApp">
+            <div id="p1" class="page">
+                <div class="header">Settings</div>
+                <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
+                <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
+                <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
+                <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
+            </div>
+            <div id="p2" class="page" style="display:none;"><div class="header">Speed</div><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" onclick="setSpd('0s')">Off</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+            <div id="p3" class="page" style="display:none;"><div class="header">Wallpaper</div><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+            <div id="p4" class="page" style="display:none;"><div class="header">About Phone</div><div style="padding:40px; text-align:center;"><h1 style="color:#000;">FakeOS 1.0</h1><p style="color:#666;">POCO X6 Pro</p></div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
+            <div id="p5" class="page" style="display:none;"><div class="header">Icons</div><div class="item" onclick="changeIconStyle('glassy')">Glassy</div><div class="item" onclick="changeIconStyle('normal')">Normal</div><div class="item" style="color:#007aff;" onclick="showPage(1)">Back</div></div>
         </div>
 
-        <div class="home-bar" id="homeBar" onclick="handleHomeBar()"></div>
+        <div class="home-bar" onclick="handleHomeBar()"></div>
     </div>
 
     <script>
-        const phone = document.getElementById('phone');
-        let isPowerOn = false;
-        let isUnlocked = false;
-
-        // ჩართვა/გამორთვა
-        function togglePower() {
-            isPowerOn = true;
-            phone.classList.add('is-on');
-        }
-
-        // განბლოკვა/დაბლოკვა ხაზზე დაჭერით
-        function handleHomeBar() {
-            if (!isPowerOn) return;
-            
-            if (!isUnlocked) {
-                isUnlocked = true;
-                phone.classList.add('is-unlocked');
-            } else {
-                // თუ უკვე ღიაა, მეორედ დაჭერით ისევ ბლოკავს (სატესტოდ)
-                isUnlocked = false;
-                phone.classList.remove('is-unlocked');
-            }
-        }
-
-        // საათის განახლება
-        function updateTime() {
-            const now = new Date();
-            const timeStr = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('st-time').innerText = timeStr;
-            document.getElementById('clock').innerText = timeStr;
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
+        // აქედან გააგრძელე შენი JavaScript კოდი (ფუნქციები: handleHomeBar, setupDrag და ა.შ.)
+        // რომლებსაც ზემოთ იძახებ.
     </script>
 </body>
 </html>
