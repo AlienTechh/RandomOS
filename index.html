@@ -49,14 +49,7 @@
         .num-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; }
         .num-btn:active { background: rgba(255,255,255,0.3); }
 
-        .fingerprint-scanner {
-            margin-top: auto; margin-bottom: 120px; 
-            width: 65px; height: 65px;
-            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%;
-            display: none; justify-content: center; align-items: center; font-size: 32px;
-            cursor: pointer; transition: transform 0.2s; animation: pulse 2s infinite; z-index: 600;
-        }
+        .fingerprint-scanner { margin-top: auto; margin-bottom: 120px; width: 65px; height: 65px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 32px; cursor: pointer; animation: pulse 2s infinite; z-index: 600; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
         .drag-btn { position: absolute; width: 60px; height: 60px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: grab; z-index: 5; opacity: 0; transform: scale(0.5); transition: opacity 0.5s, transform 0.6s var(--ios-spring); touch-action: none; }
@@ -67,29 +60,28 @@
         
         #settingsBtn { top: 110px; left: 30px; }
         #ccIconBtn { top: 110px; left: 110px; }
-        #calcIconBtn { top: 110px; left: 190px; }
+        #calcBtn { top: 110px; left: 190px; }
 
         .app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #f2f2f7; z-index: 100; transform: scale(0); opacity: 0; pointer-events: none; transition: transform var(--spd) var(--ios-spring), opacity 0.3s; display: flex; flex-direction: column; border-radius: 40px; overflow: hidden; }
-        
-        /* Glassy App Fix - Only affects container, not content */
-        .app.is-glassy { background: rgba(255, 255, 255, 0.25) !important; backdrop-filter: blur(30px); }
-        .app.is-glassy .header, .app.is-glassy .item { color: #fff; background: transparent; border-bottom: 0.5px solid rgba(255,255,255,0.2); }
-        
+        .app.glass-mode { background: rgba(255,255,255,0.4) !important; backdrop-filter: blur(30px); }
+
         .header { padding: 60px 20px 10px; font-weight: 800; font-size: 26px; color: #000; }
         .item { padding: 15px 18px; font-size: 16px; border-bottom: 0.5px solid #e5e5ea; cursor: pointer; color: #000; display: flex; justify-content: space-between; background: #fff; align-items: center; }
+        .app.glass-mode .header { color: #fff; }
+        .app.glass-mode .item { background: rgba(255,255,255,0.1); color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); }
         
-        /* Calculator UI */
-        .calc-display { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; padding: 20px; font-size: 40px; color: inherit; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 20px; background: rgba(0,0,0,0.05); }
-        .c-btn { height: 50px; background: #fff; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); color: #000; }
-        .app.is-glassy .c-btn { background: rgba(255,255,255,0.2); color: #fff; }
+        /* Calc UI */
+        .calc-res { height: 120px; display: flex; align-items: flex-end; justify-content: flex-end; padding: 20px; font-size: 42px; color: inherit; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px; }
+        .c-btn { height: 50px; background: #fff; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; color: #000; }
+        .app.glass-mode .c-btn { background: rgba(255,255,255,0.2); color: #fff; }
 
         .home-bar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 100px; height: 5px; background: white; border-radius: 10px; z-index: 3500; cursor: pointer; }
         
         .is-unlocked .wallpaper { transform: scale(1); }
         .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
         .is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; }
-        .open .app-active { transform: scale(1); opacity: 1; pointer-events: auto; }
+        .open .active-app { transform: scale(1); opacity: 1; pointer-events: auto; }
         .open .wallpaper { filter: blur(30px); transform: scale(1.1) !important; }
     </style>
 </head>
@@ -137,17 +129,9 @@
             <div style="margin-top: 30px; color: #007aff; cursor: pointer;" onclick="closePinPad()">Back</div>
         </div>
 
-        <div class="drag-btn icon-normal-settings" id="settingsBtn" 
-             onmousedown="setupDrag(event, this, 'settings')" 
-             ontouchstart="setupDrag(event, this, 'settings')">⚙️</div>
-             
-        <div class="drag-btn icon-normal-cc" id="ccIconBtn" 
-             onmousedown="setupDrag(event, this, 'cc')" 
-             ontouchstart="setupDrag(event, this, 'cc')">🎛️</div>
-
-        <div class="drag-btn icon-normal-calc" id="calcIconBtn" 
-             onmousedown="setupDrag(event, this, 'calc')" 
-             ontouchstart="setupDrag(event, this, 'calc')">➗</div>
+        <div class="drag-btn icon-normal-settings" id="settingsBtn" onmousedown="setupDrag(event, this, 'settings')" ontouchstart="setupDrag(event, this, 'settings')">⚙️</div>
+        <div class="drag-btn icon-normal-cc" id="ccIconBtn" onmousedown="setupDrag(event, this, 'cc')" ontouchstart="setupDrag(event, this, 'cc')">🎛️</div>
+        <div class="drag-btn icon-normal-calc" id="calcBtn" onmousedown="setupDrag(event, this, 'calc')" ontouchstart="setupDrag(event, this, 'calc')">➗</div>
 
         <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
 
@@ -175,24 +159,12 @@
 
         <div class="app" id="calcApp">
             <div class="header">Calculator</div>
-            <div class="calc-display" id="calcScreen">0</div>
+            <div class="calc-res" id="calcDisplay">0</div>
             <div class="calc-grid">
-                <div class="c-btn" style="color:#ff9500" onclick="calcInput('C')">C</div>
-                <div class="c-btn" onclick="calcInput('/')">÷</div>
-                <div class="c-btn" onclick="calcInput('*')">×</div>
-                <div class="c-btn" onclick="calcInput('-')">−</div>
-                <div class="c-btn" onclick="calcInput('7')">7</div>
-                <div class="c-btn" onclick="calcInput('8')">8</div>
-                <div class="c-btn" onclick="calcInput('9')">9</div>
-                <div class="c-btn" onclick="calcInput('+')">+</div>
-                <div class="c-btn" onclick="calcInput('4')">4</div>
-                <div class="c-btn" onclick="calcInput('5')">5</div>
-                <div class="c-btn" onclick="calcInput('6')">6</div>
-                <div class="c-btn" style="background:#ff9500; color:#fff" onclick="calcInput('=')">=</div>
-                <div class="c-btn" onclick="calcInput('1')">1</div>
-                <div class="c-btn" onclick="calcInput('2')">2</div>
-                <div class="c-btn" onclick="calcInput('3')">3</div>
-                <div class="c-btn" onclick="calcInput('0')">0</div>
+                <div class="c-btn" style="color:orange" onclick="calcOp('C')">C</div><div class="c-btn" onclick="calcOp('/')">÷</div><div class="c-btn" onclick="calcOp('*')">×</div><div class="c-btn" onclick="calcOp('-')">−</div>
+                <div class="c-btn" onclick="calcOp('7')">7</div><div class="c-btn" onclick="calcOp('8')">8</div><div class="c-btn" onclick="calcOp('9')">9</div><div class="c-btn" onclick="calcOp('+')">+</div>
+                <div class="c-btn" onclick="calcOp('4')">4</div><div class="c-btn" onclick="calcOp('5')">5</div><div class="c-btn" onclick="calcOp('6')">6</div><div class="c-btn" style="background:orange; color:white" onclick="calcOp('=')">=</div>
+                <div class="c-btn" onclick="calcOp('1')">1</div><div class="c-btn" onclick="calcOp('2')">2</div><div class="c-btn" onclick="calcOp('3')">3</div><div class="c-btn" onclick="calcOp('0')">0</div>
             </div>
         </div>
 
@@ -201,14 +173,14 @@
 
     <script>
         const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), wallpaper = document.getElementById('mainWallpaper');
-        let isPowerOn = true, isDragging = false, activePin = null, currentPinInput = "", calcVal = "";
+        let isPowerOn = true, activePin = null, currentPinInput = "", calcVal = "";
 
-        function calcInput(v) {
-            const s = document.getElementById('calcScreen');
+        function calcOp(v) {
+            const d = document.getElementById('calcDisplay');
             if(v === 'C') calcVal = "";
             else if(v === '=') { try { calcVal = eval(calcVal).toString(); } catch { calcVal = "Error"; } }
             else calcVal += v;
-            s.innerText = calcVal || "0";
+            d.innerText = calcVal || "0";
         }
 
         function createPin() {
@@ -261,17 +233,14 @@
                 else phone.classList.add('is-unlocked');
             } else { 
                 phone.classList.remove('open'); 
-                document.querySelectorAll('.app').forEach(a => {
-                    a.classList.remove('app-active');
-                    a.style.transform = "scale(0)";
-                });
+                document.querySelectorAll('.app').forEach(a => { a.classList.remove('active-app'); a.style.transform = "scale(0)"; });
                 toggleCC(false); 
             } 
         }
 
         function setupDrag(e, el, type) {
             if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open')) return;
-            isDragging = false;
+            let moved = false;
             const isTouch = e.type === 'touchstart';
             let startX = isTouch ? e.touches[0].clientX : e.clientX;
             let startY = isTouch ? e.touches[0].clientY : e.clientY;
@@ -279,25 +248,25 @@
             let initY = el.offsetTop;
 
             const move = (ev) => {
-                isDragging = true;
-                const currentX = isTouch ? ev.touches[0].clientX : ev.clientX;
-                const currentY = isTouch ? ev.touches[0].clientY : ev.clientY;
-                el.style.left = Math.max(10, Math.min(initX + (currentX - startX), 210)) + 'px';
-                el.style.top = Math.max(40, Math.min(initY + (currentY - startY), 480)) + 'px';
+                const curX = isTouch ? ev.touches[0].clientX : ev.clientX;
+                const curY = isTouch ? ev.touches[0].clientY : ev.clientY;
+                if (Math.abs(curX - startX) > 5 || Math.abs(curY - startY) > 5) moved = true;
+                el.style.left = Math.max(10, Math.min(initX + (curX - startX), 210)) + 'px';
+                el.style.top = Math.max(40, Math.min(initY + (curY - startY), 480)) + 'px';
             };
 
             const stop = () => { 
                 document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', move); 
                 document.removeEventListener(isTouch ? 'touchend' : 'mouseup', stop); 
-                if (!isDragging) { 
+                if (!moved) { 
                     if(type === 'cc') { toggleCC(true); return; }
-                    const targetApp = document.getElementById(type + 'App');
-                    targetApp.style.transformOrigin = (parseInt(el.style.left)+30)+"px "+(parseInt(el.style.top)+30)+"px";
+                    const app = document.getElementById(type + 'App');
+                    app.style.transformOrigin = (parseInt(el.style.left)+30)+"px "+(parseInt(el.style.top)+30)+"px";
                     phone.classList.add('open');
-                    targetApp.classList.add('app-active');
+                    app.classList.add('active-app');
                 } 
             };
-            document.addEventListener(isTouch ? 'touchmove' : 'mousemove', move, { passive: false }); 
+            document.addEventListener(isTouch ? 'touchmove' : 'mousemove', move); 
             document.addEventListener(isTouch ? 'touchend' : 'mouseup', stop);
         }
 
@@ -313,17 +282,9 @@
         function changeIconStyle(s) { 
             document.querySelectorAll('.drag-btn').forEach(b => {
                 if(s === 'glassy') b.className = 'drag-btn icon-glassy';
-                else {
-                    if(b.id === 'settingsBtn') b.className = 'drag-btn icon-normal-settings';
-                    else if(b.id === 'ccIconBtn') b.className = 'drag-btn icon-normal-cc';
-                    else b.className = 'drag-btn icon-normal-calc';
-                }
+                else b.className = 'drag-btn ' + (b.id==='settingsBtn'?'icon-normal-settings':(b.id==='ccIconBtn'?'icon-normal-cc':'icon-normal-calc'));
             });
-            // Apply glass to App container but keep content readable via CSS logic
-            document.querySelectorAll('.app').forEach(app => {
-                if(s === 'glassy') app.classList.add('is-glassy');
-                else app.classList.remove('is-glassy');
-            });
+            document.querySelectorAll('.app').forEach(a => a.classList.toggle('glass-mode', s === 'glassy'));
         }
         function updateTime() { const now = new Date(); const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); document.getElementById('clock').innerText = t; document.getElementById('st-time').innerText = t; }
         setInterval(updateTime, 1000); updateTime();
