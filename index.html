@@ -38,7 +38,7 @@
             box-shadow: 0 50px 100px rgba(0,0,0,0.9);
         }
 
-        /* --- NEW: Boot Screen Styling --- */
+        /* --- Boot & Setup Screens --- */
         .boot-screen {
             position: absolute; inset: 0; background: #000; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -51,6 +51,21 @@
             border-radius: 50%; animation: spin 1s linear infinite;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .setup-screen {
+            position: absolute; inset: 0; background: var(--bg-app); z-index: 9998;
+            display: none; flex-direction: column; padding: 60px 25px; color: var(--text-main);
+        }
+        .setup-screen h2 { font-size: 28px; margin-bottom: 10px; }
+        .setup-input {
+            width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);
+            background: var(--bg-item); color: var(--text-main); font-size: 16px; margin-top: 20px;
+            box-sizing: border-box; outline: none;
+        }
+        .setup-btn {
+            margin-top: auto; background: var(--ios-blue); color: white; padding: 18px;
+            border-radius: 16px; text-align: center; font-weight: 600; cursor: pointer;
+        }
 
         /* AOD Styling */
         .aod-layer {
@@ -77,7 +92,6 @@
 
         .wallpaper { position: absolute; width: 100%; height: 100%; background: #1a3a5a url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; transition: transform 0.8s var(--ios-spring), filter 0.5s; z-index: 1; transform: scale(1.1); }
         
-        /* --- NEW: CC Real-time Blur --- */
         .cc-active .wallpaper { filter: blur(25px) brightness(0.6); transform: scale(1.15); }
 
         .lockscreen { position: absolute; width: 100%; height: 100%; z-index: 3000; display: flex; flex-direction: column; align-items: center; padding-top: 80px; color: white; transition: transform 0.7s var(--ios-spring), opacity 0.4s; }
@@ -138,6 +152,14 @@
         <div class="boot-screen" id="bootScreen">
             <div class="boot-logo">FakeOS</div>
             <div class="boot-spinner"></div>
+        </div>
+
+        <div class="setup-screen" id="setupScreen">
+            <h2>Welcome</h2>
+            <p>Personalize your device to get started.</p>
+            <label style="font-size: 14px; font-weight: 600; margin-top: 20px;">Device Name</label>
+            <input type="text" id="setupDeviceName" class="setup-input" placeholder="e.g. My Phone" value="POCO X6 Pro">
+            <div class="setup-btn" onclick="finishSetup()">Get Started</div>
         </div>
 
         <div class="aod-layer" id="aod">
@@ -214,7 +236,16 @@
             </div>
             <div id="p2" class="page" style="display:none;"><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
             <div id="p3" class="page" style="display:none;"><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
-            <div id="p4" class="page" style="display:none;"><div style="padding:40px; text-align:center;"><h1 style="color:var(--text-main);">FakeOS 1.0</h1><p style="color:var(--text-main); opacity:0.6;">POCO X6 Pro Edition</p></div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
+            
+            <div id="p4" class="page" style="display:none;">
+                <div style="padding:40px 20px; text-align:center;">
+                    <h1 style="color:var(--text-main); margin-bottom: 5px;">FakeOS 1.0</h1>
+                    <p id="aboutDeviceName" style="color:var(--text-main); opacity:0.6; font-size: 18px;">POCO X6 Pro Edition</p>
+                </div>
+                <div class="item" onclick="renameDevice()">Device Name <span id="deviceNameLabel" style="opacity: 0.5;">POCO X6 Pro ›</span></div>
+                <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
+            </div>
+
             <div id="p5" class="page" style="display:none;"><div class="item" onclick="changeIconStyle('glassy')">Glassmorphism</div><div class="item" onclick="changeIconStyle('normal')">Classic</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
             <div id="p6" class="page" style="display:none;">
                 <div class="item">Fingerprint <div style="display:flex; gap: 12px;"><span onclick="setFingerprint(true)" style="color:#34c759; font-weight: bold;">ON</span><span onclick="setFingerprint(false)" style="color:#ff3b30; font-weight: bold;">OFF</span></div></div>
@@ -233,15 +264,43 @@
     </div>
 
     <script>
-        // --- NEW: Boot Screen Logic ---
+        let deviceName = "POCO X6 Pro";
+
+        // --- NEW: Boot and Setup Logic ---
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const boot = document.getElementById('bootScreen');
                 boot.style.opacity = '0';
-                setTimeout(() => boot.style.display = 'none', 500); // Wait for fade transition
+                setTimeout(() => {
+                    boot.style.display = 'none';
+                    document.getElementById('setupScreen').style.display = 'flex';
+                }, 500);
             }, 3000);
         });
 
+        function finishSetup() {
+            const inputName = document.getElementById('setupDeviceName').value;
+            if(inputName.trim() !== "") updateDeviceName(inputName);
+            
+            document.getElementById('setupScreen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('setupScreen').style.display = 'none';
+                unlockPhone(); // Go straight to home screen
+            }, 500);
+        }
+
+        function updateDeviceName(newName) {
+            deviceName = newName;
+            document.getElementById('aboutDeviceName').innerText = deviceName + " Edition";
+            document.getElementById('deviceNameLabel').innerText = deviceName + " ›";
+        }
+
+        function renameDevice() {
+            let n = prompt("Enter new device name:", deviceName);
+            if(n && n.trim() !== "") updateDeviceName(n);
+        }
+
+        // --- Core OS Logic ---
         const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), wallpaper = document.getElementById('mainWallpaper'), ccPanel = document.getElementById('ccPanel');
         const settingsApp = document.getElementById('settingsApp');
         const soundUnlock = document.getElementById('sound-unlock');
@@ -250,7 +309,7 @@
         
         let isPowerOn = true, activePin = null, currentPinInput = "";
         let homeTimer, aodTimeout;
-        let currentPage = 1; // --- NEW: Track current app page for Gestures ---
+        let currentPage = 1;
 
         function playSfx(s) { s.currentTime = 0; s.play().catch(e => {}); }
 
@@ -348,7 +407,7 @@
         updateBattery();
 
         function handleDoubleTap(e) {
-            if (e.target.closest('.cc-btn') || e.target.closest('.cc-slider-box') || ccPanel.classList.contains('cc-open')) return;
+            if (e.target.closest('.cc-btn') || e.target.closest('.cc-slider-box') || ccPanel.classList.contains('cc-open') || e.target.closest('.setup-screen')) return;
             
             if (!isPowerOn) { 
                 blackOverlay.classList.remove('screen-is-off'); 
@@ -363,7 +422,6 @@
                 isPowerOn = false; 
                 toggleCC(false); 
                 closePinPad();
-                // AOD Timer
                 aodTimeout = setTimeout(() => {
                     if(!isPowerOn) aod.style.display = 'flex';
                 }, 5000);
@@ -371,14 +429,8 @@
         }
 
         function handleHomeBar() { 
-            if (ccPanel.classList.contains('cc-open')) {
-                toggleCC(false);
-                return;
-            }
-            if (phone.classList.contains('recents-view')) {
-                phone.classList.remove('recents-view');
-                return;
-            }
+            if (ccPanel.classList.contains('cc-open')) { toggleCC(false); return; }
+            if (phone.classList.contains('recents-view')) { phone.classList.remove('recents-view'); return; }
             if (isPowerOn && !phone.classList.contains('is-unlocked')) {
                 unlockPhone();
             } else { 
@@ -386,39 +438,26 @@
             } 
         }
 
-        // --- NEW: App Swipe Back Gestures ---
+        // Gestures
         let isSwiping = false, gestureStartX = 0, gestureStartY = 0;
-        
         function startGesture(x, y) {
             if (!phone.classList.contains('open')) return;
             let rect = settingsApp.getBoundingClientRect();
-            let relX = x - rect.left;
-            if (relX < 40) { // If starting near the left edge
-                isSwiping = true;
-                gestureStartX = x;
-                gestureStartY = y;
-            }
+            if (x - rect.left < 40) { isSwiping = true; gestureStartX = x; gestureStartY = y; }
         }
-
         function endGesture(x, y) {
             if (!isSwiping) return;
             isSwiping = false;
-            // If swiped right by at least 60px, and didn't move too much vertically
             if (x - gestureStartX > 60 && Math.abs(y - gestureStartY) < 50) {
-                if (currentPage !== 1) {
-                    showPage(1); // Go back a page
-                } else {
-                    handleHomeBar(); // Swipe away app if on root page
-                }
+                if (currentPage !== 1) showPage(1);
+                else handleHomeBar();
             }
         }
 
         settingsApp.addEventListener('touchstart', e => startGesture(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
         settingsApp.addEventListener('touchend', e => endGesture(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
-        // Added mouse support so you can test swipe gestures on PC
         settingsApp.addEventListener('mousedown', e => startGesture(e.clientX, e.clientY));
         settingsApp.addEventListener('mouseup', e => endGesture(e.clientX, e.clientY));
-        // ------------------------------------
 
         function setupDrag(e, el, type) {
             if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open') || phone.classList.contains('recents-view') || ccPanel.classList.contains('cc-open')) return;
@@ -445,7 +484,7 @@
                     if(type === 'settings') {
                         phone.classList.add('open');
                         settingsApp.classList.add('is-running');
-                        currentPage = 1; // Reset to page 1 on open
+                        currentPage = 1;
                     } else toggleCC(true); 
                 } 
             };
@@ -454,44 +493,32 @@
         }
 
         function changeBrightness(v) { document.documentElement.style.setProperty('--bright', v); }
-        
-        // --- UPDATED: Toggle CC to add blur class ---
         function toggleCC(o) { 
             if(isPowerOn && phone.classList.contains('is-unlocked')) {
                 ccPanel.classList.toggle('cc-open', o); 
                 phone.classList.toggle('cc-active', o);
             }
         }
-        
-        // --- UPDATED: Track current page for back gestures ---
         function showPage(n) { 
             currentPage = n;
             document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); 
             document.getElementById('p' + n).style.display = 'block'; 
         }
-
         function setSpd(t) { document.documentElement.style.setProperty('--spd', t); }
-        
         function changeWallpaper(e) { 
             const r = new FileReader(); 
             r.onload = (ev) => { wallpaper.style.backgroundImage = `url('${ev.target.result}')`; }; 
             r.readAsDataURL(e.target.files[0]); 
         }
-        
         function changeIconStyle(s) { 
             const setBtn = document.getElementById('settingsBtn');
             const ccBtn = document.getElementById('ccIconBtn');
-            
             if(s === 'glassy') {
                 setBtn.className = 'drag-btn icon-glassy';
                 ccBtn.className = 'drag-btn icon-glassy';
-                setBtn.textContent = '⚙️';
-                ccBtn.textContent = '📱';
             } else {
                 setBtn.className = 'drag-btn icon-normal-settings';
                 ccBtn.className = 'drag-btn icon-normal-cc';
-                setBtn.textContent = '⚙️';
-                ccBtn.textContent = '📱';
             }
         }
 
