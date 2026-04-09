@@ -31,91 +31,101 @@
             touch-action: manipulation;
         }
         
-        /* POCO X3 NFC (SURYA) ACCURATE BEZELS */
+        /* POCO X3 NFC (SURYA) HARDWARE FIX */
         .phone { 
-            width: 300px; height: 640px; background: #000; 
+            width: 305px; height: 650px; background: #000; 
             border: 14px solid #1a1a1a; 
-            border-bottom: 22px solid #1a1a1a; /* Thicker Chin for Surya LCD */
+            border-bottom: 24px solid #1a1a1a; /* Surya Chin */
             border-radius: 48px; 
             position: relative; overflow: hidden; 
             box-shadow: 0 50px 100px rgba(0,0,0,0.9);
+            /* FIX: GPU acceleration prevents border-radius bugs */
             transform: translateZ(0);
+            will-change: transform;
         }
+
+        /* IMPROVED FEEDBACK ANIMATIONS */
+        .num-btn, .cc-btn, .item, .drag-btn {
+            transition: transform 0.1s ease, opacity 0.2s ease, background 0.2s ease;
+        }
+        .num-btn:active, .cc-btn:active, .item:active {
+            transform: scale(0.94);
+            background: rgba(0,0,0,0.1);
+        }
+        .dark-mode .item:active { background: rgba(255,255,255,0.1); }
 
         .brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; pointer-events: none; z-index: 3800; opacity: calc(1 - var(--bright)); }
         
-        /* SURYA PUNCH HOLE (Tiny Center Dot) */
+        /* SURYA CENTER DOT DISPLAY */
         .punch-hole { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 14px; height: 14px; background: #000; border-radius: 50%; z-index: 3900; border: 1px solid #222; }
         
-        .status-bar { position: absolute; top: 0; width: 100%; height: 40px; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; box-sizing: border-box; color: white; font-size: 12px; font-weight: 600; z-index: 3500; }
+        .status-bar { position: absolute; top: 0; width: 100%; height: 44px; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; box-sizing: border-box; color: white; font-size: 13px; font-weight: 600; z-index: 3500; }
 
-        .control-center { position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 2500; transform: translateY(-100%); transition: transform 0.5s var(--ios-spring); display: flex; flex-direction: column; align-items: center; padding-top: 100px; gap: 15px; }
+        .control-center { position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); z-index: 2500; transform: translateY(-100%); transition: transform 0.5s var(--ios-spring); display: flex; flex-direction: column; align-items: center; padding-top: 100px; gap: 15px; }
         .cc-open { transform: translateY(0); }
-        .cc-slider-box { width: 220px; background: rgba(255,255,255,0.15); padding: 20px; border-radius: 28px; color: white; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        .cc-btn { width: 220px; padding: 15px; background: rgba(255,255,255,0.15); border-radius: 20px; color: white; font-weight: 600; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
+        .cc-slider-box { width: 230px; background: rgba(255,255,255,0.15); padding: 22px; border-radius: 28px; color: white; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .cc-btn { width: 230px; padding: 16px; background: rgba(255,255,255,0.15); border-radius: 22px; color: white; font-weight: 600; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
 
         .screen-off { position: absolute; width: 100%; height: 100%; background: #000; z-index: 4000; transition: opacity 0.4s; cursor: pointer; opacity: 0; pointer-events: none; }
         .screen-is-off { opacity: 1; pointer-events: auto; }
 
-        .wallpaper { position: absolute; width: 100%; height: 100%; background: #1a3a5a url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; transition: transform 0.8s var(--ios-spring), filter 0.5s; z-index: 1; transform: scale(1.1); }
+        .wallpaper { position: absolute; width: 102%; height: 102%; left: -1%; top: -1%; background: #1a3a5a url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; transition: transform 0.8s var(--ios-spring), filter 0.6s ease; z-index: 1; transform: scale(1.1); }
         
-        .lockscreen { position: absolute; width: 100%; height: 100%; z-index: 3000; display: flex; flex-direction: column; align-items: center; padding-top: 80px; color: white; transition: transform 0.7s var(--ios-spring), opacity 0.4s; }
-        .lock-time { font-size: 64px; font-weight: 200; }
+        .lockscreen { position: absolute; width: 100%; height: 100%; z-index: 3000; display: flex; flex-direction: column; align-items: center; padding-top: 90px; color: white; transition: transform 0.7s var(--ios-spring), opacity 0.4s; }
+        .lock-time { font-size: 72px; font-weight: 200; transition: transform 0.3s ease; }
+        .lock-time:active { transform: scale(1.05); }
 
-        .pin-pad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); z-index: 3100; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        .pin-pad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 3100; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .pin-dots { display: flex; gap: 15px; margin-bottom: 40px; }
-        .dot { width: 12px; height: 12px; border: 1.5px solid #fff; border-radius: 50%; }
+        .dot { width: 13px; height: 13px; border: 2px solid #fff; border-radius: 50%; transition: all 0.2s; }
         .dot.active { background: #fff; transform: scale(1.2); }
-        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .num-btn { width: 65px; height: 65px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; }
-        .num-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+        .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+        .num-btn { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.12); display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: pointer; }
 
-        .fingerprint-scanner { margin-top: auto; margin-bottom: 100px; width: 70px; height: 70px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 32px; animation: pulse 2s infinite; pointer-events: auto; cursor: pointer; }
+        .fingerprint-scanner { margin-top: auto; margin-bottom: 110px; width: 75px; height: 75px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 34px; animation: pulse 2s infinite; pointer-events: auto; cursor: pointer; }
 
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); } 70% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); } 70% { box-shadow: 0 0 0 25px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
-        .drag-btn { position: absolute; width: 56px; height: 56px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: grab; z-index: 5; opacity: 0; transform: scale(0.5); transition: opacity 0.5s, transform 0.6s var(--ios-spring); }
-        .drag-btn:active { transform: scale(0.9); }
+        .drag-btn { position: absolute; width: 60px; height: 60px; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: grab; z-index: 5; opacity: 0; transform: scale(0.5); transition: opacity 0.5s, transform 0.6s var(--ios-spring); }
         
         .icon-normal-settings { background: linear-gradient(180deg, #5e5e62 0%, #2c2c2e 100%); color: #fff; }
         .icon-normal-settings::after { content: '⚙️'; }
         .icon-normal-cc { background: linear-gradient(180deg, #007aff 0%, #004080 100%); color: #fff; }
         .icon-normal-cc::after { content: '📊'; }
         
-        .icon-glassy { background: rgba(255, 255, 255, 0.2) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.2); color: #fff; }
+        .icon-glassy { background: rgba(255, 255, 255, 0.25) !important; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1.5px solid rgba(255, 255, 255, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.2); color: #fff; }
 
-        #settingsBtn { top: 110px; left: 30px; }
-        #ccIconBtn { top: 110px; left: 110px; }
+        #settingsBtn { top: 120px; left: 35px; }
+        #ccIconBtn { top: 120px; left: 120px; }
 
-        .multitasking-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 80; display: none; background: rgba(0,0,0,0.1); }
+        .multitasking-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 80; display: none; background: rgba(0,0,0,0.2); }
         .recents-view .multitasking-overlay { display: block; pointer-events: auto; }
         .recents-view .drag-btn { opacity: 0 !important; pointer-events: none !important; }
 
-        .recents-view .app.is-running { display: flex !important; opacity: 1 !important; left: 50% !important; top: 45% !important; transform: translate(-50%, -50%) scale(0.65) !important; pointer-events: none !important; box-shadow: 0 30px 60px rgba(0,0,0,0.5); z-index: 105; }
+        .recents-view .app.is-running { display: flex !important; opacity: 1 !important; left: 50% !important; top: 45% !important; transform: translate(-50%, -50%) scale(0.68) !important; pointer-events: none !important; box-shadow: 0 40px 80px rgba(0,0,0,0.6); z-index: 105; border-radius: 40px; }
         .app-card-trigger { position: absolute; top: 20%; left: 15%; width: 70%; height: 50%; z-index: 110; display: none; cursor: pointer; }
         .recents-view .app.is-running ~ .app-card-trigger { display: block; }
         
-        #kill-app-btn { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); width: 44px; height: 44px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 50%; color: #ff3b30; font-size: 22px; font-weight: bold; display: none; justify-content: center; align-items: center; z-index: 120; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
+        #kill-app-btn { position: absolute; bottom: 85px; left: 50%; transform: translateX(-50%); width: 48px; height: 48px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 50%; color: #ff3b30; font-size: 24px; font-weight: bold; display: none; justify-content: center; align-items: center; z-index: 120; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
         .recents-view.has-apps #kill-app-btn { display: flex; }
-        .recents-view .wallpaper { transform: scale(0.9) !important; filter: blur(15px); }
+        .recents-view .wallpaper { transform: scale(0.92) !important; filter: blur(20px); }
 
-        #no-apps-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 600; font-size: 18px; opacity: 0; pointer-events: none; z-index: 90; transition: opacity 0.3s; }
+        #no-apps-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 600; font-size: 19px; opacity: 0; pointer-events: none; z-index: 90; transition: opacity 0.3s; }
         .recents-view:not(.has-apps) #no-apps-msg { opacity: 0.7; }
 
-        .app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-app); z-index: 100; transform: scale(0); opacity: 0; pointer-events: none; transition: transform var(--spd) var(--ios-spring), opacity 0.3s; display: flex; flex-direction: column; border-radius: 44px; overflow: hidden; }
-        .header { padding: 50px 20px 15px; font-weight: 700; font-size: 32px; color: var(--text-main); background: var(--bg-app); }
-        .item { padding: 14px 20px; font-size: 17px; border-bottom: 0.5px solid var(--border-color); color: var(--text-main); display: flex; justify-content: space-between; background: var(--bg-item); align-items: center; cursor: pointer; }
-        .item:active { background: rgba(0,0,0,0.05); }
-        .dark-mode .item:active { background: rgba(255,255,255,0.05); }
+        .app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-app); z-index: 100; transform: scale(0.85); opacity: 0; pointer-events: none; transition: transform 0.4s var(--ios-spring), opacity 0.3s; display: flex; flex-direction: column; border-radius: 44px; overflow: hidden; }
+        .header { padding: 55px 20px 18px; font-weight: 700; font-size: 34px; color: var(--text-main); background: var(--bg-app); }
+        .item { padding: 16px 20px; font-size: 18px; border-bottom: 0.5px solid var(--border-color); color: var(--text-main); display: flex; justify-content: space-between; background: var(--bg-item); align-items: center; cursor: pointer; }
         
-        .home-bar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; background: rgba(255,255,255,0.8); border-radius: 10px; z-index: 3500; cursor: pointer; }
+        .home-bar { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 130px; height: 5px; background: rgba(255,255,255,0.8); border-radius: 10px; z-index: 3500; cursor: pointer; transition: width 0.3s, opacity 0.3s; }
+        .home-bar:active { opacity: 0.5; width: 100px; }
 
         .is-unlocked .wallpaper { transform: scale(1); }
         .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
         .is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; pointer-events: none; }
         
         .open .app { transform: scale(1) !important; opacity: 1 !important; pointer-events: auto !important; z-index: 1000; left: 0 !important; top: 0 !important; }
-        .open .wallpaper { filter: blur(25px); transform: scale(1.15) !important; }
+        .open .wallpaper { filter: blur(30px); transform: scale(1.15) !important; }
     </style>
 </head>
 <body id="mainBody">
@@ -151,12 +161,12 @@
         
         <div class="lockscreen" id="lockView">
             <div class="lock-time" id="clock">12:00</div>
-            <div style="margin-top: 5px; opacity: 0.7; font-size: 14px;">Hold Home Bar to Unlock</div>
+            <div style="margin-top: 8px; opacity: 0.8; font-size: 14px; font-weight: 500;">Hold Home Bar to Unlock</div>
             <div class="fingerprint-scanner" id="fp-icon" onclick="unlockByFingerprint()">🔘</div>
         </div>
 
         <div class="pin-pad" id="pinPad">
-            <div id="pinStatus" style="margin-bottom: 25px; font-weight: 500; font-size: 18px;">Enter Passcode</div>
+            <div id="pinStatus" style="margin-bottom: 30px; font-weight: 500; font-size: 19px;">Enter Passcode</div>
             <div class="pin-dots" id="pinDots">
                 <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
             </div>
@@ -166,7 +176,7 @@
                 <div class="num-btn" onclick="inputPin(7)">7</div><div class="num-btn" onclick="inputPin(8)">8</div><div class="num-btn" onclick="inputPin(9)">9</div>
                 <div></div><div class="num-btn" onclick="inputPin(0)">0</div>
             </div>
-            <div style="margin-top: 40px; color: #fff; font-weight:600; cursor: pointer; opacity: 0.8;" onclick="closePinPad()">Cancel</div>
+            <div style="margin-top: 45px; color: #fff; font-weight:600; cursor: pointer; opacity: 0.8;" onclick="closePinPad()">Cancel</div>
         </div>
 
         <div class="drag-btn icon-normal-settings" id="settingsBtn" 
@@ -352,8 +362,8 @@
                 const curX = isTouch ? ev.touches[0].clientX : ev.clientX;
                 const curY = isTouch ? ev.touches[0].clientY : ev.clientY;
                 if (Math.abs(curX - startX) > 5 || Math.abs(curY - startY) > 5) moved = true;
-                el.style.left = Math.max(10, Math.min(initX + (curX - startX), 210)) + 'px';
-                el.style.top = Math.max(40, Math.min(initY + (curY - startY), 480)) + 'px';
+                el.style.left = Math.max(10, Math.min(initX + (curX - startX), 220)) + 'px';
+                el.style.top = Math.max(40, Math.min(initY + (curY - startY), 500)) + 'px';
                 if(type === 'settings') settingsApp.style.transformOrigin = (parseInt(el.style.left)+30)+"px "+(parseInt(el.style.top)+30)+"px";
             };
 
@@ -375,10 +385,10 @@
         function toggleCC(o) { if(isPowerOn && phone.classList.contains('is-unlocked')) ccPanel.classList.toggle('cc-open', o); }
         function showPage(n) { document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); document.getElementById('p' + n).style.display = 'block'; }
         function setSpd(t) { document.documentElement.style.setProperty('--spd', t); }
-        function changeWallpaper(e) { 
-            const r = new FileReader(); 
-            r.onload = (ev) => { wallpaper.style.backgroundImage = `url('${ev.target.result}')`; }; 
-            r.readAsDataURL(e.target.files[0]); 
+        function changeWallpaper(event) { 
+            const reader = new FileReader(); 
+            reader.onload = (e) => { wallpaper.style.backgroundImage = `url('${e.target.result}')`; }; 
+            reader.readAsDataURL(event.target.files[0]); 
         }
         
         function changeIconStyle(s) { 
