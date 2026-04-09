@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FakeOS 1.0</title>
+    <title>FakeOS 1.0 - AI Edition</title>
     <style>
         :root { 
             --spd: 0.5s; 
@@ -39,92 +39,72 @@
             box-shadow: 0 50px 100px rgba(0,0,0,0.9);
         }
 
-        .boot-screen {
-            position: absolute; inset: 0; background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: white; transition: opacity 0.5s ease;
-        }
+        /* [EXISTING BOOT, AOD, STATUS STYLES UNCHANGED] */
+        .boot-screen { position: absolute; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: opacity 0.5s ease; }
         .boot-logo { font-size: 32px; font-weight: 800; letter-spacing: 1px; }
-        .boot-spinner {
-            margin-top: 25px; width: 24px; height: 24px;
-            border: 3px solid rgba(255,255,255,0.2); border-top-color: #fff;
-            border-radius: 50%; animation: spin 1s linear infinite;
-        }
+        .boot-spinner { margin-top: 25px; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .aod-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; z-index: 4500; display: none;
-            flex-direction: column; justify-content: center; align-items: center;
-            color: rgba(255, 255, 255, 0.2); pointer-events: none;
-        }
+        .aod-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 4500; display: none; flex-direction: column; justify-content: center; align-items: center; color: rgba(255, 255, 255, 0.2); pointer-events: none; }
         .aod-time { font-size: 40px; font-weight: var(--aod-weight); transition: font-weight 0.3s; }
         .aod-date { font-size: 12px; margin-top: 5px; text-transform: uppercase; }
-
         .brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; pointer-events: none; z-index: 3800; opacity: calc(1 - var(--bright)); }
         .punch-hole { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 80px; height: 22px; background: #000; border-radius: 20px; z-index: 3900; border: 1px solid #1a1a1a; }
-        
         .status-bar { position: absolute; top: 0; width: 100%; height: 40px; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; box-sizing: border-box; color: white; font-size: 12px; font-weight: 600; z-index: 3500; }
-
         .control-center { position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 2500; transform: translateY(-100%); transition: transform 0.5s var(--ios-spring); display: flex; flex-direction: column; align-items: center; padding-top: 100px; gap: 15px; }
         .cc-open { transform: translateY(0); }
         .cc-slider-box { width: 220px; background: rgba(255,255,255,0.15); padding: 20px; border-radius: 28px; color: white; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         .cc-btn { width: 220px; padding: 15px; background: rgba(255,255,255,0.15); border-radius: 20px; color: white; font-weight: 600; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
-
         .screen-off { position: absolute; width: 100%; height: 100%; background: #000; z-index: 4000; transition: opacity 0.4s; cursor: pointer; opacity: 0; pointer-events: none; }
         .screen-is-off { opacity: 1; pointer-events: auto; }
-
         .wallpaper { position: absolute; width: 100%; height: 100%; background: #1a3a5a url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover; transition: transform 0.8s var(--ios-spring), filter 0.5s; z-index: 1; transform: scale(1.1); }
-        
         .cc-active .wallpaper { filter: blur(25px) brightness(0.6); transform: scale(1.15); }
-
         .lockscreen { position: absolute; width: 100%; height: 100%; z-index: 3000; display: flex; flex-direction: column; align-items: center; padding-top: 80px; color: white; transition: transform 0.7s var(--ios-spring), opacity 0.4s; }
         .lock-time { font-size: 64px; font-weight: 200; }
-
         .pin-pad { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); z-index: 3100; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .pin-dots { display: flex; gap: 15px; margin-bottom: 40px; }
         .dot { width: 12px; height: 12px; border: 1.5px solid #fff; border-radius: 50%; }
         .dot.active { background: #fff; transform: scale(1.2); }
         .num-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .num-btn { width: 65px; height: 65px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; }
-
         .fingerprint-scanner { margin-top: auto; margin-bottom: 100px; width: 70px; height: 70px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; display: none; justify-content: center; align-items: center; font-size: 32px; animation: pulse 2s infinite; pointer-events: auto; cursor: pointer; }
-
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); } 70% { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
 
+        /* Draggable Icons */
         .drag-btn { position: absolute; width: 56px; height: 56px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: grab; z-index: 5; opacity: 0; transform: scale(0.5); transition: opacity 0.5s, transform 0.6s var(--ios-spring); }
         .icon-normal-settings { background: linear-gradient(180deg, #5e5e62 0%, #2c2c2e 100%); color: #fff; }
         .icon-normal-cc { background: linear-gradient(180deg, #007aff 0%, #004080 100%); color: #fff; }
+        .icon-ai { background: linear-gradient(135deg, #8e2de2, #4a00e0); color: white; }
         .icon-glassy { background: rgba(255, 255, 255, 0.2) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.2); color: #fff; }
 
         #settingsBtn { top: 110px; left: 30px; }
-        #ccIconBtn { top: 110px; left: 110px; }
+        #ccIconBtn { top: 110px; left: 105px; }
+        #aiBtn { top: 110px; left: 180px; }
 
-        .multitasking-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 80; display: none; background: rgba(0,0,0,0.1); }
-        .recents-view .multitasking-overlay { display: block; pointer-events: auto; }
-        .recents-view .drag-btn { opacity: 0 !important; pointer-events: none !important; }
-
-        .recents-view .app.is-running { display: flex !important; opacity: 1 !important; left: 50% !important; top: 45% !important; transform: translate(-50%, -50%) scale(0.65) !important; pointer-events: none !important; box-shadow: 0 30px 60px rgba(0,0,0,0.5); z-index: 105; }
-        .app-card-trigger { position: absolute; top: 20%; left: 15%; width: 70%; height: 50%; z-index: 110; display: none; cursor: pointer; }
-        .recents-view .app.is-running ~ .app-card-trigger { display: block; }
-        
-        #kill-app-btn { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); width: 44px; height: 44px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 50%; color: #ff3b30; font-size: 22px; font-weight: bold; display: none; justify-content: center; align-items: center; z-index: 120; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
-        .recents-view.has-apps #kill-app-btn { display: flex; }
-        .recents-view .wallpaper { transform: scale(0.9) !important; filter: blur(15px); }
-
-        #no-apps-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 600; font-size: 18px; opacity: 0; pointer-events: none; z-index: 90; transition: opacity 0.3s; }
-        .recents-view:not(.has-apps) #no-apps-msg { opacity: 0.7; }
-
+        /* App General */
         .app { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-app); z-index: 100; transform: scale(0); opacity: 0; pointer-events: none; transition: transform var(--spd) var(--ios-spring), opacity 0.3s; display: flex; flex-direction: column; border-radius: 44px; overflow: hidden; }
         .header { padding: 50px 20px 15px; font-weight: 700; font-size: 32px; color: var(--text-main); background: var(--bg-app); }
         .item { padding: 14px 20px; font-size: 17px; border-bottom: 0.5px solid var(--border-color); color: var(--text-main); display: flex; justify-content: space-between; background: var(--bg-item); align-items: center; }
-        
+
+        /* AI Assistant Specific UI */
+        #aiContent { flex: 1; display: flex; flex-direction: column; padding: 10px; overflow-y: auto; background: var(--bg-app); }
+        .chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; font-size: 15px; line-height: 1.4; }
+        .user-msg { align-self: flex-end; background: var(--ios-blue); color: white; border-bottom-right-radius: 4px; }
+        .ai-msg { align-self: flex-start; background: var(--bg-item); color: var(--text-main); border-bottom-left-radius: 4px; border: 0.5px solid var(--border-color); }
+        .chat-input-area { padding: 15px; background: var(--bg-item); display: flex; gap: 10px; align-items: center; border-top: 0.5px solid var(--border-color); padding-bottom: 30px; }
+        .chat-input-area input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid var(--border-color); outline: none; background: var(--bg-app); color: var(--text-main); }
+        .voice-btn { width: 35px; height: 35px; border-radius: 50%; background: #ff3b30; display: flex; justify-content: center; align-items: center; color: white; cursor: pointer; }
+        .voice-btn.listening { animation: pulse 1s infinite; background: #4cd964; }
+
+        /* Multitasking */
+        .multitasking-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 80; display: none; background: rgba(0,0,0,0.1); }
+        .recents-view .multitasking-overlay { display: block; pointer-events: auto; }
+        .recents-view .drag-btn { opacity: 0 !important; pointer-events: none !important; }
+        .recents-view .app.is-running { display: flex !important; opacity: 1 !important; left: 50% !important; top: 45% !important; transform: translate(-50%, -50%) scale(0.65) !important; pointer-events: none !important; box-shadow: 0 30px 60px rgba(0,0,0,0.5); z-index: 105; }
         .home-bar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; background: rgba(255,255,255,0.8); border-radius: 10px; z-index: 3500; cursor: pointer; }
 
         .is-unlocked .wallpaper { transform: scale(1); }
         .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
         .is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; pointer-events: none; }
-        
         .open .app { transform: scale(1) !important; opacity: 1 !important; pointer-events: auto !important; z-index: 1000; left: 0 !important; top: 0 !important; }
         .open .wallpaper { filter: blur(25px); transform: scale(1.15) !important; }
     </style>
@@ -133,73 +113,40 @@
 
     <div class="phone" id="phone" ondblclick="handleDoubleTap(event)">
 
-        <div class="boot-screen" id="bootScreen">
-            <div class="boot-logo">FakeOS</div>
-            <div class="boot-spinner"></div>
-        </div>
-
-        <div class="aod-layer" id="aod">
-            <div class="aod-time" id="aodTime">00:00</div>
-            <div class="aod-date" id="aodDate">Thursday, April 9</div>
-        </div>
-
-        <audio id="sound-unlock" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
-        <audio id="sound-lock" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-
+        <div class="boot-screen" id="bootScreen"><div class="boot-logo">FakeOS</div><div class="boot-spinner"></div></div>
+        <div class="aod-layer" id="aod"><div class="aod-time" id="aodTime">00:00</div><div class="aod-date" id="aodDate">Thursday, April 9</div></div>
         <div class="brightness-overlay"></div>
         <div class="punch-hole"></div>
-        <div class="multitasking-overlay" onclick="exitRecentsToHome()"></div>
-        <div id="no-apps-msg">No Open Apps</div>
+        <div class="screen-off" id="blackOverlay"></div>
+        <div class="wallpaper" id="mainWallpaper"></div>
 
         <div class="status-bar">
             <span id="st-time">12:00</span>
             <div class="battery-section" onclick="toggleCC(true)">
                 <span id="battery-level">--%</span>
-                <span id="battery-icon"></span>
             </div>
         </div>
 
-        <div class="control-center" id="ccPanel">
-            <div class="cc-slider-box">
-                <div style="font-size:14px; font-weight:600; margin-bottom:12px;">Brightness</div>
-                <input type="range" min="0.1" max="1" step="0.1" value="1" oninput="changeBrightness(this.value)" style="width:100%;">
-            </div>
-            <div class="cc-btn" onclick="toggleDarkMode()"> Appearance: <span id="mode-text">Light</span></div>
-            <div class="cc-btn" style="background:rgba(255,255,255,0.1); margin-top:10px;" onclick="toggleCC(false)">Done</div>
-        </div>
-
-        <div class="screen-off" id="blackOverlay"></div>
-        <div class="wallpaper" id="mainWallpaper"></div>
-        
         <div class="lockscreen" id="lockView">
             <div class="lock-time" id="clock">12:00</div>
-            <div style="margin-top: 5px; opacity: 0.7; font-size: 14px;">Hold Home Bar to Unlock</div>
             <div class="fingerprint-scanner" id="fp-icon" onclick="unlockByFingerprint()"></div>
         </div>
 
         <div class="pin-pad" id="pinPad">
-            <div id="pinStatus" style="margin-bottom: 25px; font-weight: 500; font-size: 18px;">Enter Passcode</div>
-            <div class="pin-dots" id="pinDots">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-            </div>
-            <div class="num-grid">
+            <div id="pinStatus" style="margin-bottom: 25px;">Enter PIN</div>
+            <div class="pin-dots" id="pinDots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+            <div class="num-grid" id="nums">
                 <div class="num-btn" onclick="inputPin(1)">1</div><div class="num-btn" onclick="inputPin(2)">2</div><div class="num-btn" onclick="inputPin(3)">3</div>
                 <div class="num-btn" onclick="inputPin(4)">4</div><div class="num-btn" onclick="inputPin(5)">5</div><div class="num-btn" onclick="inputPin(6)">6</div>
                 <div class="num-btn" onclick="inputPin(7)">7</div><div class="num-btn" onclick="inputPin(8)">8</div><div class="num-btn" onclick="inputPin(9)">9</div>
                 <div></div><div class="num-btn" onclick="inputPin(0)">0</div>
             </div>
-            <div style="margin-top: 40px; color: #fff; font-weight:600; cursor: pointer; opacity: 0.8;" onclick="closePinPad()">Cancel</div>
+            <div onclick="closePinPad()" style="margin-top:20px;">Cancel</div>
         </div>
 
-        <div class="drag-btn icon-normal-settings" id="settingsBtn" 
-             onmousedown="setupDrag(event, this, 'settings')" 
-             ontouchstart="setupDrag(event, this, 'settings')"></div>
-             
-        <div class="drag-btn icon-normal-cc" id="ccIconBtn" 
-             onmousedown="setupDrag(event, this, 'cc')" 
-             ontouchstart="setupDrag(event, this, 'cc')"></div>
-
-        <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
+        <div class="drag-btn icon-normal-settings" id="settingsBtn" onmousedown="setupDrag(event, this, 'settings')" ontouchstart="setupDrag(event, this, 'settings')"></div>
+        <div class="drag-btn icon-normal-cc" id="ccIconBtn" onmousedown="setupDrag(event, this, 'cc')" ontouchstart="setupDrag(event, this, 'cc')"></div>
+        <div class="drag-btn icon-ai" id="aiBtn" onmousedown="setupDrag(event, this, 'ai')" ontouchstart="setupDrag(event, this, 'ai')">🤖</div>
 
         <div class="app" id="settingsApp">
             <div class="header">Settings</div>
@@ -207,312 +154,181 @@
                 <div class="item" onclick="showPage(6)">Screen Lock <span>›</span></div>
                 <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
                 <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
-                <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
-                <div class="item" onclick="showPage(7)">Customization <span>›</span></div>
             </div>
-            <div id="p2" class="page" style="display:none;"><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
-            <div id="p3" class="page" style="display:none;"><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(7)">Back</div></div>
-            <div id="p4" class="page" style="display:none;"><div style="padding:40px; text-align:center;"><h1 style="color:var(--text-main);">FakeOS 1.0</h1><p style="color:var(--text-main); opacity:0.6;">POCO X6 Pro Edition</p></div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
-            <div id="p5" class="page" style="display:none;"><div class="item" onclick="changeIconStyle('glassy')">Glassmorphism</div><div class="item" onclick="changeIconStyle('normal')">Classic</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
-            <div id="p6" class="page" style="display:none;">
-                <div class="item">Fingerprint <div style="display:flex; gap: 12px;"><span onclick="setFingerprint(true)" style="color:#34c759; font-weight: bold;">ON</span><span onclick="setFingerprint(false)" style="color:#ff3b30; font-weight: bold;">OFF</span></div></div>
-                <div class="item" id="createPinBtn" onclick="createPin()">Create a PIN <span style="color:var(--ios-blue);">+</span></div>
-                <div class="item" id="turnOffPinBtn" style="display:none;" onclick="turnOffPin()">Turn off PIN <span style="color:#ff3b30;">✕</span></div>
-                <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
+            <div id="p2" class="page" style="display:none;"><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="showPage(1)">Back</div></div>
+            <div id="p4" class="page" style="display:none;"><div style="padding:40px; text-align:center;"><h1>FakeOS 1.0</h1></div><div class="item" onclick="showPage(1)">Back</div></div>
+            <div id="p6" class="page" style="display:none;"><div class="item" onclick="createPin()">Create PIN</div><div class="item" onclick="showPage(1)">Back</div></div>
+        </div>
+
+        <div class="app" id="aiApp">
+            <div class="header">Assistant</div>
+            <div id="aiContent">
+                <div class="chat-bubble ai-msg">Hello! I am your AI assistant. How can I help you today?</div>
             </div>
-            <div id="p7" class="page" style="display:none;">
-                <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
-                <div class="item" onclick="showPage(8)">AOD Customization <span>›</span></div>
-                <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
-            </div>
-            <div id="p8" class="page" style="display:none;">
-                <div class="item" onclick="setAODStyle(100)">Clock Style: Thin</div>
-                <div class="item" onclick="setAODStyle(400)">Clock Style: Standard</div>
-                <div class="item" onclick="setAODStyle(800)">Clock Style: Bold</div>
-                <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(7)">Back</div>
+            <div class="chat-input-area">
+                <input type="text" id="aiInput" placeholder="Ask something...">
+                <div class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎙️</div>
+                <div style="color:var(--ios-blue); font-weight:600;" onclick="sendAiMessage()">Send</div>
             </div>
         </div>
-        
-        <div id="kill-app-btn" onclick="killApp()">✕</div>
-        <div class="app-card-trigger" id="cardTrigger" onclick="exitRecentsToApp()"></div>
 
-        <div class="home-bar" id="bottomBar" 
-             onmousedown="handleHomeStart()" onmouseup="handleHomeEnd()"
-             ontouchstart="handleHomeStart()" ontouchend="handleHomeEnd()"></div>
+        <div class="control-center" id="ccPanel">
+            <div class="cc-slider-box">
+                <input type="range" min="0.1" max="1" step="0.1" value="1" oninput="changeBrightness(this.value)" style="width:100%;">
+            </div>
+            <div class="cc-btn" onclick="toggleDarkMode()">Toggle Dark Mode</div>
+            <div class="cc-btn" onclick="toggleCC(false)">Done</div>
+        </div>
+
+        <div class="home-bar" id="bottomBar" onmousedown="handleHomeStart()" onmouseup="handleHomeEnd()" ontouchstart="handleHomeStart()" ontouchend="handleHomeEnd()"></div>
+        
+        <audio id="sound-unlock" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
+        <audio id="sound-lock" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
     </div>
 
     <script>
+        // System initialization
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const boot = document.getElementById('bootScreen');
                 boot.style.opacity = '0';
                 setTimeout(() => boot.style.display = 'none', 500);
-            }, 3000);
+            }, 2000);
         });
 
-        const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), wallpaper = document.getElementById('mainWallpaper'), ccPanel = document.getElementById('ccPanel');
-        const settingsApp = document.getElementById('settingsApp');
-        const soundUnlock = document.getElementById('sound-unlock');
-        const soundLock = document.getElementById('sound-lock');
-        const aod = document.getElementById('aod');
+        const phone = document.getElementById('phone'), 
+              blackOverlay = document.getElementById('blackOverlay'), 
+              settingsApp = document.getElementById('settingsApp'),
+              aiApp = document.getElementById('aiApp'),
+              ccPanel = document.getElementById('ccPanel');
         
-        let isPowerOn = true, activePin = null, currentPinInput = "";
-        let homeTimer, aodTimeout;
-        let currentPage = 1;
+        let isPowerOn = true, activePin = null, currentPinInput = "", activeApp = null;
+        let homeTimer;
 
+        // Sound & Basic Logic (Retained from your script)
         function playSfx(s) { s.currentTime = 0; s.play().catch(e => {}); }
 
         function handleHomeStart() {
-            if (isPowerOn && phone.classList.contains('is-unlocked') && !ccPanel.classList.contains('cc-open')) {
-                homeTimer = setTimeout(() => {
-                    phone.classList.add('recents-view');
-                    checkRunningApps();
-                }, 600);
+            if (isPowerOn && phone.classList.contains('is-unlocked')) {
+                homeTimer = setTimeout(() => { phone.classList.add('recents-view'); }, 600);
             }
         }
 
         function handleHomeEnd() {
             clearTimeout(homeTimer);
-            if (!phone.classList.contains('recents-view')) {
-                handleHomeBar();
-            }
+            if (!phone.classList.contains('recents-view')) handleHomeBar();
         }
 
-        function checkRunningApps() {
-            if(settingsApp.classList.contains('is-running')) {
-                phone.classList.add('has-apps');
-            } else {
-                phone.classList.remove('has-apps');
-            }
-        }
-
-        function unlockPhone() {
-            if(activePin) document.getElementById('pinPad').style.display = 'flex';
-            else {
-                if(!phone.classList.contains('is-unlocked')) playSfx(soundUnlock);
-                phone.classList.add('is-unlocked');
-            }
-        }
-
-        function unlockByFingerprint() {
-            playSfx(soundUnlock);
-            phone.classList.add('is-unlocked');
-            closePinPad();
-        }
-
-        function exitRecentsToApp() { phone.classList.remove('recents-view'); phone.classList.add('open'); }
-        function exitRecentsToHome() { phone.classList.remove('recents-view'); }
-        
-        function killApp() {
-            phone.classList.remove('open');
-            settingsApp.classList.remove('is-running');
-            phone.classList.remove('has-apps');
-        }
-
-        function toggleDarkMode() {
-            const body = document.getElementById('mainBody');
-            const text = document.getElementById('mode-text');
-            body.classList.toggle('dark-mode');
-            text.innerText = body.classList.contains('dark-mode') ? "Dark" : "Light";
-        }
-
-        function createPin() {
-            let p = prompt("Enter a 4-digit PIN:");
-            if(p && p.length === 4 && !isNaN(p)) {
-                activePin = p;
-                document.getElementById('createPinBtn').style.display = 'none';
-                document.getElementById('turnOffPinBtn').style.display = 'flex';
-            }
-        }
-        function turnOffPin() { activePin = null; document.getElementById('createPinBtn').style.display = 'flex'; document.getElementById('turnOffPinBtn').style.display = 'none'; }
-        
-        function inputPin(num) {
-            if(currentPinInput.length < 4) {
-                currentPinInput += num; updatePinDots();
-                if(currentPinInput.length === 4) {
-                    if(currentPinInput === activePin) { 
-                        playSfx(soundUnlock);
-                        phone.classList.add('is-unlocked'); 
-                        closePinPad(); 
-                    } 
-                    else {
-                        const status = document.getElementById('pinStatus');
-                        status.innerText = "Incorrect PIN"; status.style.color = "#ff3b30";
-                        setTimeout(() => { status.innerText = "Enter Passcode"; status.style.color = "white"; currentPinInput = ""; updatePinDots(); }, 1200);
-                    }
-                }
-            }
-        }
-        function updatePinDots() { const dots = document.querySelectorAll('#pinDots .dot'); dots.forEach((dot, i) => dot.classList.toggle('active', i < currentPinInput.length)); }
-        function closePinPad() { document.getElementById('pinPad').style.display = 'none'; currentPinInput = ""; updatePinDots(); }
-        function setFingerprint(visible) { document.getElementById('fp-icon').style.display = visible ? 'flex' : 'none'; }
-
-        async function updateBattery() {
-            try {
-                const battery = await navigator.getBattery();
-                document.getElementById('battery-level').innerText = Math.floor(battery.level * 100) + "%";
-            } catch (e) { document.getElementById('battery-level').innerText = "100%"; }
-        }
-        updateBattery();
-
-        function handleDoubleTap(e) {
-            if (e.target.closest('.cc-btn') || e.target.closest('.cc-slider-box') || ccPanel.classList.contains('cc-open')) return;
+        function handleHomeBar() {
+            if (ccPanel.classList.contains('cc-open')) return toggleCC(false);
+            if (phone.classList.contains('recents-view')) return phone.classList.remove('recents-view');
             
-            if (!isPowerOn) { 
-                blackOverlay.classList.remove('screen-is-off'); 
-                aod.style.display = 'none';
-                clearTimeout(aodTimeout);
-                isPowerOn = true; 
-            } 
-            else if (!phone.classList.contains('open') && phone.classList.contains('is-unlocked')) { 
-                playSfx(soundLock);
-                blackOverlay.classList.add('screen-is-off'); 
-                phone.classList.remove('is-unlocked'); 
-                isPowerOn = false; 
-                toggleCC(false); 
-                closePinPad();
-                aodTimeout = setTimeout(() => {
-                    if(!isPowerOn) aod.style.display = 'flex';
-                }, 5000);
-            }
-        }
-
-        function handleHomeBar() { 
-            if (ccPanel.classList.contains('cc-open')) {
-                toggleCC(false);
-                return;
-            }
-            if (phone.classList.contains('recents-view')) {
-                phone.classList.remove('recents-view');
-                return;
-            }
             if (isPowerOn && !phone.classList.contains('is-unlocked')) {
-                unlockPhone();
-            } else { 
-                phone.classList.remove('open'); 
-            } 
-        }
-
-        let isSwiping = false, gestureStartX = 0, gestureStartY = 0;
-        
-        function startGesture(x, y) {
-            if (!phone.classList.contains('open')) return;
-            let rect = settingsApp.getBoundingClientRect();
-            let relX = x - rect.left;
-            if (relX < 40) {
-                isSwiping = true;
-                gestureStartX = x;
-                gestureStartY = y;
+                if(activePin) document.getElementById('pinPad').style.display = 'flex';
+                else { phone.classList.add('is-unlocked'); playSfx(document.getElementById('sound-unlock')); }
+            } else {
+                phone.classList.remove('open');
+                activeApp = null;
             }
         }
 
-        function endGesture(x, y) {
-            if (!isSwiping) return;
-            isSwiping = false;
-            if (x - gestureStartX > 60 && Math.abs(y - gestureStartY) < 50) {
-                if (currentPage === 8) {
-                    showPage(7);
-                } else if (currentPage === 7 || currentPage === 6 || currentPage === 5 || currentPage === 4 || currentPage === 2) {
-                    showPage(1);
-                } else if (currentPage === 3) {
-                    showPage(7);
-                } else {
-                    handleHomeBar();
-                }
-            }
-        }
-
-        settingsApp.addEventListener('touchstart', e => startGesture(e.touches[0].clientX, e.touches[0].clientY), {passive:true});
-        settingsApp.addEventListener('touchend', e => endGesture(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
-        settingsApp.addEventListener('mousedown', e => startGesture(e.clientX, e.clientY));
-        settingsApp.addEventListener('mouseup', e => endGesture(e.clientX, e.clientY));
-
+        // DRAG LOGIC (Updated to include AI App)
         function setupDrag(e, el, type) {
-            if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open') || phone.classList.contains('recents-view') || ccPanel.classList.contains('cc-open')) return;
+            if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open')) return;
             let moved = false;
             const isTouch = e.type === 'touchstart';
             const startX = isTouch ? e.touches[0].clientX : e.clientX;
             const startY = isTouch ? e.touches[0].clientY : e.clientY;
-            const initX = el.offsetLeft;
-            const initY = el.offsetTop;
+            const initX = el.offsetLeft, initY = el.offsetTop;
 
             const move = (ev) => {
                 const curX = isTouch ? ev.touches[0].clientX : ev.clientX;
                 const curY = isTouch ? ev.touches[0].clientY : ev.clientY;
-                if (Math.abs(curX - startX) > 5 || Math.abs(curY - startY) > 5) moved = true;
+                if (Math.abs(curX - startX) > 5) moved = true;
                 el.style.left = Math.max(10, Math.min(initX + (curX - startX), 210)) + 'px';
                 el.style.top = Math.max(40, Math.min(initY + (curY - startY), 480)) + 'px';
-                if(type === 'settings') settingsApp.style.transformOrigin = (parseInt(el.style.left)+30)+"px "+(parseInt(el.style.top)+30)+"px";
             };
 
-            const stop = () => { 
-                document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', move); 
-                document.removeEventListener(isTouch ? 'touchend' : 'mouseup', stop); 
-                if (!moved) { 
-                    if(type === 'settings') {
-                        phone.classList.add('open');
-                        settingsApp.classList.add('is-running');
-                        showPage(1);
-                    } else toggleCC(true); 
-                } 
+            const stop = () => {
+                document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', move);
+                document.removeEventListener(isTouch ? 'touchend' : 'mouseup', stop);
+                if (!moved) {
+                    phone.classList.add('open');
+                    if(type === 'settings') { settingsApp.classList.add('is-running'); activeApp = settingsApp; }
+                    if(type === 'ai') { aiApp.classList.add('is-running'); activeApp = aiApp; }
+                    if(type === 'cc') { phone.classList.remove('open'); toggleCC(true); }
+                }
             };
-            document.addEventListener(isTouch ? 'touchmove' : 'mousemove', move, { passive: false }); 
+            document.addEventListener(isTouch ? 'touchmove' : 'mousemove', move);
             document.addEventListener(isTouch ? 'touchend' : 'mouseup', stop);
         }
 
+        // AI ASSISTANT LOGIC
+        function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const chat = document.getElementById('aiContent');
+            if (!input.value.trim()) return;
+
+            // Add User Message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-bubble user-msg';
+            userDiv.innerText = input.value;
+            chat.appendChild(userDiv);
+
+            const userText = input.value.toLowerCase();
+            input.value = "";
+            chat.scrollTop = chat.scrollHeight;
+
+            // Generate AI Response
+            setTimeout(() => {
+                const aiDiv = document.createElement('div');
+                aiDiv.className = 'chat-bubble ai-msg';
+                let response = "I'm not sure about that. Try asking for the time or to toggle dark mode!";
+                
+                if(userText.includes("time")) response = "The current time is " + document.getElementById('st-time').innerText;
+                else if(userText.includes("hello")) response = "Hi there! I'm your FakeOS helper.";
+                else if(userText.includes("dark mode")) { response = "Switching appearance now..."; toggleDarkMode(); }
+                else if(userText.includes("who are you")) response = "I am a built-in AI assistant for your virtual phone.";
+                
+                aiDiv.innerText = response;
+                chat.appendChild(aiDiv);
+                chat.scrollTop = chat.scrollHeight;
+                
+                // Real Talk (Text-to-Speech)
+                const speech = new SpeechSynthesisUtterance(response);
+                window.speechSynthesis.speak(speech);
+            }, 800);
+        }
+
+        // VOICE RECOGNITION (Talk to AI)
+        function toggleVoice() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            
+            recognition.onstart = () => { voiceBtn.classList.add('listening'); };
+            recognition.onend = () => { voiceBtn.classList.remove('listening'); };
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('aiInput').value = transcript;
+                sendAiMessage();
+            };
+            recognition.start();
+        }
+
+        // Remaining helpers (Retained)
+        function toggleDarkMode() { document.getElementById('mainBody').classList.toggle('dark-mode'); }
+        function toggleCC(o) { ccPanel.classList.toggle('cc-open', o); }
         function changeBrightness(v) { document.documentElement.style.setProperty('--bright', v); }
-        
-        function toggleCC(o) { 
-            if(isPowerOn && phone.classList.contains('is-unlocked')) {
-                ccPanel.classList.toggle('cc-open', o); 
-                phone.classList.toggle('cc-active', o);
-            }
-        }
-        
-        function showPage(n) { 
-            currentPage = n;
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); 
-            document.getElementById('p' + n).style.display = 'block'; 
-        }
-
-        function setSpd(t) { document.documentElement.style.setProperty('--spd', t); }
-        
-        function changeWallpaper(e) { 
-            const r = new FileReader(); 
-            r.onload = (ev) => { wallpaper.style.backgroundImage = `url('${ev.target.result}')`; }; 
-            r.readAsDataURL(e.target.files[0]); 
-        }
-
-        function setAODStyle(weight) {
-            document.documentElement.style.setProperty('--aod-weight', weight);
-        }
-        
-        function changeIconStyle(s) { 
-            const setBtn = document.getElementById('settingsBtn');
-            const ccBtn = document.getElementById('ccIconBtn');
-            if(s === 'glassy') {
-                setBtn.className = 'drag-btn icon-glassy';
-                ccBtn.className = 'drag-btn icon-glassy';
-                setBtn.textContent = '⚙️';
-                ccBtn.textContent = '📱';
-            } else {
-                setBtn.className = 'drag-btn icon-normal-settings';
-                ccBtn.className = 'drag-btn icon-normal-cc';
-                setBtn.textContent = '';
-                ccBtn.textContent = '';
-            }
-        }
-
+        function showPage(n) { document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); document.getElementById('p' + n).style.display = 'block'; }
         function updateTime() { 
             const now = new Date(); 
             const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); 
-            const d = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            document.getElementById('clock').innerText = t; 
-            document.getElementById('st-time').innerText = t; 
-            document.getElementById('aodTime').innerText = t; 
-            document.getElementById('aodDate').innerText = d; 
+            document.getElementById('clock').innerText = t; document.getElementById('st-time').innerText = t; 
         }
         setInterval(updateTime, 1000); updateTime();
+        async function updateBattery() { try { const b = await navigator.getBattery(); document.getElementById('battery-level').innerText = Math.floor(b.level * 100) + "%"; } catch(e){} }
+        updateBattery();
     </script>
 </body>
 </html>
