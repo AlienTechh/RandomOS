@@ -71,11 +71,14 @@
         .icon-normal-settings { background: linear-gradient(180deg, #5e5e62 0%, #2c2c2e 100%); color: #fff; }
         .icon-normal-cc { background: linear-gradient(180deg, #007aff 0%, #004080 100%); color: #fff; }
         .icon-normal-msg { background: linear-gradient(180deg, #34c759 0%, #248a3d 100%); color: #fff; }
+        .icon-normal-store { background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 100%); color: #000; font-size: 24px; }
+        .icon-normal-flappy { background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%); color: #fff; }
         .icon-glassy { background: rgba(255, 255, 255, 0.2) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0,0,0,0.2); color: #fff; }
 
         #settingsBtn { top: 110px; left: 30px; }
         #ccIconBtn { top: 110px; left: 110px; }
         #msgBtn { top: 110px; left: 190px; }
+        #storeBtn { top: 190px; left: 30px; } /* New Store Button */
 
         .multitasking-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 80; display: none; background: rgba(0,0,0,0.1); }
         .recents-view .multitasking-overlay { display: block; pointer-events: auto; }
@@ -106,10 +109,11 @@
         .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
         .is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; pointer-events: none; }
         
-        /* THIS IS THE FIXED LINE: Only open the ACTIVE app, not all of them */
         .open .app.is-active { transform: scale(1) !important; opacity: 1 !important; pointer-events: auto !important; z-index: 1000; left: 0 !important; top: 0 !important; }
-        
         .open .wallpaper { filter: blur(25px); transform: scale(1.15) !important; }
+
+        /* Uninstall Context Menu */
+        .context-menu { position: absolute; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 14px; color: #ff3b30; font-weight: bold; font-size: 15px; cursor: pointer; z-index: 5000; box-shadow: 0 8px 24px rgba(0,0,0,0.3); display: none; transform: translate(-50%, -15px); }
     </style>
 </head>
 <body id="mainBody">
@@ -160,9 +164,12 @@
             <div style="margin-top: 40px; color: #fff; font-weight:600; cursor: pointer; opacity: 0.8;" onclick="closePinPad()">Cancel</div>
         </div>
 
+        <div class="context-menu" id="uninstallMenu" onclick="uninstallFlappy()">Uninstall</div>
+
         <div class="drag-btn icon-normal-settings" id="settingsBtn" onmousedown="setupDrag(event, this, 'settings')" ontouchstart="setupDrag(event, this, 'settings')">⚙️</div>
         <div class="drag-btn icon-normal-cc" id="ccIconBtn" onmousedown="setupDrag(event, this, 'cc')" ontouchstart="setupDrag(event, this, 'cc')">🛠️</div>
         <div class="drag-btn icon-normal-msg" id="msgBtn" onmousedown="setupDrag(event, this, 'messages')" ontouchstart="setupDrag(event, this, 'messages')">💬</div>
+        <div class="drag-btn icon-normal-store" id="storeBtn" onmousedown="setupDrag(event, this, 'store')" ontouchstart="setupDrag(event, this, 'store')">▶️</div>
 
         <input type="file" id="file-input" hidden accept="image/*" onchange="changeWallpaper(event)">
 
@@ -201,6 +208,34 @@
             </div>
         </div>
 
+        <div class="app" id="storeApp">
+            <div class="header">Play Store</div>
+            <div id="store-list">
+                <div class="item" onclick="showGameDetails()">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 40px; height: 40px; background: linear-gradient(180deg, #ffd700, #ff8c00); border-radius: 10px; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px;">🐦</div>
+                        <div><b>Flappy Bird</b><br><small>Action Game</small></div>
+                    </div>
+                    <span>›</span>
+                </div>
+            </div>
+            <div id="store-details" style="display:none; flex-direction: column; height: 100%; align-items: center;">
+                <div class="item" onclick="backToStore()" style="width: 100%; background: var(--bg-app); border: none; color: var(--ios-blue); box-sizing: border-box;">‹ Back</div>
+                <div style="margin-top: 40px; width: 100px; height: 100px; background: linear-gradient(180deg, #ffd700, #ff8c00); border-radius: 24px; display: flex; justify-content: center; align-items: center; color: white; font-size: 50px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">🐦</div>
+                <h2 style="color: var(--text-main); margin-bottom: 5px;">Flappy Bird</h2>
+                <p style="color: var(--text-main); opacity: 0.6; margin-top: 0;">Tap to fly!</p>
+                <button id="installBtn" onclick="installGame()" style="margin-top: 20px; background: var(--ios-blue); color: white; border: none; padding: 12px 40px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer;">Install</button>
+            </div>
+        </div>
+
+        <div class="app" id="flappyApp" style="background: #71c5cf;">
+            <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white;">
+                <div style="font-size: 80px; margin-bottom: 20px;">🐦</div>
+                <h1 style="margin: 0; font-family: impact, sans-serif; text-transform: uppercase; letter-spacing: 2px;">Flappy Bird</h1>
+                <p style="font-weight: bold; margin-top: 10px;">Coming Soon!</p>
+            </div>
+        </div>
+
         <div id="kill-app-btn" onclick="killApp()">✕</div>
         <div class="app-card-trigger" id="cardTrigger" onclick="exitRecentsToApp()"></div>
 
@@ -209,11 +244,12 @@
 
     <script>
         const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), wallpaper = document.getElementById('mainWallpaper'), ccPanel = document.getElementById('ccPanel');
-        const settingsApp = document.getElementById('settingsApp'), messagesApp = document.getElementById('messagesApp');
+        const settingsApp = document.getElementById('settingsApp'), messagesApp = document.getElementById('messagesApp'), storeApp = document.getElementById('storeApp'), flappyApp = document.getElementById('flappyApp');
         const soundUnlock = document.getElementById('sound-unlock'), soundLock = document.getElementById('sound-lock');
         
         let isPowerOn = true, activePin = null, currentPinInput = "", currentApp = null;
         let homeTimer;
+        let isFlappyInstalled = false;
 
         function playSfx(s) { s.currentTime = 0; s.play().catch(e => {}); }
 
@@ -232,7 +268,7 @@
         }
 
         function checkRunningApps() {
-            const hasApps = settingsApp.classList.contains('is-running') || messagesApp.classList.contains('is-running');
+            const hasApps = Array.from(document.querySelectorAll('.app')).some(a => a.classList.contains('is-running'));
             phone.classList.toggle('has-apps', hasApps);
         }
 
@@ -243,7 +279,6 @@
 
         function unlockByFingerprint() { playSfx(soundUnlock); phone.classList.add('is-unlocked'); closePinPad(); }
 
-        // FIXED: Re-add active state when re-opening from Recents
         function exitRecentsToApp() { 
             phone.classList.remove('recents-view'); 
             if(currentApp) currentApp.classList.add('is-active');
@@ -251,7 +286,6 @@
         }
         function exitRecentsToHome() { phone.classList.remove('recents-view'); }
         
-        // FIXED: Make sure all states clear when killing
         function killApp() {
             phone.classList.remove('open');
             if(currentApp) {
@@ -260,6 +294,59 @@
             currentApp = null;
             checkRunningApps();
         }
+
+        // Play Store Logic
+        function showGameDetails() { document.getElementById('store-list').style.display = 'none'; document.getElementById('store-details').style.display = 'flex'; }
+        function backToStore() { document.getElementById('store-list').style.display = 'block'; document.getElementById('store-details').style.display = 'none'; }
+        
+        function installGame() {
+            if(isFlappyInstalled) return;
+            const btn = document.getElementById('installBtn');
+            btn.innerText = "Installing...";
+            
+            setTimeout(() => {
+                btn.innerText = "Installed";
+                isFlappyInstalled = true;
+                
+                // Add the draggable game icon
+                const gameIcon = document.createElement('div');
+                const isGlassy = document.getElementById('settingsBtn').classList.contains('icon-glassy');
+                gameIcon.className = isGlassy ? 'drag-btn icon-glassy' : 'drag-btn icon-normal-flappy';
+                gameIcon.id = 'flappyBtn';
+                gameIcon.innerText = '🐦';
+                gameIcon.style.top = '190px';
+                gameIcon.style.left = '110px';
+                gameIcon.style.opacity = '1';
+                gameIcon.style.transform = 'scale(1)'; // ensures it shows immediately if unlocked
+                
+                // Bind to existing drag logic
+                gameIcon.onmousedown = (e) => setupDrag(e, gameIcon, 'flappy');
+                gameIcon.ontouchstart = (e) => setupDrag(e, gameIcon, 'flappy');
+                
+                phone.appendChild(gameIcon);
+            }, 5000); // 5 seconds wait
+        }
+
+        function uninstallFlappy() {
+            const gameIcon = document.getElementById('flappyBtn');
+            if(gameIcon) gameIcon.remove();
+            isFlappyInstalled = false;
+            document.getElementById('installBtn').innerText = "Install";
+            document.getElementById('uninstallMenu').style.display = 'none';
+            if(currentApp === flappyApp) killApp(); // close if it was running
+        }
+
+        // Hide Context menu if clicked outside
+        document.addEventListener('mousedown', (e) => {
+            if(e.target.id !== 'uninstallMenu' && !e.target.closest('#flappyBtn')) {
+                document.getElementById('uninstallMenu').style.display = 'none';
+            }
+        });
+        document.addEventListener('touchstart', (e) => {
+            if(e.target.id !== 'uninstallMenu' && !e.target.closest('#flappyBtn')) {
+                document.getElementById('uninstallMenu').style.display = 'none';
+            }
+        });
 
         // Messages Logic
         const chats = {
@@ -327,7 +414,6 @@
             }
         }
 
-        // FIXED: Clear .is-active states when going Home
         function handleHomeBar() { 
             if (ccPanel.classList.contains('cc-open')) return toggleCC(false);
             if (phone.classList.contains('recents-view')) return phone.classList.remove('recents-view');
@@ -337,9 +423,7 @@
             document.querySelectorAll('.app').forEach(a => a.classList.remove('is-active'));
         }
 
-        // FIXED: Helper function to strictly open one app at a time
         function openApp(appEl) {
-            // Kill background apps so they don't overlap in multitasking
             document.querySelectorAll('.app').forEach(a => {
                 a.classList.remove('is-running', 'is-active');
             });
@@ -350,26 +434,46 @@
 
         function setupDrag(e, el, type) {
             if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open') || phone.classList.contains('recents-view') || ccPanel.classList.contains('cc-open')) return;
+            
+            document.getElementById('uninstallMenu').style.display = 'none'; // hide menu when clicking icon
+            
             let moved = false;
             const isTouch = e.type === 'touchstart';
             const startX = isTouch ? e.touches[0].clientX : e.clientX;
             const startY = isTouch ? e.touches[0].clientY : e.clientY;
             const initX = el.offsetLeft, initY = el.offsetTop;
 
+            // Long press logic specifically for Flappy Bird
+            let longPressTimer = setTimeout(() => {
+                if (!moved && type === 'flappy') {
+                    const menu = document.getElementById('uninstallMenu');
+                    menu.style.display = 'block';
+                    menu.style.left = (el.offsetLeft + 28) + 'px'; // Center above icon
+                    menu.style.top = (el.offsetTop - 30) + 'px';
+                    moved = true; // Prevents the app from opening when letting go
+                }
+            }, 1000);
+
             const move = (ev) => {
                 const curX = isTouch ? ev.touches[0].clientX : ev.clientX;
                 const curY = isTouch ? ev.touches[0].clientY : ev.clientY;
-                if (Math.abs(curX - startX) > 5 || Math.abs(curY - startY) > 5) moved = true;
+                if (Math.abs(curX - startX) > 5 || Math.abs(curY - startY) > 5) {
+                    moved = true;
+                    clearTimeout(longPressTimer); // Cancel uninstall menu if dragging
+                }
                 el.style.left = Math.max(10, Math.min(initX + (curX - startX), 210)) + 'px';
                 el.style.top = Math.max(40, Math.min(initY + (curY - startY), 480)) + 'px';
             };
 
             const stop = () => { 
+                clearTimeout(longPressTimer);
                 document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', move); 
                 document.removeEventListener(isTouch ? 'touchend' : 'mouseup', stop); 
                 if (!moved) { 
                     if(type === 'settings') openApp(settingsApp);
                     else if(type === 'messages') openApp(messagesApp);
+                    else if(type === 'store') openApp(storeApp);
+                    else if(type === 'flappy') openApp(flappyApp);
                     else toggleCC(true); 
                 } 
             };
@@ -385,9 +489,14 @@
             const r = new FileReader(); r.onload = (ev) => { wallpaper.style.backgroundImage = `url('${ev.target.result}')`; }; r.readAsDataURL(e.target.files[0]); 
         }
         function changeIconStyle(s) { 
-            const setBtn = document.getElementById('settingsBtn'), ccBtn = document.getElementById('ccIconBtn'), msgBtn = document.getElementById('msgBtn');
-            if(s === 'glassy') { setBtn.className = 'drag-btn icon-glassy'; ccBtn.className = 'drag-btn icon-glassy'; msgBtn.className = 'drag-btn icon-glassy'; } 
-            else { setBtn.className = 'drag-btn icon-normal-settings'; ccBtn.className = 'drag-btn icon-normal-cc'; msgBtn.className = 'drag-btn icon-normal-msg'; }
+            const setBtn = document.getElementById('settingsBtn'), ccBtn = document.getElementById('ccIconBtn'), msgBtn = document.getElementById('msgBtn'), storeBtn = document.getElementById('storeBtn'), flappyBtn = document.getElementById('flappyBtn');
+            if(s === 'glassy') { 
+                setBtn.className = 'drag-btn icon-glassy'; ccBtn.className = 'drag-btn icon-glassy'; msgBtn.className = 'drag-btn icon-glassy'; storeBtn.className = 'drag-btn icon-glassy';
+                if(flappyBtn) flappyBtn.className = 'drag-btn icon-glassy';
+            } else { 
+                setBtn.className = 'drag-btn icon-normal-settings'; ccBtn.className = 'drag-btn icon-normal-cc'; msgBtn.className = 'drag-btn icon-normal-msg'; storeBtn.className = 'drag-btn icon-normal-store';
+                if(flappyBtn) flappyBtn.className = 'drag-btn icon-normal-flappy';
+            }
         }
         function updateTime() { 
             const now = new Date(); const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); 
