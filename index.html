@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FakeOS 2.0</title>
+    <title>FakeOS 1.0</title>
     <style>
         :root { 
             --spd: 0.5s; 
@@ -40,11 +40,11 @@
 
         .brightness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; pointer-events: none; z-index: 3800; opacity: calc(1 - var(--bright)); }
         
-        /* Face ID Dynamic Island */
-        .punch-hole { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 80px; height: 22px; background: #000; border-radius: 20px; z-index: 3900; border: 1px solid #1a1a1a; transition: all 0.4s var(--ios-spring); display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; overflow: hidden; }
-        .punch-hole.scanning { width: 100px; height: 40px; background: #1c1c1e; border: 1px solid var(--ios-blue); }
-        #face-vid { width: 100%; height: 100%; object-fit: cover; display: none; transform: scaleX(-1); }
-
+        /* Fixed Punch Hole with Viewfinder */
+        .punch-hole { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 80px; height: 22px; background: #000; border-radius: 20px; z-index: 3900; border: 1px solid #1a1a1a; transition: all 0.3s; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .punch-hole.active { width: 120px; height: 40px; border-color: var(--ios-blue); }
+        #face-cam { width: 100%; height: 100%; object-fit: cover; display: none; transform: scaleX(-1); }
+        
         .status-bar { position: absolute; top: 0; width: 100%; height: 40px; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; box-sizing: border-box; color: white; font-size: 12px; font-weight: 600; z-index: 3500; }
 
         .control-center { position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); z-index: 2500; transform: translateY(-100%); transition: transform 0.5s var(--ios-spring); display: flex; flex-direction: column; align-items: center; padding-top: 100px; gap: 15px; }
@@ -88,6 +88,7 @@
         .is-unlocked .wallpaper { transform: scale(1); }
         .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
         .is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        
         .open .app { transform: scale(1) !important; opacity: 1 !important; pointer-events: auto !important; z-index: 1000; left: 0 !important; top: 0 !important; }
         .open .wallpaper { filter: blur(25px); transform: scale(1.15) !important; }
     </style>
@@ -99,9 +100,8 @@
         <audio id="sound-lock" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
 
         <div class="brightness-overlay"></div>
-        <div class="punch-hole" id="dynamic-island"><video id="face-vid" autoplay muted></video></div>
-        <div class="multitasking-overlay" onclick="exitRecentsToHome()"></div>
-
+        <div class="punch-hole" id="island"><video id="face-cam" autoplay muted playsinline></video></div>
+        
         <div class="status-bar">
             <span id="st-time">12:00</span>
             <div class="battery-section" onclick="toggleCC(true)">
@@ -123,8 +123,7 @@
         
         <div class="lockscreen" id="lockView">
             <div class="lock-time" id="clock">12:00</div>
-            <div id="face-status" style="margin-top:10px; font-weight:600; font-size:12px; color:#34c759;"></div>
-            <div style="margin-top: 5px; opacity: 0.7; font-size: 14px;">Swipe up or Hold to Unlock</div>
+            <div id="lock-msg" style="margin-top: 5px; opacity: 0.7; font-size: 14px;">Hold Home Bar to Unlock</div>
             <div class="fingerprint-scanner" id="fp-icon" onclick="unlockByFingerprint()"></div>
         </div>
 
@@ -139,7 +138,7 @@
                 <div class="num-btn" onclick="inputPin(7)">7</div><div class="num-btn" onclick="inputPin(8)">8</div><div class="num-btn" onclick="inputPin(9)">9</div>
                 <div></div><div class="num-btn" onclick="inputPin(0)">0</div>
             </div>
-            <div style="margin-top: 40px; color: #fff; font-weight:600; cursor: pointer;" onclick="closePinPad()">Cancel</div>
+            <div style="margin-top: 40px; color: #fff; font-weight:600; cursor: pointer; opacity: 0.8;" onclick="closePinPad()">Cancel</div>
         </div>
 
         <div class="drag-btn icon-normal-settings" id="settingsBtn" onmousedown="setupDrag(event, this, 'settings')" ontouchstart="setupDrag(event, this, 'settings')">⚙️</div>
@@ -150,98 +149,104 @@
         <div class="app" id="settingsApp">
             <div class="header">Settings</div>
             <div id="p1" class="page">
-                <div class="item" onclick="showPage(6)">Face ID & Passcode <span>›</span></div>
+                <div class="item" onclick="showPage(6)">Face ID & PIN <span>›</span></div>
                 <div class="item" onclick="showPage(4)">About Phone <span>›</span></div>
                 <div class="item" onclick="showPage(2)">Animation Speed <span>›</span></div>
                 <div class="item" onclick="showPage(5)">Icons <span>›</span></div>
                 <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
             </div>
+            <div id="p2" class="page" style="display:none;"><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
+            <div id="p3" class="page" style="display:none;"><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper +</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
+            <div id="p4" class="page" style="display:none;"><div style="padding:40px; text-align:center;"><h1 style="color:var(--text-main);">FakeOS 1.0</h1><p style="color:var(--text-main); opacity:0.6;">POCO X6 Pro Edition</p></div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
+            <div id="p5" class="page" style="display:none;"><div class="item" onclick="changeIconStyle('glassy')">Glassmorphism</div><div class="item" onclick="changeIconStyle('normal')">Classic</div><div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div></div>
             <div id="p6" class="page" style="display:none;">
-                <div class="item">Face ID <span id="face-toggle-text" onclick="enrollFace()" style="color:var(--ios-blue); font-weight:bold; cursor:pointer;">ENROLL</span></div>
+                <div class="item" id="enrollBtn" onclick="enrollFaceID()" style="color:var(--ios-blue); font-weight:bold;">Set up Face ID</div>
+                <div class="item">Fingerprint <div style="display:flex; gap: 12px;"><span onclick="setFingerprint(true)" style="color:#34c759; font-weight: bold;">ON</span><span onclick="setFingerprint(false)" style="color:#ff3b30; font-weight: bold;">OFF</span></div></div>
                 <div class="item" id="createPinBtn" onclick="createPin()">Create a PIN <span style="color:var(--ios-blue);">+</span></div>
-                <div class="item" id="turnOffPinBtn" style="display:none;" onclick="turnOffPin()">Turn off PIN</div>
+                <div class="item" id="turnOffPinBtn" style="display:none;" onclick="turnOffPin()">Turn off PIN <span style="color:#ff3b30;">✕</span></div>
                 <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
             </div>
-            <div id="p2" class="page" style="display:none;"><div class="item" onclick="setSpd('1.5s')">Slow</div><div class="item" onclick="setSpd('0.5s')">Normal</div><div class="item" onclick="setSpd('0.2s')">Fast</div><div class="item" onclick="showPage(1)">Back</div></div>
-            <div id="p3" class="page" style="display:none;"><div class="item" onclick="document.getElementById('file-input').click()">Choose Wallpaper</div><div class="item" onclick="showPage(1)">Back</div></div>
-            <div id="p4" class="page" style="display:none;"><div style="padding:40px; text-align:center;"><h1>FakeOS 2.0</h1><p>Secure Biometrics Edition</p></div><div class="item" onclick="showPage(1)">Back</div></div>
-            <div id="p5" class="page" style="display:none;"><div class="item" onclick="changeIconStyle('glassy')">Glassmorphism</div><div class="item" onclick="changeIconStyle('normal')">Classic</div><div class="item" onclick="showPage(1)">Back</div></div>
         </div>
-        
+
         <div class="home-bar" id="bottomBar" onmousedown="handleHomeBar()" ontouchstart="handleHomeBar()"></div>
     </div>
 
     <script>
         const phone = document.getElementById('phone'), blackOverlay = document.getElementById('blackOverlay'), wallpaper = document.getElementById('mainWallpaper'), ccPanel = document.getElementById('ccPanel');
-        const settingsApp = document.getElementById('settingsApp'), island = document.getElementById('dynamic-island'), faceVid = document.getElementById('face-vid');
+        const settingsApp = document.getElementById('settingsApp'), island = document.getElementById('island'), faceCam = document.getElementById('face-cam');
         const soundUnlock = document.getElementById('sound-unlock'), soundLock = document.getElementById('sound-lock');
         
-        let isPowerOn = true, activePin = null, currentPinInput = "", enrolledFaceData = null;
+        let isPowerOn = true, activePin = null, currentPinInput = "", enrolledFaceKey = null;
 
-        // Face ID Functions
-        async function enrollFace() {
+        // FACE ID CORE LOGIC
+        async function enrollFaceID() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                faceVid.srcObject = stream;
-                faceVid.style.display = 'block';
-                island.classList.add('scanning');
+                faceCam.srcObject = stream; faceCam.style.display = 'block'; island.classList.add('active');
                 setTimeout(() => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 100; canvas.height = 100;
-                    canvas.getContext('2d').drawImage(faceVid, 0, 0, 100, 100);
-                    enrolledFaceData = canvas.toDataURL(); // Save "face"
-                    island.classList.remove('scanning');
-                    faceVid.style.display = 'none';
-                    stream.getTracks().forEach(t => t.stop());
-                    document.getElementById('face-toggle-text').innerText = "ENROLLED";
-                    alert("Face Enrolled Successfully!");
+                    enrolledFaceKey = captureSignature();
+                    island.classList.remove('active'); faceCam.style.display = 'none';
+                    stream.getTracks().forEach(track => track.stop());
+                    document.getElementById('enrollBtn').innerText = "Face ID Enrolled ✅";
                 }, 2000);
-            } catch(e) { alert("Camera required for Face ID"); }
+            } catch (e) { alert("Camera Permission Required"); }
         }
 
-        async function verifyFace() {
-            if (!enrolledFaceData) return;
-            island.classList.add('scanning');
-            faceVid.style.display = 'block';
+        function captureSignature() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 10; canvas.height = 10;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(faceCam, 0, 0, 10, 10);
+            const data = ctx.getImageData(0,0,10,10).data;
+            let sum = 0; for(let i=0; i<data.length; i++) sum += data[i];
+            return sum; // A numeric "signature" of the current lighting/face
+        }
+
+        async function attemptFaceUnlock() {
+            if (!enrolledFaceKey) return;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                faceVid.srcObject = stream;
+                faceCam.srcObject = stream; faceCam.style.display = 'block'; island.classList.add('active');
                 setTimeout(() => {
-                    // Simulating comparison logic (In real JS, we'd use face-api.js)
-                    // For this script, we'll auto-success if light is sufficient, or fail if no face detected
-                    playSfx(soundUnlock);
-                    phone.classList.add('is-unlocked');
-                    island.classList.remove('scanning');
-                    faceVid.style.display = 'none';
-                    stream.getTracks().forEach(t => t.stop());
-                }, 1500);
-            } catch(e) { island.classList.remove('scanning'); }
+                    const currentKey = captureSignature();
+                    const diff = Math.abs(currentKey - enrolledFaceKey);
+                    stream.getTracks().forEach(track => track.stop());
+                    faceCam.style.display = 'none'; island.classList.remove('active');
+
+                    if (diff < 15000) { // Accuracy threshold
+                        playSfx(soundUnlock); phone.classList.add('is-unlocked');
+                    } else {
+                        document.getElementById('lock-msg').innerText = "Face Not Recognized";
+                        setTimeout(() => document.getElementById('lock-msg').innerText = "Hold Home Bar to Unlock", 2000);
+                    }
+                }, 1000);
+            } catch (e) { island.classList.remove('active'); }
         }
 
         function playSfx(s) { s.currentTime = 0; s.play().catch(e => {}); }
 
         function handleDoubleTap(e) {
-            if (e.target.closest('.cc-btn') || e.target.closest('.num-btn')) return;
-            if (!isPowerOn) { 
+            if (e.target.closest('.cc-btn') || e.target.closest('.cc-slider-box') || ccPanel.classList.contains('cc-open')) return;
+            if (isPowerOn) { 
+                playSfx(soundLock); blackOverlay.classList.add('screen-is-off'); phone.classList.remove('is-unlocked'); isPowerOn = false; toggleCC(false); closePinPad();
+            } else { 
                 blackOverlay.classList.remove('screen-is-off'); isPowerOn = true; 
-                if (enrolledFaceData) verifyFace();
-            } 
-            else if (!phone.classList.contains('open') && phone.classList.contains('is-unlocked')) { 
-                playSfx(soundLock); blackOverlay.classList.add('screen-is-off'); phone.classList.remove('is-unlocked'); isPowerOn = false; 
+                if (enrolledFaceKey) attemptFaceUnlock();
             }
         }
 
         function handleHomeBar() { 
-            if (ccPanel.classList.contains('cc-open')) toggleCC(false);
-            else if (isPowerOn && !phone.classList.contains('is-unlocked')) {
-                if(activePin) document.getElementById('pinPad').style.display = 'flex';
+            if (ccPanel.classList.contains('cc-open')) { toggleCC(false); return; }
+            if (isPowerOn && !phone.classList.contains('is-unlocked')) {
+                if (enrolledFaceKey) attemptFaceUnlock();
+                else if (activePin) document.getElementById('pinPad').style.display = 'flex';
                 else { playSfx(soundUnlock); phone.classList.add('is-unlocked'); }
             } else { phone.classList.remove('open'); }
         }
 
         function createPin() {
             let p = prompt("Enter a 4-digit PIN:");
-            if(p && p.length === 4) {
+            if(p && p.length === 4 && !isNaN(p)) {
                 activePin = p;
                 document.getElementById('createPinBtn').style.display = 'none';
                 document.getElementById('turnOffPinBtn').style.display = 'flex';
@@ -254,56 +259,61 @@
                 currentPinInput += num; updatePinDots();
                 if(currentPinInput.length === 4) {
                     if(currentPinInput === activePin) { playSfx(soundUnlock); phone.classList.add('is-unlocked'); closePinPad(); } 
-                    else { alert("Wrong PIN"); currentPinInput = ""; updatePinDots(); }
+                    else { 
+                        document.getElementById('pinStatus').innerText = "Wrong PIN";
+                        setTimeout(() => { document.getElementById('pinStatus').innerText = "Enter Passcode"; currentPinInput = ""; updatePinDots(); }, 1000);
+                    }
                 }
             }
-        }
-        function updatePinDots() { const dots = document.querySelectorAll('#pinDots .dot'); dots.forEach((dot, i) => dot.classList.toggle('active', i < currentPinInput.length)); }
-        function closePinPad() { document.getElementById('pinPad').style.display = 'none'; currentPinInput = ""; updatePinDots(); }
-        function setFingerprint(v) { document.getElementById('fp-icon').style.display = v ? 'flex' : 'none'; }
-        function unlockByFingerprint() { playSfx(soundUnlock); phone.classList.add('is-unlocked'); }
-        function showPage(n) { document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); document.getElementById('p' + n).style.display = 'block'; }
-        function setSpd(t) { document.documentElement.style.setProperty('--spd', t); }
-        function changeBrightness(v) { document.documentElement.style.setProperty('--bright', v); }
-        function toggleDarkMode() { document.getElementById('mainBody').classList.toggle('dark-mode'); }
-        function toggleCC(o) { if(isPowerOn && phone.classList.contains('is-unlocked')) ccPanel.classList.toggle('cc-open', o); }
-
-        function changeWallpaper(e) { 
-            const r = new FileReader(); 
-            r.onload = (ev) => { wallpaper.style.backgroundImage = `url('${ev.target.result}')`; }; 
-            r.readAsDataURL(e.target.files[0]); 
         }
 
         function setupDrag(e, el, type) {
             if (!phone.classList.contains('is-unlocked') || phone.classList.contains('open')) return;
             let moved = false;
-            const startX = e.clientX || e.touches[0].clientX;
-            const startY = e.clientY || e.touches[0].clientY;
+            const isTouch = e.type === 'touchstart';
+            const startX = isTouch ? e.touches[0].clientX : e.clientX;
+            const startY = isTouch ? e.touches[0].clientY : e.clientY;
+            const initX = el.offsetLeft; const initY = el.offsetTop;
             const move = (ev) => {
-                moved = true;
-                const cx = ev.clientX || ev.touches[0].clientX;
-                const cy = ev.clientY || ev.touches[0].clientY;
-                el.style.left = (cx - 25) + 'px'; el.style.top = (cy - 25) + 'px';
+                const curX = isTouch ? ev.touches[0].clientX : ev.clientX;
+                const curY = isTouch ? ev.touches[0].clientY : ev.clientY;
+                if (Math.abs(curX - startX) > 5) moved = true;
+                el.style.left = (initX + (curX - startX)) + 'px';
+                el.style.top = (initY + (curY - startY)) + 'px';
             };
-            const stop = () => {
-                document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', stop);
-                document.removeEventListener('touchmove', move); document.removeEventListener('touchend', stop);
-                if (!moved) { if(type === 'settings') phone.classList.add('open'); else toggleCC(true); }
+            const stop = () => { 
+                document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', move); 
+                document.removeEventListener(isTouch ? 'touchend' : 'mouseup', stop); 
+                if (!moved) { if(type === 'settings') phone.classList.add('open'); else toggleCC(true); } 
             };
-            document.addEventListener('mousemove', move); document.addEventListener('mouseup', stop);
-            document.addEventListener('touchmove', move); document.addEventListener('touchend', stop);
+            document.addEventListener(isTouch ? 'touchmove' : 'mousemove', move); document.addEventListener(isTouch ? 'touchend' : 'mouseup', stop);
         }
 
+        function updatePinDots() { const dots = document.querySelectorAll('#pinDots .dot'); dots.forEach((dot, i) => dot.classList.toggle('active', i < currentPinInput.length)); }
+        function closePinPad() { document.getElementById('pinPad').style.display = 'none'; currentPinInput = ""; updatePinDots(); }
+        function setFingerprint(v) { document.getElementById('fp-icon').style.display = v ? 'flex' : 'none'; }
+        function unlockByFingerprint() { playSfx(soundUnlock); phone.classList.add('is-unlocked'); closePinPad(); }
+        function changeBrightness(v) { document.documentElement.style.setProperty('--bright', v); }
+        function showPage(n) { document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); document.getElementById('p' + n).style.display = 'block'; }
+        function setSpd(t) { document.documentElement.style.setProperty('--spd', t); }
+        function changeWallpaper(e) { 
+            const r = new FileReader(); 
+            r.onload = (ev) => { wallpaper.style.backgroundImage = `url(${ev.target.result})`; }; 
+            r.readAsDataURL(e.target.files[0]); 
+        }
+        function changeIconStyle(s) { 
+            document.getElementById('settingsBtn').className = s === 'glassy' ? 'drag-btn icon-glassy' : 'drag-btn icon-normal-settings';
+            document.getElementById('ccIconBtn').className = s === 'glassy' ? 'drag-btn icon-glassy' : 'drag-btn icon-normal-cc';
+        }
         function updateTime() { 
-            const now = new Date(); 
-            const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); 
+            const now = new Date(); const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0'); 
             document.getElementById('clock').innerText = t; document.getElementById('st-time').innerText = t; 
         }
         setInterval(updateTime, 1000); updateTime();
         
         async function updateBattery() {
             try { const b = await navigator.getBattery(); document.getElementById('battery-level').innerText = Math.floor(b.level * 100) + "%"; } 
-            catch (e) { document.getElementById('battery-level').innerText = "85%"; }
+            catch (e) { document.getElementById('battery-level').innerText = "100%"; }
         }
         updateBattery();
     </script>
