@@ -106,7 +106,9 @@
         .is-unlocked .drag-btn { opacity: 1; transform: scale(1); }
         .is-unlocked .lockscreen { transform: translateY(-100%); opacity: 0; pointer-events: none; }
         
-        .open .app { transform: scale(1) !important; opacity: 1 !important; pointer-events: auto !important; z-index: 1000; left: 0 !important; top: 0 !important; }
+        /* THIS IS THE FIXED LINE: Only open the ACTIVE app, not all of them */
+        .open .app.is-active { transform: scale(1) !important; opacity: 1 !important; pointer-events: auto !important; z-index: 1000; left: 0 !important; top: 0 !important; }
+        
         .open .wallpaper { filter: blur(25px); transform: scale(1.15) !important; }
     </style>
 </head>
@@ -241,12 +243,20 @@
 
         function unlockByFingerprint() { playSfx(soundUnlock); phone.classList.add('is-unlocked'); closePinPad(); }
 
-        function exitRecentsToApp() { phone.classList.remove('recents-view'); phone.classList.add('open'); }
+        // FIXED: Re-add active state when re-opening from Recents
+        function exitRecentsToApp() { 
+            phone.classList.remove('recents-view'); 
+            if(currentApp) currentApp.classList.add('is-active');
+            phone.classList.add('open'); 
+        }
         function exitRecentsToHome() { phone.classList.remove('recents-view'); }
         
+        // FIXED: Make sure all states clear when killing
         function killApp() {
             phone.classList.remove('open');
-            if(currentApp) currentApp.classList.remove('is-running');
+            if(currentApp) {
+                currentApp.classList.remove('is-running', 'is-active');
+            }
             currentApp = null;
             checkRunningApps();
         }
@@ -317,11 +327,25 @@
             }
         }
 
+        // FIXED: Clear .is-active states when going Home
         function handleHomeBar() { 
             if (ccPanel.classList.contains('cc-open')) return toggleCC(false);
             if (phone.classList.contains('recents-view')) return phone.classList.remove('recents-view');
             if (isPowerOn && !phone.classList.contains('is-unlocked')) return unlockPhone();
+            
             phone.classList.remove('open'); 
+            document.querySelectorAll('.app').forEach(a => a.classList.remove('is-active'));
+        }
+
+        // FIXED: Helper function to strictly open one app at a time
+        function openApp(appEl) {
+            // Kill background apps so they don't overlap in multitasking
+            document.querySelectorAll('.app').forEach(a => {
+                a.classList.remove('is-running', 'is-active');
+            });
+            currentApp = appEl;
+            phone.classList.add('open');
+            appEl.classList.add('is-running', 'is-active');
         }
 
         function setupDrag(e, el, type) {
@@ -344,8 +368,8 @@
                 document.removeEventListener(isTouch ? 'touchmove' : 'mousemove', move); 
                 document.removeEventListener(isTouch ? 'touchend' : 'mouseup', stop); 
                 if (!moved) { 
-                    if(type === 'settings') { currentApp = settingsApp; phone.classList.add('open'); settingsApp.classList.add('is-running'); } 
-                    else if(type === 'messages') { currentApp = messagesApp; phone.classList.add('open'); messagesApp.classList.add('is-running'); }
+                    if(type === 'settings') openApp(settingsApp);
+                    else if(type === 'messages') openApp(messagesApp);
                     else toggleCC(true); 
                 } 
             };
