@@ -39,6 +39,21 @@
             box-shadow: 0 50px 100px rgba(0,0,0,0.9);
         }
 
+        /* Red Power Button Style */
+        .power-btn {
+            position: absolute;
+            right: -12px;
+            top: 140px;
+            width: 6px;
+            height: 60px;
+            background: #ff3b30;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            z-index: 5000;
+            transition: transform 0.1s;
+        }
+        .power-btn:active { transform: translateX(-2px); }
+
         .boot-screen {
             position: absolute; inset: 0; background: #000; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -131,7 +146,9 @@
 </head>
 <body id="mainBody">
 
-    <div class="phone" id="phone" ondblclick="handleDoubleTap(event)">
+    <div class="phone" id="phone">
+
+        <div class="power-btn" onclick="togglePower()"></div>
 
         <div class="boot-screen" id="bootScreen">
             <div class="boot-logo">FakeOS</div>
@@ -185,7 +202,7 @@
             <div class="num-grid">
                 <div class="num-btn" onclick="inputPin(1)">1</div><div class="num-btn" onclick="inputPin(2)">2</div><div class="num-btn" onclick="inputPin(3)">3</div>
                 <div class="num-btn" onclick="inputPin(4)">4</div><div class="num-btn" onclick="inputPin(5)">5</div><div class="num-btn" onclick="inputPin(6)">6</div>
-                <div class="num-btn" onclick="inputPin(7)">7</div><div class="num-btn" onclick="inputPin(😎">8</div><div class="num-btn" onclick="inputPin(9)">9</div>
+                <div class="num-btn" onclick="inputPin(7)">7</div><div class="num-btn" onclick="inputPin(8)">8</div><div class="num-btn" onclick="inputPin(9)">9</div>
                 <div></div><div class="num-btn" onclick="inputPin(0)">0</div>
             </div>
             <div style="margin-top: 40px; color: #fff; font-weight:600; cursor: pointer; opacity: 0.8;" onclick="closePinPad()">Cancel</div>
@@ -222,7 +239,7 @@
             </div>
             <div id="p7" class="page" style="display:none;">
                 <div class="item" onclick="showPage(3)">Wallpaper <span>›</span></div>
-                <div class="item" onclick="showPage(😎">AOD Customization <span>›</span></div>
+                <div class="item" onclick="showPage(8)">AOD Customization <span>›</span></div>
                 <div class="item" style="color:var(--ios-blue); font-weight:600;" onclick="showPage(1)">Back</div>
             </div>
             <div id="p8" class="page" style="display:none;">
@@ -355,16 +372,15 @@
         }
         updateBattery();
 
-        function handleDoubleTap(e) {
-            if (e.target.closest('.cc-btn') || e.target.closest('.cc-slider-box') || ccPanel.classList.contains('cc-open')) return;
-            
+        // New Power Function
+        function togglePower() {
             if (!isPowerOn) { 
                 blackOverlay.classList.remove('screen-is-off'); 
                 aod.style.display = 'none';
                 clearTimeout(aodTimeout);
                 isPowerOn = true; 
             } 
-            else if (!phone.classList.contains('open') && phone.classList.contains('is-unlocked')) { 
+            else { 
                 playSfx(soundLock);
                 blackOverlay.classList.add('screen-is-off'); 
                 phone.classList.remove('is-unlocked'); 
@@ -410,7 +426,7 @@
             if (!isSwiping) return;
             isSwiping = false;
             if (x - gestureStartX > 60 && Math.abs(y - gestureStartY) < 50) {
-                if (currentPage === 😎 {
+                if (currentPage === 8) {
                     showPage(7);
                 } else if (currentPage === 7 || currentPage === 6 || currentPage === 5 || currentPage === 4 || currentPage === 2) {
                     showPage(1);
@@ -479,7 +495,7 @@
         
         function changeWallpaper(e) { 
             const r = new FileReader(); 
-            r.onload = (ev) => { wallpaper.style.backgroundImage = url('${ev.target.result}'); }; 
+            r.onload = (ev) => { wallpaper.style.backgroundImage = `url('${ev.target.result}')`; }; 
             r.readAsDataURL(e.target.files[0]); 
         }
 
@@ -493,8 +509,8 @@
             if(s === 'glassy') {
                 setBtn.className = 'drag-btn icon-glassy';
                 ccBtn.className = 'drag-btn icon-glassy';
-                setBtn.textContent = '⚙️';
-                ccBtn.textContent = '📱';
+                setBtn.textContent = '';
+                ccBtn.textContent = '';
             } else {
                 setBtn.className = 'drag-btn icon-normal-settings';
                 ccBtn.className = 'drag-btn icon-normal-cc';
