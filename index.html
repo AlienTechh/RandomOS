@@ -9,28 +9,30 @@
             --ios-blur: blur(25px);
             --glass-bg: rgba(255, 255, 255, 0.1);
             --accent-blue: #007AFF;
+            --system-gray: #f2f2f7;
         }
 
         * { 
             margin: 0; padding: 0; box-sizing: border-box; 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
         
         body { 
-            background: #000; 
+            background: #0f0f0f; 
             display: flex; justify-content: center; align-items: center; 
             height: 100vh; overflow: hidden;
         }
 
+        /* HARDWARE FRAME */
         .phone {
             width: 310px; height: 640px;
             background: #1a1a1a;
             border: 12px solid #2c2c2c;
             border-radius: 50px;
             position: relative;
-            box-shadow: 0 0 100px rgba(0,0,0,0.9);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8), inset 0 0 15px rgba(255,255,255,0.05);
         }
 
         .screen-container {
@@ -47,161 +49,250 @@
             padding: 0 25px; display: flex; justify-content: space-between;
             align-items: center; z-index: 4500; color: white;
             font-size: 0.8rem; font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .status-right { display: flex; align-items: center; gap: 6px; }
+        .battery-icon {
+            width: 22px; height: 11px; border: 1.5px solid rgba(255,255,255,0.5);
+            border-radius: 3px; position: relative;
+        }
+        .battery-icon::after {
+            content: ''; position: absolute; right: -3.5px; top: 2px;
+            width: 2px; height: 4px; background: rgba(255,255,255,0.5); border-radius: 0 1px 1px 0;
+        }
+        .battery-level {
+            position: absolute; left: 1px; top: 1px; height: 6px; 
+            width: 80%; background: white; border-radius: 1px;
         }
 
         .punch-hole {
-            position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-            width: 70px; height: 22px; background: #000;
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 75px; height: 22px; background: #000;
             border-radius: 20px; z-index: 5000;
         }
 
-        /* BRIGHTNESS OVERLAY */
+        .power-btn {
+            position: absolute; right: -16px; top: 130px;
+            width: 5px; height: 60px; background: #333;
+            border-radius: 0 5px 5px 0; cursor: pointer; z-index: 5500;
+            transition: background 0.2s;
+        }
+        .power-btn:active { background: #ff3b30; }
+
+        /* OVERLAYS */
         #brightness-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: black; opacity: 0; pointer-events: none; z-index: 4000;
+            transition: opacity 0.1s ease;
+        }
+
+        #black-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 5500; display: none;
         }
 
         /* CONTROL CENTER */
         #control-center {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5); backdrop-filter: var(--ios-blur);
+            background: rgba(0, 0, 0, 0.3); backdrop-filter: var(--ios-blur);
             z-index: 4800; transform: translateY(-100%);
-            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            padding: 70px 20px;
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            padding: 80px 20px;
+            display: flex; flex-direction: column;
         }
         #control-center.open { transform: translateY(0); }
 
-        .cc-module {
-            background: var(--glass-bg); border-radius: 24px;
-            padding: 20px; margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .cc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;}
+        .cc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .cc-btn {
-            background: var(--glass-bg); padding: 18px; border-radius: 20px;
-            color: white; font-size: 0.85rem; display: flex; 
-            flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
+            background: var(--glass-bg); padding: 20px; border-radius: 22px;
+            color: white; font-size: 0.85rem; font-weight: 500;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.3s;
         }
         .cc-btn.active { background: var(--accent-blue); }
 
-        input[type=range] {
-            width: 100%; height: 30px; -webkit-appearance: none;
-            background: rgba(255,255,255,0.15); border-radius: 12px; overflow: hidden;
+        .cc-slider {
+            background: var(--glass-bg); padding: 20px; border-radius: 22px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .cc-slider input { 
+            width: 100%; margin-top: 15px; cursor: pointer; height: 28px;
+            -webkit-appearance: none; background: rgba(255,255,255,0.2);
+            border-radius: 10px; overflow: hidden;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; width: 0;
             box-shadow: -400px 0 0 400px rgba(255,255,255,0.4);
         }
 
-        /* SCREENS */
+        .cc-close-trigger {
+            margin-top: auto; text-align: center; color: rgba(255,255,255,0.4);
+            font-size: 2rem; cursor: pointer; padding-bottom: 20px;
+        }
+
+        /* WALLPAPER */
         .wallpaper {
             position: absolute; width: 100%; height: 100%;
             background-color: #1a1a1a;
-            background-image: url('1000005643.jpg'); background-size: cover;
-            background-position: center; transition: 0.6s cubic-bezier(0.2, 0, 0.2, 1);
+            background-image: url('1000005643.jpg');
+            background-size: cover; background-position: center;
+            transition: filter 0.6s cubic-bezier(0.2, 0, 0.2, 1), transform 0.6s;
             z-index: 1;
         }
+        .wallpaper.app-active { filter: blur(25px) brightness(0.7); transform: scale(1.1); }
 
+        /* SCREENS */
         .screen {
             position: absolute; width: 100%; height: 100%; z-index: 5;
-            transition: 0.4s ease; display: flex; flex-direction: column;
+            transition: opacity 0.4s, transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         .hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
         .active { opacity: 1; pointer-events: all; transform: scale(1); }
 
-        #lock-screen { align-items: center; padding-top: 80px; color: white; cursor: pointer; }
-        .time-big { font-size: 4.5rem; font-weight: 200; }
-
-        #home-screen { padding: 70px 20px; }
-        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .app { display: flex; flex-direction: column; align-items: center; gap: 5px; color: white; cursor: pointer; }
-        .icon {
-            width: 54px; height: 54px; border-radius: 12px;
-            background: white; display: flex; justify-content: center; align-items: center;
-            font-size: 1.6rem;
+        #lock-screen {
+            display: flex; flex-direction: column; align-items: center;
+            padding-top: 100px; color: white;
         }
+        .time { font-size: 4.5rem; font-weight: 200; letter-spacing: -2px; }
+        .date { font-size: 1.1rem; font-weight: 400; margin-top: -10px; opacity: 0.9; }
 
-        /* APP WINDOWS */
+        #home-screen { padding: 80px 20px; }
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .app { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.8rem; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .app:active .icon { transform: scale(0.9); }
+        .app span { color: white; font-size: 0.75rem; font-weight: 500; }
+
+        /* WINDOWS */
         .app-window {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #f2f2f7; z-index: 1000; 
-            transform: translateY(100%); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            background: var(--system-gray); z-index: 1000;
+            opacity: 0; transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s;
             padding: 60px 25px;
         }
-        .app-window.open { transform: translateY(0); }
+        .app-window.open { opacity: 1; transform: translateY(0); }
 
-        .close-btn {
-            width: 100%; padding: 15px; border-radius: 15px; border: none;
-            background: #e5e5ea; font-weight: 600; margin-top: 20px; cursor: pointer;
+        .settings-item {
+            background: white; padding: 16px; border-radius: 14px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            color: #000; font-weight: 600; cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        /* TRIGGERS */
+        .back-btn { color: var(--accent-blue); font-weight: 700; margin-bottom: 25px; cursor: pointer; display: flex; align-items: center; gap: 5px;}
+
+        #home-bar {
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 5px; background: rgba(255,255,255,0.8);
+            border-radius: 10px; z-index: 5600; cursor: pointer;
+            transition: background 0.2s;
+        }
+        #home-bar:hover { background: #fff; }
+
         .status-trigger {
             position: absolute; top: 0; right: 0; width: 40%; height: 50px;
             z-index: 4600; cursor: pointer;
-        }
-        /* Clickable bottom area for Home/Back instead of a visible bar */
-        .home-touch-area {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 40px;
-            z-index: 5600; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
     <div class="phone">
+        <div class="power-btn" onclick="togglePower()"></div>
+
         <div class="screen-container">
             <div class="status-bar">
                 <div id="status-time">09:41</div>
-                <div>RandomOS 1.0</div>
+                <div class="status-right">
+                    <span>5G</span>
+                    <div class="battery-icon"><div class="battery-level"></div></div>
+                </div>
             </div>
 
             <div class="status-trigger" onclick="toggleCC(true)"></div>
             <div class="punch-hole"></div>
+            
+            <div id="black-overlay"></div>
             <div id="brightness-overlay"></div>
+            
             <div class="wallpaper" id="main-wallpaper"></div>
 
             <div id="control-center">
                 <div class="cc-grid">
-                    <div class="cc-btn active" id="wifi-btn" onclick="toggleCCBtn('wifi-btn')">📶 Wi-Fi</div>
-                    <div class="cc-btn active" id="bt-btn" onclick="toggleCCBtn('bt-btn')">🔹 Bluetooth</div>
+                    <div class="cc-btn" id="wifi-btn" onclick="toggleCCBtn('wifi-btn')">
+                        <span style="font-size: 1.5rem;">📶</span>
+                        <span>Wi-Fi</span>
+                    </div>
+                    <div class="cc-btn" id="bt-btn" onclick="toggleCCBtn('bt-btn')">
+                        <span style="font-size: 1.5rem;">🔹</span>
+                        <span>Bluetooth</span>
+                    </div>
                 </div>
-                <div class="cc-module">
-                    <label style="color:white; font-size:0.8rem;">Brightness</label>
-                    <input type="range" min="10" max="100" value="100" oninput="adjustBrightness(this.value)">
+                <div class="cc-slider">
+                    <label style="font-size: 0.8rem; font-weight: 600; color: #ddd;">BRIGHTNESS</label>
+                    <input type="range" min="0" max="100" value="100" oninput="adjustBrightness(this.value)">
                 </div>
-                <div style="text-align:center; color:white; font-size:1.5rem; cursor:pointer;" onclick="toggleCC(false)">︿</div>
+                <div class="cc-close-trigger" onclick="toggleCC(false)">︿</div>
             </div>
 
-            <div id="lock-screen" class="screen active" onclick="unlock()">
-                <div class="time-big" id="clock-large">09:41</div>
-                <div>Friday, April 10</div>
-                <div style="margin-top: auto; margin-bottom: 60px; opacity: 0.5;">Tap to unlock</div>
+            <div id="lock-screen" class="screen active">
+                <div class="time" id="clock-large">09:41</div>
+                <div class="date">Friday, April 10</div>
+                <div style="margin-top: auto; margin-bottom: 80px; opacity: 0.6; font-size: 0.85rem;">Swipe up to open</div>
             </div>
 
             <div id="home-screen" class="screen hidden">
                 <div class="app-grid">
-                    <div class="app" onclick="openApp('settings-window')">
-                        <div class="icon">⚙️</div>
-                        <span style="font-size:0.7rem;">Settings</span>
+                    <div class="app" onclick="openApp('settings-main')">
+                        <div class="icon" style="background: linear-gradient(#f0f0f0, #d1d1d6);">⚙️</div>
+                        <span>Settings</span>
                     </div>
                 </div>
             </div>
 
-            <div id="settings-window" class="app-window">
-                <h1>Settings</h1>
-                <p style="margin: 20px 0; color: #8e8e93;">Version: 1.0 Beta</p>
-                <button class="close-btn" onclick="closeAllApps()">Close App</button>
+            <div id="settings-main" class="app-window">
+                <h1 style="margin-bottom: 25px; font-size: 2rem;">Settings</h1>
+                <div class="settings-item" onclick="showSubPage('customization-page')">
+                    <span>Appearance</span>
+                    <span style="color: #c7c7cc;">❯</span>
+                </div>
+                <div class="settings-item" style="cursor: default; opacity: 0.6;">
+                    <span>Software Version</span>
+                    <span>1.0 Beta</span>
+                </div>
             </div>
 
-            <div class="home-touch-area" onclick="goHome()"></div>
+            <div id="customization-page" class="app-window">
+                <div class="back-btn" onclick="showSubPage('settings-main')">❮ Settings</div>
+                <h2 style="margin-bottom: 25px;">Wallpaper</h2>
+                <div class="settings-item" onclick="triggerFileSelect()">
+                    <span>Choose New Photo</span>
+                    <span style="color: var(--accent-blue);">+</span>
+                </div>
+            </div>
+
+            <div id="home-bar" onclick="handleBarClick()"></div>
         </div>
     </div>
 
+    <input type="file" id="wallpaper-input" hidden accept="image/*">
+
     <script>
+        let isPhoneOff = false;
+        const wallpaperLayer = document.getElementById('main-wallpaper');
+        const wallpaperInput = document.getElementById('wallpaper-input');
+
         function toggleCC(show) {
+            if (isPhoneOff) return;
             document.getElementById('control-center').classList.toggle('open', show);
         }
 
@@ -210,37 +301,69 @@
         }
 
         function adjustBrightness(val) {
-            // Right (100) = Bright, Left (10) = Dark
-            const darkness = (100 - val) / 110; 
+            const darkness = (100 - val) / 125; 
             document.getElementById('brightness-overlay').style.opacity = darkness;
         }
 
-        function unlock() {
-            document.getElementById('lock-screen').classList.replace('active', 'hidden');
-            document.getElementById('home-screen').classList.replace('hidden', 'active');
-        }
-
-        function goHome() {
+        function handleBarClick() {
+            if (isPhoneOff) return;
             toggleCC(false);
-            closeAllApps();
+            const lockScreen = document.getElementById('lock-screen');
+            if (lockScreen.classList.contains('active')) {
+                lockScreen.classList.replace('active', 'hidden');
+                document.getElementById('home-screen').classList.replace('hidden', 'active');
+            } else {
+                closeAllApps();
+            }
         }
 
         function openApp(id) {
             document.getElementById(id).classList.add('open');
-            document.getElementById('main-wallpaper').style.filter = "blur(20px) brightness(0.7)";
+            wallpaperLayer.classList.add('app-active');
         }
 
         function closeAllApps() {
             document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
-            document.getElementById('main-wallpaper').style.filter = "none";
+            document.getElementById('home-screen').classList.replace('hidden', 'active');
+            wallpaperLayer.classList.remove('app-active');
+        }
+
+        function showSubPage(id) {
+            document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
+            document.getElementById(id).classList.add('open');
+        }
+
+        function triggerFileSelect() { wallpaperInput.click(); }
+
+        wallpaperInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    wallpaperLayer.style.backgroundImage = `url(${e.target.result})`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function togglePower() {
+            isPhoneOff = !isPhoneOff;
+            document.getElementById('black-overlay').style.display = isPhoneOff ? 'block' : 'none';
+            document.getElementById('home-bar').style.display = isPhoneOff ? 'none' : 'block';
+            toggleCC(false);
+            if (!isPhoneOff) {
+                closeAllApps();
+                document.getElementById('home-screen').classList.replace('active', 'hidden');
+                document.getElementById('lock-screen').classList.replace('hidden', 'active');
+            }
         }
 
         function updateTime() {
             const now = new Date();
-            const time = now.getHours().toString().padStart(2, '0') + ":" + 
-                         now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock-large').innerText = time;
-            document.getElementById('status-time').innerText = time;
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                            now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock-large').innerText = timeStr;
+            document.getElementById('status-time').innerText = timeStr;
         }
         setInterval(updateTime, 1000);
         updateTime();
