@@ -313,7 +313,7 @@
             font-weight: 800;
             color: #1c1c1e;
             margin-top: 100px;
-            cursor: pointer;
+            cursor: pointer; /* Change cursor to indicate it's clickable */
         }
         .about-footer {
             width: 100%;
@@ -343,19 +343,19 @@
         }
 
         /* TOAST NOTIFICATION */
-        #toast {
+        #dev-toast {
             position: absolute;
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
+            background: rgba(40, 40, 40, 0.9);
             color: white;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
+            z-index: 9999;
             opacity: 0;
             transition: opacity 0.3s;
-            z-index: 9999;
             pointer-events: none;
         }
     </style>
@@ -363,7 +363,7 @@
 <body>
 
     <div class="phone">
-        <div id="toast">Developer options enabled</div>
+        <div id="dev-toast">developer options activated</div>
 
         <div class="power-btn" 
              onmousedown="startPowerTimer(event)" 
@@ -442,7 +442,7 @@
                     <span>About</span>
                     <span>❯</span>
                 </div>
-                <div id="dev-opt-item" class="settings-item" style="display:none;" onclick="showSubPage('dev-page')">
+                <div id="dev-options-row" class="settings-item" style="display:none;" onclick="alert('Dev Mode Active')">
                     <span>Developer Options</span>
                     <span>❯</span>
                 </div>
@@ -472,18 +472,12 @@
             <div id="about-page" class="app-window">
                 <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
                 <div id="about-content">
-                    <div class="about-main-text" onclick="handleAboutClick()">RandomOS 1.0 Beta</div>
+                    <div class="about-main-text" onclick="handleAboutTap()">RandomOS 1.0 Beta</div>
                     <div class="about-footer">
                         <span>Phone Name</span>
                         <span>rPhone 1 pro</span>
                     </div>
                 </div>
-            </div>
-
-            <div id="dev-page" class="app-window">
-                <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
-                <h1>Developer Options</h1>
-                <p style="margin-top:20px; color:#666;">You are now a developer.</p>
             </div>
 
             <div id="nav-container">
@@ -507,28 +501,32 @@
         let powerTimer;
         let pressStartTime;
         
-        // Developer Options Logic
-        let aboutClickCount = 0;
-        let devOptionsEnabled = false;
+        // NEW STATE FOR DEVELOPER OPTIONS
+        let aboutTapCount = 0;
+        let isDevEnabled = false;
 
         const wallpaperLayer = document.getElementById('main-wallpaper');
         const wallpaperInput = document.getElementById('wallpaper-input');
 
-        function handleAboutClick() {
-            if (devOptionsEnabled) return;
-            aboutClickCount++;
-            if (aboutClickCount >= 4) {
-                devOptionsEnabled = true;
-                document.getElementById('dev-opt-item').style.display = 'flex';
-                showToast("Developer options enabled");
+        // NEW FUNCTION: Handle taps on the About text
+        function handleAboutTap() {
+            if (isDevEnabled) return; // Don't do anything if already enabled
+
+            aboutTapCount++;
+            if (aboutTapCount >= 4) {
+                isDevEnabled = true;
+                showDevToast();
+                document.getElementById('dev-options-row').style.display = 'flex';
             }
         }
 
-        function showToast(text) {
-            const toast = document.getElementById('toast');
-            toast.innerText = text;
+        // NEW FUNCTION: Show the activation toast
+        function showDevToast() {
+            const toast = document.getElementById('dev-toast');
             toast.style.opacity = '1';
-            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
         }
 
         function startPowerTimer(e) {
@@ -559,4 +557,7 @@
             const overlay = document.getElementById('black-overlay');
             
             if (isPhoneSleeping) {
-                overlay.style.display = 'bloc
+                overlay.style.display = 'block';
+                setTimeout(() => overlay.style.opacity = '1', 10);
+            } else {
+                resetToLoc
