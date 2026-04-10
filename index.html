@@ -91,43 +91,46 @@
             top: 120px;
             width: 6px;
             height: 50px;
-            background: #333;
+            background: #444;
             border-radius: 0 5px 5px 0;
             cursor: pointer;
-            z-index: 5500;
+            z-index: 9000; /* Ensure it's above everything */
         }
 
         /* POWER MENU & BOOT */
         #power-menu {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            z-index: 6000;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(15px);
+            z-index: 8000;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 30px;
-            color: white;
+            gap: 25px;
         }
-        .power-option { font-size: 1.2rem; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
-        .power-option:active { opacity: 0.5; }
-        .power-option.red { color: #ff3b30; }
+        .power-option { 
+            color: white; 
+            font-size: 1.2rem; 
+            padding: 10px 20px;
+            cursor: pointer; 
+        }
+        .power-option.red { color: #ff453a; font-weight: bold; }
 
         #boot-screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: black;
-            z-index: 7000;
+            z-index: 8500;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             color: white;
         }
-        .boot-logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+        .boot-logo { font-size: 1.4rem; font-weight: bold; letter-spacing: 3px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
         /* OVERLAYS */
         #brightness-overlay {
@@ -141,7 +144,7 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             background: #000;
-            z-index: 5500;
+            z-index: 7000;
             display: none;
         }
 
@@ -222,7 +225,7 @@
         }
         .app span { color: white; font-size: 0.7rem; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 
-        /* UPGRADED APP WINDOWS */
+        /* APP WINDOWS */
         .app-window {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -234,73 +237,35 @@
             transform: scale(0);
             transition: 
                 transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), 
-                opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1),
-                border-radius 0.5s ease;
+                opacity 0.3s cubic-bezier(0.32, 0.72, 0, 1);
         }
         
-        .app-window.open { 
-            opacity: 1; 
-            transform: scale(1); 
-            pointer-events: all; 
-            border-radius: 38px;
-        }
+        .app-window.open { opacity: 1; transform: scale(1); pointer-events: all; }
 
         .settings-item {
             background: white; padding: 18px; border-radius: 15px; margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
             color: #000; font-weight: 600; cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .back-btn { color: #007aff; font-weight: 700; margin-bottom: 25px; cursor: pointer; }
 
         #nav-container {
-            position: absolute; 
-            bottom: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 45px;
-            z-index: 5600; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-end;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 45px;
+            z-index: 5600; display: flex; justify-content: center; align-items: flex-end;
             padding-bottom: 8px;
         }
 
         #home-bar {
-            width: 120px; 
-            height: 5px; 
-            background: rgba(255,255,255,0.7);
-            border-radius: 10px; 
-            cursor: pointer;
-            margin-bottom: 2px;
+            width: 120px; height: 5px; background: rgba(255,255,255,0.7);
+            border-radius: 10px; cursor: pointer;
         }
 
-        #three-buttons {
-            width: 100%; 
-            display: none; 
-            justify-content: space-around; 
-            align-items: center;
-            padding: 0 30px;
-        }
-        .nav-btn {
-            color: white; 
-            font-size: 1.3rem; 
-            cursor: pointer; 
-            width: 50px; 
-            height: 35px;
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-        }
+        #three-buttons { width: 100%; display: none; justify-content: space-around; align-items: center; }
+        .nav-btn { color: white; font-size: 1.3rem; cursor: pointer; padding: 10px; }
 
         #unlock-trigger {
-            position: absolute;
-            bottom: 0;
-            width: 100%; 
-            height: 100%; 
-            background: transparent; 
-            cursor: pointer;
+            position: absolute; bottom: 0; width: 100%; height: 100%; background: transparent; cursor: pointer;
         }
     </style>
 </head>
@@ -308,10 +273,10 @@
 
     <div class="phone">
         <div class="power-btn" 
-             onmousedown="startPowerTimer()" 
-             onmouseup="endPowerTimer()" 
-             ontouchstart="startPowerTimer()" 
-             ontouchend="endPowerTimer()"></div>
+             onmousedown="startPowerTimer(event)" 
+             onmouseup="endPowerTimer(event)" 
+             ontouchstart="startPowerTimer(event)" 
+             ontouchend="endPowerTimer(event)"></div>
 
         <div class="screen-container">
             <div id="boot-screen">
@@ -376,10 +341,6 @@
                     <span>Customization</span>
                     <span>❯</span>
                 </div>
-                <div class="settings-item" style="opacity: 0.6; cursor: default;">
-                    <span>System Version</span>
-                    <span>1.0 Beta</span>
-                </div>
             </div>
 
             <div id="nav-settings" class="app-window">
@@ -418,38 +379,48 @@
     <input type="file" id="wallpaper-input" hidden accept="image/*">
 
     <script>
-        let isPhoneOff = false;
-        let isCompletelyShutdown = false;
+        let isPhoneSleeping = false; // Screen Off (black overlay)
+        let isCompletelyShutdown = false; // System Off (power button needed to boot)
         let currentNavMode = 'swipe';
         let powerTimer;
-        let longPressTriggered = false;
+        let pressStartTime;
 
         const wallpaperLayer = document.getElementById('main-wallpaper');
         const wallpaperInput = document.getElementById('wallpaper-input');
 
-        // LONG PRESS LOGIC
-        function startPowerTimer() {
-            longPressTriggered = false;
+        // POWER BUTTON LOGIC
+        function startPowerTimer(e) {
+            e.preventDefault();
+            pressStartTime = Date.now();
             powerTimer = setTimeout(() => {
-                if (!isCompletelyShutdown) {
-                    showPowerMenu();
-                    longPressTriggered = true;
-                } else {
+                if (isCompletelyShutdown) {
                     bootSystem();
-                    longPressTriggered = true;
+                } else {
+                    showPowerMenu();
                 }
-            }, 2000);
+            }, 2000); // 2 Seconds
         }
 
-        function endPowerTimer() {
+        function endPowerTimer(e) {
+            e.preventDefault();
+            const duration = Date.now() - pressStartTime;
             clearTimeout(powerTimer);
-            if (!longPressTriggered) {
-                togglePower(); // Short click logic
+
+            if (duration < 2000) {
+                // Short press logic
+                if (isCompletelyShutdown) return; // Can't wake a shutdown phone with short press
+                toggleSleep();
             }
         }
 
+        function toggleSleep() {
+            isPhoneSleeping = !isPhoneSleeping;
+            document.getElementById('black-overlay').style.display = isPhoneSleeping ? 'block' : 'none';
+            // We don't change screen states here so it stays where you left off
+        }
+
         function showPowerMenu() {
-            if (isPhoneOff) return;
+            if (isPhoneSleeping) toggleSleep(); // Wake up to show menu
             document.getElementById('power-menu').style.display = 'flex';
         }
 
@@ -460,7 +431,7 @@
         function systemShutdown() {
             closePowerMenu();
             isCompletelyShutdown = true;
-            isPhoneOff = true;
+            isPhoneSleeping = true;
             document.getElementById('black-overlay').style.display = 'block';
             document.getElementById('nav-container').style.display = 'none';
         }
@@ -472,27 +443,25 @@
         }
 
         function bootSystem() {
-            isCompletelyShutdown = false;
             const bootScreen = document.getElementById('boot-screen');
             bootScreen.style.display = 'flex';
             
             setTimeout(() => {
                 bootScreen.style.display = 'none';
-                isPhoneOff = false;
+                isCompletelyShutdown = false;
+                isPhoneSleeping = false;
                 document.getElementById('black-overlay').style.display = 'none';
                 document.getElementById('nav-container').style.display = 'flex';
-                resetToLockscreen();
+                
+                // Always go back to Lockscreen on boot
+                closeAllApps();
+                document.getElementById('home-screen').classList.replace('active', 'hidden');
+                document.getElementById('lock-screen').classList.replace('hidden', 'active');
+                updateNavVisibility();
             }, 3000);
         }
 
-        function resetToLockscreen() {
-            closeAllApps();
-            document.getElementById('home-screen').classList.replace('active', 'hidden');
-            document.getElementById('lock-screen').classList.replace('hidden', 'active');
-            updateNavVisibility();
-        }
-
-        // ORIGINAL LOGIC
+        // NAVIGATION & APPS
         function openAppWithOrigin(element, id) {
             const appWindow = document.getElementById(id);
             const rect = element.getBoundingClientRect();
@@ -505,7 +474,7 @@
         }
 
         function toggleCC(show) {
-            if (isPhoneOff || isCompletelyShutdown) return;
+            if (isPhoneSleeping || isCompletelyShutdown) return;
             document.getElementById('control-center').classList.toggle('open', show);
         }
 
@@ -543,7 +512,7 @@
         }
 
         function handleHomeAction() {
-            if (isPhoneOff) return;
+            if (isPhoneSleeping) return;
             toggleCC(false);
             const lockScreen = document.getElementById('lock-screen');
             if (lockScreen.classList.contains('active')) {
@@ -556,7 +525,7 @@
         }
 
         function handleBackAction() {
-            if (isPhoneOff) return;
+            if (isPhoneSleeping) return;
             const subpages = ['nav-settings', 'custom-page'];
             let inSubPage = false;
             subpages.forEach(id => {
@@ -567,8 +536,6 @@
             });
             if(!inSubPage) closeAllApps();
         }
-
-        function handleRecentAction() { console.log("Recent apps triggered"); }
 
         function closeAllApps() {
             document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
@@ -581,7 +548,6 @@
                 if(win.id !== id) win.classList.remove('open');
             });
             const target = document.getElementById(id);
-            target.style.transformOrigin = 'center'; 
             target.classList.add('open');
         }
 
@@ -595,17 +561,6 @@
                 reader.readAsDataURL(file);
             }
         });
-
-        function togglePower() {
-            if (isCompletelyShutdown) return; 
-            isPhoneOff = !isPhoneOff;
-            document.getElementById('black-overlay').style.display = isPhoneOff ? 'block' : 'none';
-            document.getElementById('nav-container').style.display = isPhoneOff ? 'none' : 'flex';
-            toggleCC(false);
-            if (!isPhoneOff) {
-                resetToLockscreen();
-            }
-        }
 
         function updateTime() {
             const now = new Date();
