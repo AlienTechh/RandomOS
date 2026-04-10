@@ -3,126 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaOS | Mobile Software</title>
+    <title>Mobile OS Simulator</title>
     <style>
-        /* CSS Styles directly inside the HTML */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
+        /* BASE STYLING */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { 
+            background: #121212; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden;
         }
 
-        body {
-            background-color: #f8f9fa;
-            color: #333;
+        /* PHONE FRAME */
+        .phone-container {
+            width: 360px;
+            height: 740px;
+            background: #000;
+            border: 8px solid #333;
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        nav {
+        /* SCREEN LAYERS */
+        .screen {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            transition: transform 0.5s ease-in-out, opacity 0.3s;
+            display: none;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .active { display: block; }
+
+        /* LOCK SCREEN */
+        #lock-screen {
+            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1000');
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: space-between;
-            padding: 20px 5%;
-            background: #fff;
-            border-bottom: 1px solid #eee;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        .hero {
-            text-align: center;
-            padding: 100px 20px;
-            background: linear-gradient(to right, #007bff, #00c6ff);
+            padding: 60px 20px;
             color: white;
+            z-index: 10;
         }
 
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
+        .time { font-size: 4rem; font-weight: 200; }
+        .date { font-size: 1.2rem; margin-top: -10px; opacity: 0.8; }
+        .unlock-hint { margin-bottom: 20px; font-size: 0.9rem; animation: pulse 2s infinite; }
+
+        /* HOME SCREEN */
+        #home-screen {
+            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1000');
+            padding: 40px 20px;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: white;
-            color: #007bff;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: bold;
-            margin-top: 20px;
+        .widget-clock {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 25px;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        .features {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 50px 5%;
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
         }
 
-        .card {
-            background: white;
-            padding: 30px;
-            width: 300px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .download-section {
-            text-align: center;
-            padding: 60px 20px;
-            background: #111;
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             color: white;
+            font-size: 0.7rem;
+            cursor: pointer;
         }
 
-        footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 0.8rem;
+        .icon-box {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+        }
+
+        /* SETTINGS SCREEN */
+        #settings-screen {
             background: #fff;
+            padding: 20px;
+            color: #333;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .settings-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        /* ANIMATIONS */
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <div class="logo">NovaOS</div>
-    </nav>
-
-    <header class="hero">
-        <h1>Software that moves with you.</h1>
-        <p>Simple, secure, and incredibly fast.</p>
-        <a href="#download" class="btn">Download Now</a>
-    </header>
-
-    <section class="features">
-        <div class="card">
-            <h3>⚡ Performance</h3>
-            <p>Optimized kernel for lag-free scrolling and gaming.</p>
+    <div class="phone-container">
+        
+        <div id="lock-screen" class="screen active" onclick="goToHome()">
+            <div class="top">
+                <div class="time" id="lock-time">13:59</div>
+                <div class="date">Friday, April 10</div>
+            </div>
+            <div class="unlock-hint">Tap to unlock</div>
         </div>
-        <div class="card">
-            <h3>🛡️ Security</h3>
-            <p>Real-time threat detection built into every app.</p>
-        </div>
-        <div class="card">
-            <h3>🎨 Customization</h3>
-            <p>Make your phone look exactly how you want.</p>
-        </div>
-    </section>
 
-    <section id="download" class="download-section">
-        <h2>Get it for your device</h2>
-        <p style="margin: 20px 0; color: #aaa;">Version 4.2.0 Stable Build</p>
-        <a href="#" class="btn" style="background: #007bff; color: white;">Download .ZIP</a>
-    </section>
+        <div id="home-screen" class="screen">
+            <div class="widget-clock">
+                <h2 style="font-size: 2.5rem;" id="home-time">13:59</h2>
+                <p>Wed, Apr 18</p>
+            </div>
 
-    <footer>
-        <p>&copy; 2026 NovaOS. Handcrafted for mobile enthusiasts.</p>
-    </footer>
+            <div class="app-grid">
+                <div class="app-icon">
+                    <div class="icon-box" style="background: #4CAF50;">📞</div>
+                    <span>Phone</span>
+                </div>
+                <div class="app-icon">
+                    <div class="icon-box" style="background: #2196F3;">💬</div>
+                    <span>Chat</span>
+                </div>
+                <div class="app-icon" onclick="goToSettings()">
+                    <div class="icon-box" style="background: #9E9E9E;">⚙️</div>
+                    <span>Settings</span>
+                </div>
+                <div class="app-icon">
+                    <div class="icon-box" style="background: #FF5722;">📸</div>
+                    <span>Camera</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings-screen" class="screen">
+            <div class="settings-header" onclick="goToHome()" style="cursor: pointer;">
+                <span>←</span> Settings
+            </div>
+            
+            <div class="settings-item">
+                <span>About OS</span>
+                <span style="color: #999;">></span>
+            </div>
+            <div class="settings-item">
+                <span>Animations</span>
+                <span style="color: #999;">1.5x</span>
+            </div>
+            <div class="settings-item">
+                <span>Wallpaper</span>
+                <span style="color: #999;">Set</span>
+            </div>
+            <div class="settings-item">
+                <span>Storage</span>
+                <span style="color: #999;">75% Free</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // NAVIGATION LOGIC
+        function goToHome() {
+            hideAll();
+            document.getElementById('home-screen').classList.add('active');
+        }
+
+        function goToSettings() {
+            hideAll();
+            document.getElementById('settings-screen').classList.add('active');
+        }
+
+        function hideAll() {
+            const screens = document.querySelectorAll('.screen');
+            screens.forEach(s => s.classList.remove('active'));
+        }
+
+        // REAL TIME UPDATE
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                            now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('lock-time').innerText = timeStr;
+            document.getElementById('home-time').innerText = timeStr;
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
 
 </body>
 </html>
