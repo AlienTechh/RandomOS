@@ -78,7 +78,7 @@
             justify-content: space-between;
             align-items: center;
             z-index: 4500;
-            color: var(--status-text); /* Dynamic color */
+            color: var(--status-text);
             transition: color 0.3s;
             font-size: 0.75rem;
             font-weight: 600;
@@ -99,7 +99,7 @@
             background: var(--status-text);
         }
 
-        /* DYNAMIC ISLAND / PUNCH HOLE */
+        /* DYNAMIC ISLAND */
         .punch-hole {
             position: absolute;
             top: 10px;
@@ -149,7 +149,7 @@
             z-index: 9500;
         }
 
-        /* POWER MENU & GALAXY BOOT */
+        /* POWER MENU & BOOT */
         #power-menu {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -162,12 +162,7 @@
             align-items: center;
             gap: 25px;
         }
-        .power-option { 
-            color: white; 
-            font-size: 1.2rem; 
-            padding: 10px 20px;
-            cursor: pointer; 
-        }
+        .power-option { color: white; font-size: 1.2rem; padding: 10px 20px; cursor: pointer; }
         .power-option.red { color: #ff453a; font-weight: bold; }
 
         #boot-screen {
@@ -202,18 +197,14 @@
             animation: rotateGalaxy 1.5s linear infinite;
         }
         .orbit-ring.delay {
-            width: 85%;
-            height: 85%;
+            width: 85%; height: 85%;
             border-top-color: #00ffff;
             animation-duration: 2s;
             animation-direction: reverse;
             opacity: 0.6;
         }
         .boot-logo { 
-            font-size: 1.4rem; 
-            font-weight: bold; 
-            letter-spacing: 5px; 
-            color: white;
+            font-size: 1.4rem; font-weight: bold; letter-spacing: 5px; color: white;
             text-shadow: 0 0 15px rgba(255,255,255,0.8);
             opacity: 0;
             animation: revealLogo 4s ease-in forwards;
@@ -225,7 +216,6 @@
         }
         @keyframes revealLogo {
             0% { opacity: 0; transform: scale(0.8); filter: blur(10px); }
-            60% { opacity: 0.3; transform: scale(0.9); filter: blur(5px); }
             100% { opacity: 1; transform: scale(1); filter: blur(0); }
         }
 
@@ -235,15 +225,10 @@
             top: 0; left: 0; width: 100%; height: 100%;
             background: black; opacity: 0; pointer-events: none; z-index: 4000;
         }
-
         #black-overlay {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #000;
-            z-index: 7000;
-            opacity: 0;
-            display: none;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 7000; opacity: 0; display: none;
             transition: opacity 0.8s ease;
         }
 
@@ -260,7 +245,6 @@
             display: flex; flex-direction: column; gap: 20px;
         }
         #control-center.open { transform: translateY(0); }
-
         .cc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .cc-btn {
             background: rgba(255,255,255,0.1);
@@ -270,17 +254,9 @@
             cursor: pointer;
         }
         .cc-btn.active { background: #007aff; }
-
-        .cc-slider {
-            background: rgba(255,255,255,0.1);
-            padding: 20px; border-radius: 22px; color: white;
-        }
+        .cc-slider { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 22px; color: white; }
         .cc-slider input { width: 100%; margin-top: 10px; cursor: pointer; }
-
-        .status-trigger {
-            position: absolute; top: 0; right: 0; width: 40%; height: 40px;
-            z-index: 4600; cursor: pointer;
-        }
+        .status-trigger { position: absolute; top: 0; right: 0; width: 40%; height: 40px; z-index: 4600; cursor: pointer; }
 
         /* WALLPAPER */
         .wallpaper {
@@ -301,14 +277,10 @@
             z-index: 5;
             transition: opacity 0.4s ease;
         }
-
         .hidden { opacity: 0; pointer-events: none; }
         .active { opacity: 1; pointer-events: all; }
 
-        #lock-screen {
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: white;
-        }
+        #lock-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
         .time { font-size: 3.8rem; font-weight: 200; }
         .date { font-size: 1rem; margin-top: -5px; opacity: 0.8; }
 
@@ -328,11 +300,11 @@
         .app-window {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color); /* Theme based */
-            color: var(--text-color); /* Theme based */
+            background: var(--bg-color);
+            color: var(--text-color);
             z-index: 1000;
             border-radius: 38px;
-            padding: 60px 25px;
+            padding: 60px 20px;
             opacity: 0; 
             pointer-events: none;
             transform: scale(0);
@@ -341,18 +313,45 @@
                 opacity var(--anim-speed) cubic-bezier(0.32, 0.72, 0, 1),
                 background 0.3s;
         }
-        
         .app-window.open { opacity: 1; transform: scale(1); pointer-events: all; }
 
-        .settings-item {
-            background: var(--card-bg); /* Theme based */
-            padding: 18px; border-radius: 15px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            color: var(--text-color); /* Theme based */
-            font-weight: 600; cursor: pointer;
-            transition: background 0.3s;
+        /* NEW: CALCULATOR STYLES */
+        .calc-display {
+            width: 100%; height: 100px;
+            display: flex; flex-direction: column;
+            justify-content: flex-end; align-items: flex-end;
+            font-size: 3rem; font-weight: 300;
+            padding: 10px; margin-bottom: 20px;
+            background: rgba(128, 128, 128, 0.1);
+            border-radius: 15px; overflow: hidden;
         }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .calc-btn {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.4rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            background: #333; color: white;
+            transition: filter 0.1s;
+        }
+        .calc-btn:active { filter: brightness(1.5); }
+        .calc-btn.op { background: #ff9f0a; }
+        .calc-btn.special { background: #a5a5a5; color: black; }
+        .calc-btn.zero { grid-column: span 2; aspect-ratio: auto; border-radius: 30px; }
 
+        /* SETTINGS & NAV */
+        .settings-item {
+            background: var(--card-bg); padding: 18px; border-radius: 15px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            color: var(--text-color); font-weight: 600; cursor: pointer;
+        }
         .back-btn { color: #007aff; font-weight: 700; margin-bottom: 25px; cursor: pointer; }
 
         #nav-container {
@@ -360,45 +359,21 @@
             z-index: 5600; display: flex; justify-content: center; align-items: flex-end;
             padding-bottom: 8px;
         }
-
-        #home-bar {
-            width: 120px; height: 5px; background: rgba(255,255,255,0.7);
-            border-radius: 10px; cursor: pointer;
-        }
-
+        #home-bar { width: 120px; height: 5px; background: rgba(255,255,255,0.7); border-radius: 10px; cursor: pointer; }
         #three-buttons { width: 100%; display: none; justify-content: space-around; align-items: center; }
         .nav-btn { color: white; font-size: 1.3rem; cursor: pointer; padding: 10px; }
-
-        #unlock-trigger {
-            position: absolute; bottom: 0; width: 100%; height: 100%; background: transparent; cursor: pointer;
-        }
-
+        #unlock-trigger { position: absolute; bottom: 0; width: 100%; height: 100%; background: transparent; cursor: pointer; }
         #dev-toast {
-            position: absolute; bottom: 80px; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.9);
-            color: white; padding: 10px 20px; border-radius: 20px;
-            font-size: 0.8rem; opacity: 0; transition: opacity 0.3s;
-            z-index: 9999; pointer-events: none;
+            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.9); color: white; padding: 10px 20px; border-radius: 20px;
+            font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; z-index: 9999;
         }
-
-        .dev-btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .dev-speed-btn {
-            flex: 1; padding: 15px 10px; border-radius: 12px; border: none;
-            background: #e5e5ea; font-weight: bold; cursor: pointer;
-        }
-        .dev-speed-btn.active { background: #007aff; color: white; }
     </style>
 </head>
 <body class="dark-theme"> 
     <div class="phone">
         <div id="dev-toast">developer options activated</div>
-
-        <div class="power-btn" 
-             onmousedown="startPowerTimer(event)" 
-             onmouseup="endPowerTimer(event)" 
-             ontouchstart="startPowerTimer(event)" 
-             ontouchend="endPowerTimer(event)"></div>
+        <div class="power-btn" onmousedown="startPowerTimer(event)" onmouseup="endPowerTimer(event)" ontouchstart="startPowerTimer(event)" ontouchend="endPowerTimer(event)"></div>
 
         <div class="screen-container">
             <div id="boot-screen">
@@ -430,7 +405,6 @@
             
             <div id="black-overlay"></div>
             <div id="brightness-overlay"></div>
-            
             <div class="wallpaper" id="main-wallpaper"></div>
 
             <div id="control-center">
@@ -456,100 +430,78 @@
                         <div class="icon">⚙️</div>
                         <span>Settings</span>
                     </div>
+                    <div class="app" onclick="openAppWithOrigin(this, 'calc-app')">
+                        <div class="icon" style="background: #ff9f0a; color: white;">÷</div>
+                        <span>Calculator</span>
+                    </div>
                     <div class="app" onclick="openAppWithOrigin(this, 'empty-app-1')">
                         <div class="icon" style="background: #E0E0E0;">👻</div>
-                        <span>Empty App 1</span>
+                        <span>Empty App</span>
                     </div>
-                    <div class="app" onclick="openAppWithOrigin(this, 'empty-app-2')">
-                        <div class="icon" style="background: #E0E0E0;">🍃</div>
-                        <span>Empty App 2</span>
-                    </div>
+                </div>
+            </div>
+
+            <div id="calc-app" class="app-window">
+                <div class="calc-display" id="calc-display">0</div>
+                <div class="calc-grid">
+                    <button class="calc-btn special" onclick="calcClear()">AC</button>
+                    <button class="calc-btn special" onclick="calcInput('/')">±</button>
+                    <button class="calc-btn special" onclick="calcInput('%')">%</button>
+                    <button class="calc-btn op" onclick="calcInput('/')">÷</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('7')">7</button>
+                    <button class="calc-btn" onclick="calcInput('8')">8</button>
+                    <button class="calc-btn" onclick="calcInput('9')">9</button>
+                    <button class="calc-btn op" onclick="calcInput('*')">×</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('4')">4</button>
+                    <button class="calc-btn" onclick="calcInput('5')">5</button>
+                    <button class="calc-btn" onclick="calcInput('6')">6</button>
+                    <button class="calc-btn op" onclick="calcInput('-')">−</button>
+                    
+                    <button class="calc-btn" onclick="calcInput('1')">1</button>
+                    <button class="calc-btn" onclick="calcInput('2')">2</button>
+                    <button class="calc-btn" onclick="calcInput('3')">3</button>
+                    <button class="calc-btn op" onclick="calcInput('+')">+</button>
+                    
+                    <button class="calc-btn zero" onclick="calcInput('0')">0</button>
+                    <button class="calc-btn" onclick="calcInput('.')">.</button>
+                    <button class="calc-btn op" onclick="calcSolve()">=</button>
                 </div>
             </div>
 
             <div id="empty-app-1" class="app-window">
-                <div style="height: 100%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; opacity: 0.5;">
-                    none
-                </div>
-            </div>
-
-            <div id="empty-app-2" class="app-window">
-                <div style="height: 100%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; opacity: 0.5;">
-                    none
-                </div>
+                <div style="height: 100%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; opacity: 0.5;">Empty</div>
             </div>
 
             <div id="settings-main" class="app-window">
                 <h1 style="margin-bottom: 25px;">Settings</h1>
-                <div class="settings-item" onclick="showSubPage('nav-settings')">
-                    <span>Navigation Bar</span>
-                    <span>❯</span>
-                </div>
-                <div class="settings-item" onclick="showSubPage('custom-page')">
-                    <span>Customization</span>
-                    <span>❯</span>
-                </div>
-                <div class="settings-item" onclick="showSubPage('about-page')">
-                    <span>About</span>
-                    <span>❯</span>
-                </div>
-                <div id="dev-opt-item" class="settings-item" style="display:none;" onclick="showSubPage('dev-settings')">
-                    <span>Developer Options</span>
-                    <span>❯</span>
-                </div>
-            </div>
-
-            <div id="dev-settings" class="app-window">
-                <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
-                <h1 style="text-align: center; margin-bottom: 10px;">Animation Speed</h1>
-                <div class="dev-btn-group">
-                    <button class="dev-speed-btn" id="speed-slow" onclick="setAnimSpeed('1.2s', 'slow')">Slow</button>
-                    <button class="dev-speed-btn active" id="speed-normal" onclick="setAnimSpeed('0.5s', 'normal')">Normal</button>
-                    <button class="dev-speed-btn" id="speed-fast" onclick="setAnimSpeed('0.2s', 'fast')">Fast</button>
-                </div>
+                <div class="settings-item" onclick="showSubPage('nav-settings')"><span>Navigation</span><span>❯</span></div>
+                <div class="settings-item" onclick="showSubPage('custom-page')"><span>Customization</span><span>❯</span></div>
+                <div class="settings-item" onclick="showSubPage('about-page')"><span>About</span><span>❯</span></div>
+                <div id="dev-opt-item" class="settings-item" style="display:none;" onclick="showSubPage('dev-settings')"><span>Developer Options</span><span>❯</span></div>
             </div>
 
             <div id="nav-settings" class="app-window">
                 <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
-                <h2 style="margin-bottom: 20px;">Navigation Style</h2>
-                <div class="settings-item" onclick="setNavStyle('swipe')">
-                    <span>Swipe Navigation</span>
-                    <span id="check-swipe">✓</span>
-                </div>
-                <div class="settings-item" onclick="setNavStyle('buttons')">
-                    <span>3-Button Navigation</span>
-                    <span id="check-buttons" style="display:none;">✓</span>
-                </div>
+                <h2>Navigation Style</h2>
+                <div class="settings-item" onclick="setNavStyle('swipe')"><span>Swipe</span><span id="check-swipe">✓</span></div>
+                <div class="settings-item" onclick="setNavStyle('buttons')"><span>3-Button</span><span id="check-buttons" style="display:none;">✓</span></div>
             </div>
-
+            
             <div id="custom-page" class="app-window">
                 <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
-                <h1 style="margin-bottom: 25px;">Customization</h1>
-                
-                <p style="font-size: 0.8rem; margin-bottom: 10px; opacity: 0.7;">Wallpaper</p>
-                <div class="settings-item" onclick="triggerFileSelect()">
-                    <span>Change Wallpaper</span>
-                </div>
-
-                <p style="font-size: 0.8rem; margin-top: 20px; margin-bottom: 10px; opacity: 0.7;">System Theme</p>
-                <div class="settings-item" onclick="setTheme('light')">
-                    <span>Light Mode</span>
-                    <span id="check-light" style="display:none;">✓</span>
-                </div>
-                <div class="settings-item" onclick="setTheme('dark')">
-                    <span>Dark Mode</span>
-                    <span id="check-dark">✓</span>
-                </div>
+                <h1>Customization</h1>
+                <div class="settings-item" onclick="triggerFileSelect()"><span>Change Wallpaper</span></div>
+                <div class="settings-item" onclick="setTheme('light')"><span>Light Mode</span><span id="check-light" style="display:none;">✓</span></div>
+                <div class="settings-item" onclick="setTheme('dark')"><span>Dark Mode</span><span id="check-dark">✓</span></div>
             </div>
 
             <div id="about-page" class="app-window">
                 <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
-                <div id="about-content" style="height: 80%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 40px 0; text-align: center;">
-                    <div class="about-main-text" style="font-size: 1.5rem; font-weight: 800; margin-top: 100px; cursor: pointer;" onclick="handleAboutClick()">RandomOS 1.0 Beta</div>
-                    <div style="width: 100%; display: flex; justify-content: space-between; font-size: 0.85rem; color: #8e8e93; padding: 0 10px;">
-                        <span>Phone Name</span>
-                        <span>rPhone 1 pro</span>
-                    </div>
+                <div style="text-align: center; margin-top: 100px;">
+                    <h2 onclick="handleAboutClick()">RandomOS 1.0</h2>
+                    <p style="color: gray;">rPhone 1 Pro</p>
                 </div>
             </div>
 
@@ -571,201 +523,59 @@
         let isPhoneSleeping = false; 
         let isCompletelyShutdown = false; 
         let currentNavMode = 'swipe';
-        let powerTimer;
-        let pressStartTime;
-        let aboutClicks = 0;
-        let isDevMode = false;
+        let powerTimer, pressStartTime, aboutClicks = 0, isDevMode = false;
+        
+        let calcExpression = ""; // NEW: Calculator state
 
-        const wallpaperLayer = document.getElementById('main-wallpaper');
-        const wallpaperInput = document.getElementById('wallpaper-input');
+        // CALCULATOR LOGIC
+        function calcInput(val) {
+            calcExpression += val;
+            document.getElementById('calc-display').innerText = calcExpression;
+        }
+        function calcClear() {
+            calcExpression = "";
+            document.getElementById('calc-display').innerText = "0";
+        }
+        function calcSolve() {
+            try {
+                calcExpression = eval(calcExpression).toString();
+                document.getElementById('calc-display').innerText = calcExpression;
+            } catch {
+                document.getElementById('calc-display').innerText = "Error";
+                calcExpression = "";
+            }
+        }
 
-        // NEW: BATTERY & DYNAMIC ISLAND LOGIC
+        // TIME LOGIC
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('status-time').innerText = timeStr;
+            if(document.getElementById('clock-large')) document.getElementById('clock-large').innerText = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // BATTERY LOGIC
         async function initBattery() {
             if ('getBattery' in navigator) {
                 const battery = await navigator.getBattery();
-                
                 function updateIsland() {
                     const level = Math.round(battery.level * 100);
-                    const island = document.getElementById('island');
-                    const text = document.getElementById('island-text');
-                    const fill = document.getElementById('battery-fill');
-
-                    // Update status bar icon
-                    fill.style.width = level + "%";
-
+                    document.getElementById('battery-fill').style.width = level + "%";
                     if (battery.charging) {
-                        text.innerText = `Device is charging ${level}%`;
-                        island.classList.add('charging-island');
-                        
-                        // Shrink back after 3 seconds
-                        setTimeout(() => {
-                            island.classList.remove('charging-island');
-                        }, 3000);
+                        document.getElementById('island-text').innerText = `Charging ${level}%`;
+                        document.getElementById('island').classList.add('charging-island');
+                        setTimeout(() => document.getElementById('island').classList.remove('charging-island'), 3000);
                     }
                 }
-
                 battery.addEventListener('chargingchange', updateIsland);
-                battery.addEventListener('levelchange', updateIsland);
-                
-                // Initial check
                 updateIsland(); 
             }
         }
         initBattery();
 
-        // THEME LOGIC
-        function setTheme(mode) {
-            const body = document.body;
-            if (mode === 'light') {
-                body.classList.remove('dark-theme');
-                body.classList.add('light-theme');
-                document.getElementById('check-light').style.display = 'block';
-                document.getElementById('check-dark').style.display = 'none';
-            } else {
-                body.classList.remove('light-theme');
-                body.classList.add('dark-theme');
-                document.getElementById('check-light').style.display = 'none';
-                document.getElementById('check-dark').style.display = 'block';
-            }
-        }
-
-        function handleAboutClick() {
-            if (isDevMode) return;
-            aboutClicks++;
-            if (aboutClicks >= 4) {
-                isDevMode = true;
-                const toast = document.getElementById('dev-toast');
-                toast.style.opacity = '1';
-                setTimeout(() => toast.style.opacity = '0', 2000);
-                document.getElementById('dev-opt-item').style.display = 'flex';
-            }
-        }
-
-        function setAnimSpeed(value, type) {
-            document.documentElement.style.setProperty('--anim-speed', value);
-            document.querySelectorAll('.dev-speed-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('speed-' + type).classList.add('active');
-        }
-
-        function startPowerTimer(e) {
-            e.preventDefault();
-            pressStartTime = Date.now();
-            powerTimer = setTimeout(() => {
-                if (isCompletelyShutdown) {
-                    bootSystem();
-                } else {
-                    showPowerMenu();
-                }
-            }, 2000);
-        }
-
-        function endPowerTimer(e) {
-            e.preventDefault();
-            const duration = Date.now() - pressStartTime;
-            clearTimeout(powerTimer);
-            if (duration < 2000) {
-                if (isCompletelyShutdown) return; 
-                toggleSleep();
-            }
-        }
-
-        function toggleSleep() {
-            isPhoneSleeping = !isPhoneSleeping;
-            const overlay = document.getElementById('black-overlay');
-            if (isPhoneSleeping) {
-                overlay.style.display = 'block';
-                setTimeout(() => overlay.style.opacity = '1', 10);
-            } else {
-                resetToLockscreen();
-                overlay.style.opacity = '0';
-                setTimeout(() => overlay.style.display = 'none', 800);
-            }
-        }
-
-        function resetToLockscreen() {
-            document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
-            wallpaperLayer.classList.remove('app-active');
-            document.getElementById('home-screen').classList.replace('active', 'hidden');
-            document.getElementById('lock-screen').classList.replace('hidden', 'active');
-            updateNavVisibility();
-        }
-
-        function showPowerMenu() {
-            if (isPhoneSleeping) toggleSleep();
-            document.getElementById('power-menu').style.display = 'flex';
-        }
-
-        function closePowerMenu() { document.getElementById('power-menu').style.display = 'none'; }
-
-        function systemShutdown() {
-            closePowerMenu();
-            const overlay = document.getElementById('black-overlay');
-            overlay.style.display = 'block';
-            setTimeout(() => {
-                overlay.style.opacity = '1';
-                isCompletelyShutdown = true;
-                isPhoneSleeping = true;
-                document.getElementById('nav-container').style.display = 'none';
-            }, 10);
-        }
-
-        function systemRestart() {
-            closePowerMenu();
-            systemShutdown();
-            setTimeout(bootSystem, 1500);
-        }
-
-        function bootSystem() {
-            const bootScreen = document.getElementById('boot-screen');
-            const overlay = document.getElementById('black-overlay');
-            bootScreen.style.display = 'flex';
-            overlay.style.opacity = '0';
-            overlay.style.display = 'none';
-            setTimeout(() => {
-                bootScreen.style.display = 'none';
-                isCompletelyShutdown = false;
-                isPhoneSleeping = false;
-                document.getElementById('nav-container').style.display = 'flex';
-                resetToLockscreen();
-            }, 4500);
-        }
-
-        function openAppWithOrigin(element, id) {
-            const appWindow = document.getElementById(id);
-            const rect = element.getBoundingClientRect();
-            const containerRect = document.querySelector('.screen-container').getBoundingClientRect();
-            const originX = (rect.left + rect.width / 2) - containerRect.left;
-            const originY = (rect.top + rect.height / 2) - containerRect.top;
-            appWindow.style.transformOrigin = `${originX}px ${originY}px`;
-            appWindow.classList.add('open');
-            wallpaperLayer.classList.add('app-active');
-        }
-
-        function toggleCC(show) {
-            if (isPhoneSleeping || isCompletelyShutdown) return;
-            document.getElementById('control-center').classList.toggle('open', show);
-        }
-
-        function toggleCCBtn(id) { document.getElementById(id).classList.toggle('active'); }
-
-        function adjustBrightness(val) {
-            document.getElementById('brightness-overlay').style.opacity = (100 - val) / 125;
-        }
-
-        function setNavStyle(style) {
-            currentNavMode = style;
-            document.getElementById('check-swipe').style.display = style === 'swipe' ? 'block' : 'none';
-            document.getElementById('check-buttons').style.display = style === 'buttons' ? 'block' : 'none';
-            updateNavVisibility();
-        }
-
-        function updateNavVisibility() {
-            const isLocked = document.getElementById('lock-screen').classList.contains('active');
-            document.getElementById('unlock-trigger').style.display = isLocked ? 'block' : 'none';
-            document.getElementById('home-bar').style.display = (!isLocked && currentNavMode === 'swipe') ? 'block' : 'none';
-            document.getElementById('three-buttons').style.display = (!isLocked && currentNavMode === 'buttons') ? 'flex' : 'none';
-        }
-
+        // SYSTEM ACTIONS
         function handleHomeAction() {
             if (isPhoneSleeping) return;
             toggleCC(false);
@@ -775,28 +585,26 @@
                 document.getElementById('home-screen').classList.replace('hidden', 'active');
             } else {
                 document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
-                wallpaperLayer.classList.remove('app-active');
+                document.getElementById('main-wallpaper').classList.remove('app-active');
             }
             updateNavVisibility();
         }
 
-        function handleBackAction() {
-            const allApps = document.querySelectorAll('.app-window');
-            let backProcessed = false;
-            
-            allApps.forEach(win => {
-                if(win.classList.contains('open')) {
-                    const subpages = ['nav-settings', 'custom-page', 'about-page', 'dev-settings'];
-                    if(subpages.includes(win.id)) {
-                        showSubPage('settings-main');
-                    } else {
-                        handleHomeAction();
-                    }
-                    backProcessed = true;
-                }
-            });
-            
-            if(!backProcessed) handleHomeAction();
+        function openAppWithOrigin(element, id) {
+            const appWindow = document.getElementById(id);
+            appWindow.classList.add('open');
+            document.getElementById('main-wallpaper').classList.add('app-active');
+        }
+
+        function toggleCC(show) {
+            document.getElementById('control-center').classList.toggle('open', show);
+        }
+
+        function updateNavVisibility() {
+            const isLocked = document.getElementById('lock-screen').classList.contains('active');
+            document.getElementById('unlock-trigger').style.display = isLocked ? 'block' : 'none';
+            document.getElementById('home-bar').style.display = (!isLocked && currentNavMode === 'swipe') ? 'block' : 'none';
+            document.getElementById('three-buttons').style.display = (!isLocked && currentNavMode === 'buttons') ? 'flex' : 'none';
         }
 
         function showSubPage(id) {
@@ -804,26 +612,32 @@
             document.getElementById(id).classList.add('open');
         }
 
-        function triggerFileSelect() { wallpaperInput.click(); }
-        wallpaperInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => { wallpaperLayer.style.backgroundImage = `url(${e.target.result})`; };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function updateTime() {
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
-                            now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock-large').innerText = timeStr;
-            document.getElementById('status-time').innerText = timeStr;
+        function setNavStyle(s) {
+            currentNavMode = s;
+            document.getElementById('check-swipe').style.display = s === 'swipe' ? 'block' : 'none';
+            document.getElementById('check-buttons').style.display = s === 'buttons' ? 'block' : 'none';
+            updateNavVisibility();
         }
-        setInterval(updateTime, 1000);
-        updateTime();
-        updateNavVisibility();
+
+        function setTheme(m) {
+            document.body.className = m + '-theme';
+            document.getElementById('check-light').style.display = m === 'light' ? 'block' : 'none';
+            document.getElementById('check-dark').style.display = m === 'dark' ? 'block' : 'none';
+        }
+
+        // Power Logic Simplified for demo
+        function startPowerTimer() { pressStartTime = Date.now(); powerTimer = setTimeout(() => showPowerMenu(), 2000); }
+        function endPowerTimer() { clearTimeout(powerTimer); if(Date.now() - pressStartTime < 2000) toggleSleep(); }
+        function toggleSleep() {
+            isPhoneSleeping = !isPhoneSleeping;
+            const overlay = document.getElementById('black-overlay');
+            overlay.style.display = isPhoneSleeping ? 'block' : 'none';
+            overlay.style.opacity = isPhoneSleeping ? '1' : '0';
+            if(!isPhoneSleeping) handleHomeAction();
+        }
+        function showPowerMenu() { document.getElementById('power-menu').style.display = 'flex'; }
+        function closePowerMenu() { document.getElementById('power-menu').style.display = 'none'; }
+        function systemShutdown() { location.reload(); }
     </script>
 </body>
 </html>
