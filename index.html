@@ -313,7 +313,7 @@
             font-weight: 800;
             color: #1c1c1e;
             margin-top: 100px;
-            cursor: pointer; /* Change cursor to indicate it's clickable */
+            cursor: pointer;
         }
         .about-footer {
             width: 100%;
@@ -348,14 +348,14 @@
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(40, 40, 40, 0.9);
+            background: rgba(30, 30, 30, 0.9);
             color: white;
             padding: 10px 20px;
             border-radius: 20px;
             font-size: 0.8rem;
-            z-index: 9999;
             opacity: 0;
             transition: opacity 0.3s;
+            z-index: 9999;
             pointer-events: none;
         }
     </style>
@@ -442,7 +442,7 @@
                     <span>About</span>
                     <span>❯</span>
                 </div>
-                <div id="dev-options-row" class="settings-item" style="display:none;" onclick="alert('Dev Mode Active')">
+                <div id="dev-opt-item" class="settings-item" style="display:none;" onclick="alert('Dev Settings Opened')">
                     <span>Developer Options</span>
                     <span>❯</span>
                 </div>
@@ -472,7 +472,7 @@
             <div id="about-page" class="app-window">
                 <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
                 <div id="about-content">
-                    <div class="about-main-text" onclick="handleAboutTap()">RandomOS 1.0 Beta</div>
+                    <div class="about-main-text" onclick="handleAboutClick()">RandomOS 1.0 Beta</div>
                     <div class="about-footer">
                         <span>Phone Name</span>
                         <span>rPhone 1 pro</span>
@@ -500,33 +500,22 @@
         let currentNavMode = 'swipe';
         let powerTimer;
         let pressStartTime;
-        
-        // NEW STATE FOR DEVELOPER OPTIONS
-        let aboutTapCount = 0;
-        let isDevEnabled = false;
+        let aboutClicks = 0;
+        let isDevMode = false;
 
         const wallpaperLayer = document.getElementById('main-wallpaper');
         const wallpaperInput = document.getElementById('wallpaper-input');
 
-        // NEW FUNCTION: Handle taps on the About text
-        function handleAboutTap() {
-            if (isDevEnabled) return; // Don't do anything if already enabled
-
-            aboutTapCount++;
-            if (aboutTapCount >= 4) {
-                isDevEnabled = true;
-                showDevToast();
-                document.getElementById('dev-options-row').style.display = 'flex';
+        function handleAboutClick() {
+            if (isDevMode) return;
+            aboutClicks++;
+            if (aboutClicks >= 4) {
+                isDevMode = true;
+                const toast = document.getElementById('dev-toast');
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 2000);
+                document.getElementById('dev-opt-item').style.display = 'flex';
             }
-        }
-
-        // NEW FUNCTION: Show the activation toast
-        function showDevToast() {
-            const toast = document.getElementById('dev-toast');
-            toast.style.opacity = '1';
-            setTimeout(() => {
-                toast.style.opacity = '0';
-            }, 2000);
         }
 
         function startPowerTimer(e) {
@@ -545,7 +534,6 @@
             e.preventDefault();
             const duration = Date.now() - pressStartTime;
             clearTimeout(powerTimer);
-
             if (duration < 2000) {
                 if (isCompletelyShutdown) return; 
                 toggleSleep();
@@ -555,9 +543,17 @@
         function toggleSleep() {
             isPhoneSleeping = !isPhoneSleeping;
             const overlay = document.getElementById('black-overlay');
-            
             if (isPhoneSleeping) {
                 overlay.style.display = 'block';
                 setTimeout(() => overlay.style.opacity = '1', 10);
             } else {
-                resetToLoc
+                resetToLockscreen();
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 800);
+            }
+        }
+
+        function resetToLockscreen() {
+            document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
+            wallpaperLayer.classList.remove('app-active');
+            document.g
