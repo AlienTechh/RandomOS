@@ -97,6 +97,38 @@
             z-index: 5500;
         }
 
+        /* POWER MENU & BOOT */
+        #power-menu {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 6000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            color: white;
+        }
+        .power-option { font-size: 1.2rem; font-weight: 500; cursor: pointer; transition: opacity 0.2s; }
+        .power-option:active { opacity: 0.5; }
+        .power-option.red { color: #ff3b30; }
+
+        #boot-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 7000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .boot-logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+
         /* OVERLAYS */
         #brightness-overlay {
             position: absolute;
@@ -197,8 +229,6 @@
             background: #f2f2f7; z-index: 1000;
             border-radius: 38px;
             padding: 60px 25px;
-            
-            /* High-end fluid transition */
             opacity: 0; 
             pointer-events: none;
             transform: scale(0);
@@ -224,7 +254,6 @@
 
         .back-btn { color: #007aff; font-weight: 700; margin-bottom: 25px; cursor: pointer; }
 
-        /* NAVIGATION CONTAINER */
         #nav-container {
             position: absolute; 
             bottom: 0; 
@@ -278,9 +307,23 @@
 <body>
 
     <div class="phone">
-        <div class="power-btn" onclick="togglePower()"></div>
+        <div class="power-btn" 
+             onmousedown="startPowerTimer()" 
+             onmouseup="endPowerTimer()" 
+             ontouchstart="startPowerTimer()" 
+             ontouchend="endPowerTimer()"></div>
 
         <div class="screen-container">
+            <div id="boot-screen">
+                <div class="boot-logo">RANDOM OS</div>
+            </div>
+
+            <div id="power-menu">
+                <div class="power-option red" onclick="systemShutdown()">Shutdown</div>
+                <div class="power-option" onclick="systemRestart()">Restart</div>
+                <div class="power-option" onclick="closePowerMenu()">Back</div>
+            </div>
+
             <div class="status-bar">
                 <div id="status-time">00:00</div>
                 <div class="status-right">
@@ -376,30 +419,93 @@
 
     <script>
         let isPhoneOff = false;
+        let isCompletelyShutdown = false;
         let currentNavMode = 'swipe';
+        let powerTimer;
+        let longPressTriggered = false;
+
         const wallpaperLayer = document.getElementById('main-wallpaper');
         const wallpaperInput = document.getElementById('wallpaper-input');
 
-        // Logic to grow app from the icon position
+        // LONG PRESS LOGIC
+        function startPowerTimer() {
+            longPressTriggered = false;
+            powerTimer = setTimeout(() => {
+                if (!isCompletelyShutdown) {
+                    showPowerMenu();
+                    longPressTriggered = true;
+                } else {
+                    bootSystem();
+                    longPressTriggered = true;
+                }
+            }, 2000);
+        }
+
+        function endPowerTimer() {
+            clearTimeout(powerTimer);
+            if (!longPressTriggered) {
+                togglePower(); // Short click logic
+            }
+        }
+
+        function showPowerMenu() {
+            if (isPhoneOff) return;
+            document.getElementById('power-menu').style.display = 'flex';
+        }
+
+        function closePowerMenu() {
+            document.getElementById('power-menu').style.display = 'none';
+        }
+
+        function systemShutdown() {
+            closePowerMenu();
+            isCompletelyShutdown = true;
+            isPhoneOff = true;
+            document.getElementById('black-overlay').style.display = 'block';
+            document.getElementById('nav-container').style.display = 'none';
+        }
+
+        function systemRestart() {
+            closePowerMenu();
+            systemShutdown();
+            setTimeout(bootSystem, 1000);
+        }
+
+        function bootSystem() {
+            isCompletelyShutdown = false;
+            const bootScreen = document.getElementById('boot-screen');
+            bootScreen.style.display = 'flex';
+            
+            setTimeout(() => {
+                bootScreen.style.display = 'none';
+                isPhoneOff = false;
+                document.getElementById('black-overlay').style.display = 'none';
+                document.getElementById('nav-container').style.display = 'flex';
+                resetToLockscreen();
+            }, 3000);
+        }
+
+        function resetToLockscreen() {
+            closeAllApps();
+            document.getElementById('home-screen').classList.replace('active', 'hidden');
+            document.getElementById('lock-screen').classList.replace('hidden', 'active');
+            updateNavVisibility();
+        }
+
+        // ORIGINAL LOGIC
         function openAppWithOrigin(element, id) {
             const appWindow = document.getElementById(id);
             const rect = element.getBoundingClientRect();
             const containerRect = document.querySelector('.screen-container').getBoundingClientRect();
-            
-            // Calculate center of the clicked icon relative to the phone screen
             const originX = (rect.left + rect.width / 2) - containerRect.left;
             const originY = (rect.top + rect.height / 2) - containerRect.top;
-
-            // Set the pivot point for the zoom
             appWindow.style.transformOrigin = `${originX}px ${originY}px`;
-            
-            // Trigger animation
             appWindow.classList.add('open');
             wallpaperLayer.classList.add('app-active');
         }
 
         function toggleCC(show) {
-            if (isPhoneOff) return;
+            if (isPhoneOff || isCompletelyShutdown) return;
             document.getElementById('control-center').classList.toggle('open', show);
         }
 
@@ -475,7 +581,7 @@
                 if(win.id !== id) win.classList.remove('open');
             });
             const target = document.getElementById(id);
-            target.style.transformOrigin = 'center'; // Subpages zoom from center for focus
+            target.style.transformOrigin = 'center'; 
             target.classList.add('open');
         }
 
@@ -491,15 +597,13 @@
         });
 
         function togglePower() {
+            if (isCompletelyShutdown) return; 
             isPhoneOff = !isPhoneOff;
             document.getElementById('black-overlay').style.display = isPhoneOff ? 'block' : 'none';
             document.getElementById('nav-container').style.display = isPhoneOff ? 'none' : 'flex';
             toggleCC(false);
             if (!isPhoneOff) {
-                closeAllApps();
-                document.getElementById('home-screen').classList.replace('active', 'hidden');
-                document.getElementById('lock-screen').classList.replace('hidden', 'active');
-                updateNavVisibility();
+                resetToLockscreen();
             }
         }
 
