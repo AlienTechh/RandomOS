@@ -1,3 +1,5 @@
+I've added the **About** section to your Settings. It includes the bold "RandomOS 1.0 Beta" header in the center and the "Phone Name" / "rPhone 1 pro" footer you requested. I also ensured it integrates with your existing back-button logic.
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -313,7 +315,6 @@
             font-weight: 800;
             color: #1c1c1e;
             margin-top: 100px;
-            cursor: pointer;
         }
         .about-footer {
             width: 100%;
@@ -341,30 +342,11 @@
         #unlock-trigger {
             position: absolute; bottom: 0; width: 100%; height: 100%; background: transparent; cursor: pointer;
         }
-
-        /* TOAST NOTIFICATION */
-        #dev-toast {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 9999;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
 
     <div class="phone">
-        <div id="dev-toast">developer options activated</div>
-
         <div class="power-btn" 
              onmousedown="startPowerTimer(event)" 
              onmouseup="endPowerTimer(event)" 
@@ -442,10 +424,6 @@
                     <span>About</span>
                     <span>❯</span>
                 </div>
-                <div id="dev-opt-item" class="settings-item" style="display:none;" onclick="alert('Dev Settings Opened')">
-                    <span>Developer Options</span>
-                    <span>❯</span>
-                </div>
             </div>
 
             <div id="nav-settings" class="app-window">
@@ -472,7 +450,7 @@
             <div id="about-page" class="app-window">
                 <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
                 <div id="about-content">
-                    <div class="about-main-text" onclick="handleAboutClick()">RandomOS 1.0 Beta</div>
+                    <div class="about-main-text">RandomOS 1.0 Beta</div>
                     <div class="about-footer">
                         <span>Phone Name</span>
                         <span>rPhone 1 pro</span>
@@ -500,23 +478,9 @@
         let currentNavMode = 'swipe';
         let powerTimer;
         let pressStartTime;
-        let aboutClicks = 0;
-        let isDevMode = false;
 
         const wallpaperLayer = document.getElementById('main-wallpaper');
         const wallpaperInput = document.getElementById('wallpaper-input');
-
-        function handleAboutClick() {
-            if (isDevMode) return;
-            aboutClicks++;
-            if (aboutClicks >= 4) {
-                isDevMode = true;
-                const toast = document.getElementById('dev-toast');
-                toast.style.opacity = '1';
-                setTimeout(() => toast.style.opacity = '0', 2000);
-                document.getElementById('dev-opt-item').style.display = 'flex';
-            }
-        }
 
         function startPowerTimer(e) {
             e.preventDefault();
@@ -534,6 +498,7 @@
             e.preventDefault();
             const duration = Date.now() - pressStartTime;
             clearTimeout(powerTimer);
+
             if (duration < 2000) {
                 if (isCompletelyShutdown) return; 
                 toggleSleep();
@@ -543,6 +508,7 @@
         function toggleSleep() {
             isPhoneSleeping = !isPhoneSleeping;
             const overlay = document.getElementById('black-overlay');
+            
             if (isPhoneSleeping) {
                 overlay.style.display = 'block';
                 setTimeout(() => overlay.style.opacity = '1', 10);
@@ -556,4 +522,34 @@
         function resetToLockscreen() {
             document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
             wallpaperLayer.classList.remove('app-active');
-            document.g
+            
+            document.getElementById('home-screen').classList.replace('active', 'hidden');
+            document.getElementById('lock-screen').classList.replace('hidden', 'active');
+            
+            updateNavVisibility();
+        }
+
+        function showPowerMenu() {
+            if (isPhoneSleeping) {
+                isPhoneSleeping = false;
+                const overlay = document.getElementById('black-overlay');
+                overlay.style.opacity = '0';
+                overlay.style.display = 'none';
+                resetToLockscreen();
+            }
+            document.getElementById('power-menu').style.display = 'flex';
+        }
+
+        function closePowerMenu() {
+            document.getElementById('power-menu').style.display = 'none';
+        }
+
+        function systemShutdown() {
+            closePowerMenu();
+            const overlay = document.getElementById('black-overlay');
+            overlay.style.display = 'block';
+            
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                isCompletelyShutdown = true;
+   
