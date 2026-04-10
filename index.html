@@ -6,154 +6,55 @@
     <title>RandomOS 1.0 Beta</title>
     <style>
         * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; 
+            margin: 0; padding: 0; box-sizing: border-box; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; 
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
         
         body { 
-            background: #121212; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            overflow: hidden;
+            background: #0f0f0f; display: flex; justify-content: center; 
+            align-items: center; height: 100vh; overflow: hidden;
         }
 
         .phone {
-            width: 310px;
-            height: 640px;
-            background: #000;
-            border: 12px solid #222;
-            border-radius: 50px;
-            position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            width: 310px; height: 640px; background: #000;
+            border: 12px solid #222; border-radius: 50px;
+            position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
         .screen-container {
-            width: 100%;
-            height: 100%;
-            border-radius: 38px;
-            overflow: hidden;
-            position: relative;
-            background: #000;
+            width: 100%; height: 100%; border-radius: 38px;
+            overflow: hidden; position: relative; background: #000;
         }
 
         /* STATUS BAR */
         .status-bar {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 35px;
-            padding: 0 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 4500;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-right { display: flex; align-items: center; gap: 5px; }
-        .battery-icon {
-            width: 20px;
-            height: 10px;
-            border: 1px solid white;
-            border-radius: 3px;
-            position: relative;
-        }
-        .battery-level {
-            position: absolute;
-            left: 1px; top: 1px;
-            height: 6px; width: 80%;
-            background: white;
+            position: absolute; top: 0; width: 100%; height: 35px;
+            padding: 0 22px; display: flex; justify-content: space-between;
+            align-items: center; z-index: 4500; color: white; font-size: 0.75rem; font-weight: 600;
         }
 
         .punch-hole {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
-            background: #000;
-            border-radius: 50%;
-            z-index: 5000;
-        }
-
-        .power-btn {
-            position: absolute;
-            right: -15px;
-            top: 120px;
-            width: 6px;
-            height: 50px;
-            background: #333;
-            border-radius: 0 5px 5px 0;
-            cursor: pointer;
-            z-index: 5500;
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 20px; height: 20px; background: #000; border-radius: 50%; z-index: 5000;
         }
 
         /* OVERLAYS */
         #brightness-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: black; opacity: 0; pointer-events: none; z-index: 4000;
         }
 
         #black-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #000;
-            z-index: 5500;
-            display: none;
-        }
-
-        /* CONTROL CENTER */
-        #control-center {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 15, 15, 0.7);
-            backdrop-filter: blur(25px);
-            z-index: 4800;
-            transform: translateY(-100%);
-            transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
-            padding: 60px 20px;
-            display: flex; flex-direction: column; gap: 20px;
-        }
-        #control-center.open { transform: translateY(0); }
-
-        .cc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .cc-btn {
-            background: rgba(255,255,255,0.1);
-            padding: 15px; border-radius: 20px;
-            color: white; font-size: 0.8rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            cursor: pointer;
-        }
-        .cc-btn.active { background: #007aff; }
-
-        .cc-slider {
-            background: rgba(255,255,255,0.1);
-            padding: 20px; border-radius: 22px; color: white;
-        }
-        .cc-slider input { width: 100%; margin-top: 10px; cursor: pointer; }
-
-        .status-trigger {
-            position: absolute; top: 0; right: 0; width: 40%; height: 40px;
-            z-index: 4600; cursor: pointer;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 5500; display: none;
         }
 
         /* WALLPAPER */
         .wallpaper {
-            position: absolute;
-            width: 100%; height: 100%;
-            background-color: #1a1a1a;
-            background-image: url('1000005643.jpg');
+            position: absolute; width: 100%; height: 100%;
+            background-color: #1a1a1a; background-image: url('1000005643.jpg');
             background-size: cover; background-position: center;
             transition: filter 0.5s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 1;
@@ -162,21 +63,14 @@
 
         /* SCREENS */
         .screen {
-            position: absolute;
-            width: 100%; height: 100%;
-            z-index: 5;
+            position: absolute; width: 100%; height: 100%; z-index: 5;
             transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         .hidden { opacity: 0; pointer-events: none; transform: scale(0.9); }
         .active { opacity: 1; pointer-events: all; transform: scale(1); }
 
-        #lock-screen {
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: white;
-        }
+        #lock-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; }
         .time { font-size: 3.8rem; font-weight: 200; }
-        .date { font-size: 1rem; margin-top: -5px; opacity: 0.8; }
 
         #home-screen { padding: 60px 20px; }
         .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
@@ -184,83 +78,91 @@
         .icon {
             width: 55px; height: 55px; border-radius: 16px; margin-bottom: 6px;
             display: flex; justify-content: center; align-items: center;
-            font-size: 1.6rem; box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-            background: white;
+            font-size: 1.6rem; background: white; box-shadow: 0 8px 15px rgba(0,0,0,0.3);
         }
-        .app span { color: white; font-size: 0.7rem; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .app span { color: white; font-size: 0.7rem; font-weight: 500; }
 
-        /* IMPROVED ZOOM ANIMATION */
+        /* APP WINDOW ZOOM ANIMATION */
         .app-window {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #f2f2f7; z-index: 1000;
-            border-radius: 38px; /* High-quality border radius */
-            opacity: 0; 
-            transform: scale(0.6); /* Start small for zoom effect */
-            pointer-events: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f2f2f7; z-index: 1000; border-radius: 38px;
+            opacity: 0; transform: scale(0.6); pointer-events: none;
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
             padding: 60px 25px;
         }
-        .app-window.open { 
-            opacity: 1; 
-            transform: scale(1); /* Zoom into full size */
-            pointer-events: all; 
-        }
+        .app-window.open { opacity: 1; transform: scale(1); pointer-events: all; }
 
         .settings-item {
             background: white; padding: 18px; border-radius: 15px; margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
             color: #000; font-weight: 600; cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .back-btn { color: #007aff; font-weight: 700; margin-bottom: 25px; cursor: pointer; }
 
-        #home-bar {
-            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-            width: 120px; height: 5px; background: rgba(255,255,255,0.7);
-            border-radius: 10px; z-index: 5600; cursor: pointer;
-            transition: background 0.2s;
+        /* NAVIGATION BAR SYSTEM */
+        #nav-container {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40px;
+            z-index: 5600; display: flex; justify-content: center; align-items: center;
         }
+
+        /* Swipe Line Mode */
+        #home-bar {
+            width: 120px; height: 5px; background: rgba(255,255,255,0.7);
+            border-radius: 10px; cursor: pointer; display: block;
+        }
+
+        /* 3-Button Mode */
+        #three-buttons {
+            width: 100%; display: none; justify-content: space-around; align-items: center;
+            padding: 0 30px;
+        }
+        .nav-btn {
+            color: white; font-size: 1.2rem; cursor: pointer; width: 40px; height: 40px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .status-trigger {
+            position: absolute; top: 0; right: 0; width: 40%; height: 40px; z-index: 4600; cursor: pointer;
+        }
+
+        /* CONTROL CENTER */
+        #control-center {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 15, 15, 0.7); backdrop-filter: blur(25px);
+            z-index: 4800; transform: translateY(-100%);
+            transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+            padding: 60px 20px; display: flex; flex-direction: column; gap: 20px;
+        }
+        #control-center.open { transform: translateY(0); }
     </style>
 </head>
 <body>
 
     <div class="phone">
-        <div class="power-btn" onclick="togglePower()"></div>
-
         <div class="screen-container">
             <div class="status-bar">
                 <div id="status-time">00:00</div>
-                <div class="status-right">
-                    <span>5G</span>
-                    <div class="battery-icon"><div class="battery-level"></div></div>
-                </div>
+                <div style="display:flex; gap:5px;"><span>5G</span></div>
             </div>
 
             <div class="status-trigger" onclick="toggleCC(true)"></div>
             <div class="punch-hole"></div>
-            
             <div id="black-overlay"></div>
             <div id="brightness-overlay"></div>
-            
             <div class="wallpaper" id="main-wallpaper"></div>
 
             <div id="control-center">
-                <div class="cc-grid">
-                    <div class="cc-btn" id="wifi-btn" onclick="toggleCCBtn('wifi-btn')">📶 Wi-Fi</div>
-                    <div class="cc-btn" id="bt-btn" onclick="toggleCCBtn('bt-btn')">🔹 Bluetooth</div>
+                <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:22px; color:white;">
+                    <label style="font-size:0.8rem; font-weight:600;">Brightness</label>
+                    <input type="range" style="width:100%; margin-top:10px;" min="0" max="100" value="100" oninput="adjustBrightness(this.value)">
                 </div>
-                <div class="cc-slider">
-                    <label style="font-size: 0.8rem; font-weight: 600;">Brightness</label>
-                    <input type="range" min="0" max="100" value="100" oninput="adjustBrightness(this.value)">
-                </div>
-                <div style="flex-grow: 1; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px; color: rgba(255,255,255,0.4); font-size: 2rem; cursor: pointer;" onclick="toggleCC(false)">︿</div>
+                <div style="text-align:center; color:white; font-size:2rem; cursor:pointer;" onclick="toggleCC(false)">︿</div>
             </div>
 
             <div id="lock-screen" class="screen active">
                 <div class="time" id="clock-large">00:00</div>
-                <div class="date">Friday, April 10</div>
+                <div style="margin-top:200px; color:white; opacity:0.6;">Swipe or Click Bottom to Start</div>
             </div>
 
             <div id="home-screen" class="screen hidden">
@@ -274,13 +176,26 @@
 
             <div id="settings-main" class="app-window">
                 <h1 style="margin-bottom: 25px;">Settings</h1>
-                <div class="settings-item" onclick="showSubPage('custom-page')">
-                    <span>Customization</span>
+                <div class="settings-item" onclick="showSubPage('nav-settings')">
+                    <span>Navigation Bar</span>
                     <span>❯</span>
                 </div>
-                <div class="settings-item" style="opacity: 0.6; cursor: default;">
-                    <span>System Version</span>
-                    <span>1.0 Beta</span>
+                <div class="settings-item" onclick="showSubPage('custom-page')">
+                    <span>Wallpaper</span>
+                    <span>❯</span>
+                </div>
+            </div>
+
+            <div id="nav-settings" class="app-window">
+                <div class="back-btn" onclick="showSubPage('settings-main')">❮ Back</div>
+                <h2 style="margin-bottom: 20px;">Navigation Style</h2>
+                <div class="settings-item" onclick="setNav('swipe')">
+                    <span>Swipe Navigation</span>
+                    <span id="check-swipe">✓</span>
+                </div>
+                <div class="settings-item" onclick="setNav('buttons')">
+                    <span>3-Button Navigation</span>
+                    <span id="check-buttons" style="display:none;">✓</span>
                 </div>
             </div>
 
@@ -292,40 +207,69 @@
                 </div>
             </div>
 
-            <div id="home-bar" onclick="handleBarClick()"></div>
+            <div id="nav-container">
+                <div id="home-bar" onclick="handleNavAction('home')"></div>
+                <div id="three-buttons">
+                    <div class="nav-btn" onclick="handleNavAction('back')">◂</div>
+                    <div class="nav-btn" onclick="handleNavAction('home')">●</div>
+                    <div class="nav-btn" onclick="handleNavAction('recent')">■</div>
+                </div>
+            </div>
         </div>
     </div>
 
     <input type="file" id="wallpaper-input" hidden accept="image/*">
 
     <script>
-        let isPhoneOff = false;
         const wallpaperLayer = document.getElementById('main-wallpaper');
-        const wallpaperInput = document.getElementById('wallpaper-input');
 
         function toggleCC(show) {
-            if (isPhoneOff) return;
             document.getElementById('control-center').classList.toggle('open', show);
         }
 
-        function toggleCCBtn(id) {
-            document.getElementById(id).classList.toggle('active');
-        }
-
         function adjustBrightness(val) {
-            const darkness = (100 - val) / 125; 
-            document.getElementById('brightness-overlay').style.opacity = darkness;
+            document.getElementById('brightness-overlay').style.opacity = (100 - val) / 125;
         }
 
-        function handleBarClick() {
-            if (isPhoneOff) return;
-            toggleCC(false);
-            const lockScreen = document.getElementById('lock-screen');
-            if (lockScreen.classList.contains('active')) {
-                lockScreen.classList.replace('active', 'hidden');
-                document.getElementById('home-screen').classList.replace('hidden', 'active');
+        // NAVIGATION LOGIC
+        function setNav(type) {
+            const bar = document.getElementById('home-bar');
+            const buttons = document.getElementById('three-buttons');
+            const checkS = document.getElementById('check-swipe');
+            const checkB = document.getElementById('check-buttons');
+
+            if (type === 'swipe') {
+                bar.style.display = 'block';
+                buttons.style.display = 'none';
+                checkS.style.display = 'block';
+                checkB.style.display = 'none';
             } else {
-                closeAllApps();
+                bar.style.display = 'none';
+                buttons.style.display = 'flex';
+                checkS.style.display = 'none';
+                checkB.style.display = 'block';
+            }
+        }
+
+        function handleNavAction(action) {
+            if (action === 'home') {
+                toggleCC(false);
+                const lock = document.getElementById('lock-screen');
+                if (lock.classList.contains('active')) {
+                    lock.classList.replace('active', 'hidden');
+                    document.getElementById('home-screen').classList.replace('hidden', 'active');
+                } else {
+                    closeAllApps();
+                }
+            } else if (action === 'back') {
+                // Simplified back logic: if in sub-page go to main settings, else close app
+                const navSet = document.getElementById('nav-settings');
+                const custSet = document.getElementById('custom-page');
+                if (navSet.classList.contains('open') || custSet.classList.contains('open')) {
+                    showSubPage('settings-main');
+                } else {
+                    closeAllApps();
+                }
             }
         }
 
@@ -336,47 +280,30 @@
 
         function closeAllApps() {
             document.querySelectorAll('.app-window').forEach(win => win.classList.remove('open'));
-            document.getElementById('home-screen').classList.replace('hidden', 'active');
             wallpaperLayer.classList.remove('app-active');
         }
 
         function showSubPage(id) {
-            // Keep the zoom consistent during sub-page switches
             document.querySelectorAll('.app-window').forEach(win => {
                 if(win.id !== id) win.classList.remove('open');
             });
             document.getElementById(id).classList.add('open');
         }
 
-        function triggerFileSelect() { wallpaperInput.click(); }
+        function triggerFileSelect() { document.getElementById('wallpaper-input').click(); }
 
-        wallpaperInput.addEventListener('change', function() {
+        document.getElementById('wallpaper-input').addEventListener('change', function() {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    wallpaperLayer.style.backgroundImage = `url(${e.target.result})`;
-                };
+                reader.onload = (e) => { wallpaperLayer.style.backgroundImage = `url(${e.target.result})`; };
                 reader.readAsDataURL(file);
             }
         });
 
-        function togglePower() {
-            isPhoneOff = !isPhoneOff;
-            document.getElementById('black-overlay').style.display = isPhoneOff ? 'block' : 'none';
-            document.getElementById('home-bar').style.display = isPhoneOff ? 'none' : 'block';
-            toggleCC(false);
-            if (!isPhoneOff) {
-                closeAllApps();
-                document.getElementById('home-screen').classList.replace('active', 'hidden');
-                document.getElementById('lock-screen').classList.replace('hidden', 'active');
-            }
-        }
-
         function updateTime() {
             const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
-                            now.getMinutes().toString().padStart(2, '0');
+            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
             document.getElementById('clock-large').innerText = timeStr;
             document.getElementById('status-time').innerText = timeStr;
         }
