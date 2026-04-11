@@ -135,7 +135,7 @@
             opacity: 1;
         }
 
-        /* FIXED POWER BUTTON HTML IN JS LOGIC */
+        /* POWER BUTTON */
         .power-btn {
             position: absolute;
             right: -15px;
@@ -233,7 +233,6 @@
             background: black; opacity: 0; pointer-events: none; z-index: 4000;
         }
 
-        /* This is the Screen-Off layer */
         #black-overlay {
             position: absolute;
             top: 0; left: 0;
@@ -287,7 +286,7 @@
             transition: filter 0.5s ease, transform 0.5s var(--ios-curve);
             z-index: 1;
         }
-        .wallpaper.app-active { filter: blur(15px) brightness(0.7); transform: scale(1.05); }
+        .wallpaper.app-active { filter: blur(15px) brightness(0.7); transform: scale(1.1); }
 
         .screen {
             position: absolute;
@@ -356,7 +355,7 @@
         }
         .app span { color: white; font-size: 0.7rem; font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.5); text-align: center;}
 
-        /* PREMIUM iOS-STYLE ANIMATION: Slide up from bottom */
+        /* --- UPDATED APP ANIMATION (HYPER-STYLE SCALE) --- */
         .app-window {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -367,14 +366,21 @@
             padding: 60px 25px;
             opacity: 0; 
             pointer-events: none;
-            transform: translateY(100%); /* Start below screen */
-            transition: transform 0.5s var(--ios-curve), opacity 0.3s ease;
+            /* New Transition Logic: Scale from 0.8 to 1 */
+            transform: scale(0.85);
+            filter: blur(10px) brightness(0.6);
+            transition: 
+                transform var(--anim-speed) var(--ios-curve), 
+                opacity var(--anim-speed) ease,
+                filter var(--anim-speed) ease;
+            will-change: transform, opacity;
         }
         
         .app-window.open { 
             opacity: 1; 
             pointer-events: all; 
-            transform: translateY(0); /* Slide into view */
+            transform: scale(1);
+            filter: blur(0px) brightness(1);
         }
 
         .settings-item {
@@ -651,19 +657,18 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        /* FIXED POWER LOGIC */
         function startPowerTimer(e) {
             pressStartTime = Date.now();
             powerTimer = setTimeout(() => {
                 showPowerMenu();
-            }, 1000); // 1 second for Power Menu
+            }, 1000);
         }
 
         function endPowerTimer(e) {
             clearTimeout(powerTimer);
             let duration = Date.now() - pressStartTime;
             if (duration < 500) {
-                toggleSleep(); // Short click = Screen Off
+                toggleSleep();
             }
         }
 
@@ -673,7 +678,6 @@
                 overlay.style.display = 'block';
                 setTimeout(() => overlay.style.opacity = '1', 10);
                 isPhoneSleeping = true;
-                // Automatically go to lockscreen when screen turns off
                 document.getElementById('lock-screen').classList.replace('hidden', 'active');
                 document.getElementById('lock-screen').classList.remove('lock-unlocking');
                 document.getElementById('home-screen').classList.replace('active', 'hidden');
@@ -706,7 +710,6 @@
             location.reload();
         }
 
-        /* APP LOGIC */
         function startAppHold(e, el, isEmptyApp) {
             isHolding = true;
             appHoldTimer = setTimeout(() => {
@@ -826,42 +829,84 @@
             else cc.classList.remove('open');
         }
 
+        function toggleCCBtn(id) {
+            document.getElementById(id).classList.toggle('active');
+        }
+
         function adjustBrightness(val) {
-            document.getElementById('brightness-overlay').style.opacity = (100 - val) / 100;
+            document.getElementById('brightness-overlay').style.opacity = (1 - (val / 100));
         }
 
         function setTheme(mode) {
-            document.body.className = mode + '-theme';
-            document.getElementById('check-light').style.display = mode === 'light' ? 'block' : 'none';
-            document.getElementById('check-dark').style.display = mode === 'dark' ? 'block' : 'none';
+            document.body.classList.remove('light-theme', 'dark-theme');
+            document.body.classList.add(mode + '-theme');
+            document.getElementById('check-light').style.display = (mode === 'light' ? 'block' : 'none');
+            document.getElementById('check-dark').style.display = (mode === 'dark' ? 'block' : 'none');
         }
 
         function setNavStyle(style) {
             currentNavMode = style;
-            document.getElementById('check-swipe').style.display = style === 'swipe' ? 'block' : 'none';
-            document.getElementById('check-buttons').style.display = style === 'buttons' ? 'block' : 'none';
+            document.getElementById('check-swipe').style.display = (style === 'swipe' ? 'block' : 'none');
+            document.getElementById('check-buttons').style.display = (style === 'buttons' ? 'block' : 'none');
             updateNavVisibility();
         }
 
-        async function initBattery() {
-            if ('getBattery' in navigator) {
-                const battery = await navigator.getBattery();
-                const updateIsland = () => {
-                    const level = Math.round(battery.level * 100);
-                    document.getElementById('battery-fill').style.width = level + "%";
-                    if (battery.charging) {
-                        document.getElementById('island-text').innerText = `Charging ${level}%`;
-                        document.getElementById('island').classList.add('charging-island');
-                        setTimeout(() => document.getElementById('island').classList.remove('charging-island'), 3000);
-                    }
-                };
-                battery.onchargingchange = updateIsland;
-                battery.onlevelchange = updateIsland;
-                updateIsland();
+        function handleAboutClick() {
+            aboutClicks++;
+            if(aboutClicks === 7 && !isDevMode) {
+                isDevMode = true;
+                document.getElementById('dev-opt-item').style.display = 'flex';
+                const toast = document.getElementById('dev-toast');
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 2000);
             }
         }
-        initBattery();
 
+        function setAnimSpeed(speed, label) {
+            document.documentElement.style.setProperty('--anim-speed', speed);
+            document.querySelectorAll('.dev-speed-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('speed-' + label).classList.add('active');
+        }
+
+        function triggerFileSelect() { wallpaperInput.click(); }
+
+        wallpaperInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    wallpaperLayer.style.backgroundImage = `url(${event.target.result})`;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        function handleBackAction() {
+             const openWins = Array.from(document.querySelectorAll('.app-window.open'));
+             if (openWins.length > 0) {
+                 const lastWin = openWins[openWins.length - 1];
+                 if (lastWin.id === 'settings-main' || lastWin.id.includes('empty')) {
+                     handleHomeAction();
+                 } else {
+                     showSubPage('settings-main');
+                 }
+             }
+        }
+        
+        function handleRecentAction() {
+            const toast = document.getElementById('dev-toast');
+            toast.innerText = "Recents menu coming soon";
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 1500);
+        }
+
+        window.onload = () => {
+            const island = document.getElementById('island');
+            setTimeout(() => {
+                island.classList.add('charging-island');
+                setTimeout(() => island.classList.remove('charging-island'), 3000);
+            }, 1000);
+        };
     </script>
 </body>
 </html>
