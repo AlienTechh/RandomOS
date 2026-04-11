@@ -13,6 +13,7 @@
             height: 100vh;
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
         }
 
         /* The Phone Frame */
@@ -26,7 +27,7 @@
             box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
-            overflow: visible; /* Allow buttons to sit outside */
+            overflow: visible;
         }
 
         /* Red Power Button */
@@ -39,11 +40,7 @@
             top: 120px;
             border-radius: 0 5px 5px 0;
             cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .power-btn:active {
-            transform: translateX(-2px);
+            z-index: 100;
         }
 
         .punch-hole {
@@ -55,7 +52,7 @@
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 20;
+            z-index: 50;
         }
 
         /* The Screen */
@@ -67,50 +64,67 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
         }
 
-        /* Lockscreen Content (Hidden by default) */
-        #lockscreen {
+        /* UI Views */
+        .view {
             display: none;
             width: 100%;
             height: 100%;
+            position: absolute;
             flex-direction: column;
             align-items: center;
-            padding-top: 80px;
             color: white;
-            animation: fadeIn 0.5s ease-in;
+            animation: fadeIn 0.3s ease;
         }
 
-        #time {
-            font-size: 3.5rem;
-            font-weight: 200;
-            margin: 0;
+        /* Lockscreen */
+        #lockscreen {
+            padding-top: 80px;
         }
 
-        #date {
-            font-size: 1rem;
-            color: #888;
-            margin-top: -5px;
+        #time { font-size: 3.5rem; font-weight: 200; margin: 0; }
+        #date { font-size: 1rem; color: #888; margin-top: -5px; }
+
+        /* Home Screen */
+        #homescreen {
+            padding-top: 50px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #000 100%);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+            margin-top: 20px;
         }
 
-        .home-bar {
+        .app-icon {
+            width: 50px;
+            height: 50px;
+            background: #333;
+            border-radius: 12px;
+        }
+
+        /* Home Indicator Bar */
+        #home-bar {
             width: 110px;
             height: 4px;
-            background: #333;
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 10px;
             position: absolute;
             bottom: 8px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 20;
+            z-index: 60;
+            cursor: pointer;
+            display: none; /* Hidden when phone is off */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -119,34 +133,61 @@
     <div class="phone-container">
         <div class="power-btn" onclick="togglePower()"></div>
         <div class="punch-hole"></div>
-        <div class="home-bar"></div>
+        <div id="home-bar" onclick="unlockPhone()"></div>
 
         <div class="screen" id="main-screen">
-            <div id="lockscreen">
+            <div id="lockscreen" class="view">
                 <p id="time">00:00</p>
-                <p id="date">Friday, April 11</p>
+                <p id="date">Date</p>
+                <p style="position:absolute; bottom:50px; font-size: 12px; color: #555;">Tap bar to unlock</p>
+            </div>
+
+            <div id="homescreen" class="view">
+                <div class="app-grid">
+                    <div class="app-icon" style="background: #00ff96;"></div>
+                    <div class="app-icon" style="background: #007aff;"></div>
+                    <div class="app-icon" style="background: #ff9500;"></div>
+                    <div class="app-icon" style="background: #ff2d55;"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         let isPowerOn = false;
+        let isUnlocked = false;
+
+        const screen = document.getElementById('main-screen');
+        const lockscreen = document.getElementById('lockscreen');
+        const homescreen = document.getElementById('homescreen');
+        const homeBar = document.getElementById('home-bar');
 
         function togglePower() {
-            const screen = document.getElementById('main-screen');
-            const lockscreen = document.getElementById('lockscreen');
-            
-            isPowerOn = !isPowerOn;
-
-            if (isPowerOn) {
-                // Turn On
-                screen.style.background = "linear-gradient(to bottom, #000000, #1a1a2e)";
+            if (!isPowerOn) {
+                // TURN ON
+                isPowerOn = true;
+                isUnlocked = false;
+                screen.style.background = "#000";
                 lockscreen.style.display = "flex";
+                homescreen.style.display = "none";
+                homeBar.style.display = "block";
                 updateClock();
             } else {
-                // Turn Off
-                screen.style.background = "#000000";
+                // TURN OFF (And reset state)
+                isPowerOn = false;
+                isUnlocked = false;
+                screen.style.background = "#000";
                 lockscreen.style.display = "none";
+                homescreen.style.display = "none";
+                homeBar.style.display = "none";
+            }
+        }
+
+        function unlockPhone() {
+            if (isPowerOn && !isUnlocked) {
+                isUnlocked = true;
+                lockscreen.style.display = "none";
+                homescreen.style.display = "flex";
             }
         }
 
@@ -154,14 +195,11 @@
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            
             document.getElementById('time').textContent = `${hours}:${minutes}`;
-            
             const options = { weekday: 'long', month: 'long', day: 'numeric' };
             document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
         }
 
-        // Keep the clock ticking every second
         setInterval(updateClock, 1000);
     </script>
 </body>
