@@ -135,7 +135,7 @@
         #camera-app.open { transform: scale(1); opacity: 1; pointer-events: auto; }
         #camera-feed {
             width: 100%; height: 100%; object-fit: cover;
-            transform: scaleX(1); /* Default, flipped for front cam in JS */
+            transform: scaleX(1); 
         }
         .camera-ui {
             position: absolute; bottom: 40px; width: 100%;
@@ -145,7 +145,10 @@
         .shutter-btn {
             width: 65px; height: 65px; background: white; border-radius: 50%;
             border: 4px solid #333; outline: 2px solid white; cursor: pointer;
+            transition: transform 0.1s;
         }
+        .shutter-btn:active { transform: scale(0.9); }
+
         .flip-btn {
             position: absolute; right: 30px; background: rgba(0,0,0,0.5);
             width: 40px; height: 40px; border-radius: 50%; display: flex;
@@ -235,10 +238,11 @@
 
             <div id="camera-app" class="view">
                 <video id="camera-feed" autoplay playsinline></video>
+                <canvas id="camera-canvas" style="display:none;"></canvas>
                 <div id="cam-error" class="cam-error">Camera access denied or not found.</div>
                 
                 <div class="camera-ui">
-                    <div class="shutter-btn" onclick="takeFakePhoto()"></div>
+                    <div class="shutter-btn" onclick="takePhoto()"></div>
                     <div class="flip-btn" onclick="flipCamera()">🔄</div>
                 </div>
             </div>
@@ -250,9 +254,8 @@
         let isPowerOn = false, isUnlocked = false, clickCount = 0, devActive = false;
         const lockWP = document.getElementById('lock-wp'), homeWP = document.getElementById('home-wp');
 
-        // Camera Variables
         let currentStream = null;
-        let facingMode = "environment"; // "environment" is back camera, "user" is front
+        let facingMode = "environment"; 
 
         function togglePower() {
             isPowerOn = !isPowerOn;
@@ -273,13 +276,9 @@
                     document.getElementById('lockscreen').style.display = 'none';
                     document.getElementById('homescreen').style.display = 'none';
                     document.getElementById('homescreen').classList.remove('unlocked');
-                    
-                    // Close all apps
                     document.getElementById('settings-app').classList.remove('open');
                     document.getElementById('camera-app').classList.remove('open');
-                    
-                    stopCamera(); // Turn off the camera to save power!
-                    
+                    stopCamera(); 
                     lockWP.classList.remove('app-active');
                     homeWP.classList.remove('app-active');
                     isUnlocked = false;
@@ -298,7 +297,7 @@
                 homeWP.classList.remove('app-active');
             } else if (camera.classList.contains('open')) {
                 camera.classList.remove('open');
-                stopCamera(); // Shut off hardware when leaving the app
+                stopCamera(); 
                 lockWP.classList.remove('app-active');
                 homeWP.classList.remove('app-active');
             } else if (isPowerOn && !isUnlocked) {
@@ -311,15 +310,11 @@
             }
         }
 
-        // --- Apps ---
-
         function openSettings() { 
             document.getElementById('settings-app').classList.add('open');
             lockWP.classList.add('app-active');
             homeWP.classList.add('app-active');
         }
-
-        // --- Camera Logic ---
 
         function openCamera() {
             document.getElementById('camera-app').classList.add('open');
@@ -329,13 +324,12 @@
         }
 
         async function startCamera() {
-            if (currentStream) stopCamera(); // Stop existing before starting new
+            if (currentStream) stopCamera(); 
             const videoElement = document.getElementById('camera-feed');
             const errorText = document.getElementById('cam-error');
             errorText.style.display = 'none';
 
             try {
-                // Request camera permission
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: facingMode }
                 });
@@ -343,7 +337,6 @@
                 currentStream = stream;
                 videoElement.srcObject = stream;
 
-                // Mirror the video if using the front camera so it acts like a mirror
                 if (facingMode === "user") {
                     videoElement.style.transform = "scaleX(-1)";
                 } else {
@@ -358,26 +351,53 @@
 
         function stopCamera() {
             if (currentStream) {
-                // Stop all video tracks (turns off the physical camera light)
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
         }
 
         function flipCamera() {
-            // Toggle between front and back
             facingMode = (facingMode === "user") ? "environment" : "user";
             startCamera();
         }
 
-        function takeFakePhoto() {
-            // Just a fun little animation to simulate taking a photo
+        // --- NEW REAL PHOTO SAVING LOGIC ---
+        function takePhoto() {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('camera-canvas');
+            const context = canvas.getContext('2d');
+
+            // Flash effect
             const app = document.getElementById('camera-app');
             app.style.opacity = '0.5';
             setTimeout(() => { app.style.opacity = '1'; }, 100);
-        }
 
-        // --- Settings / OS Logic ---
+            // Match canvas size to video feed resolution
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Handle mirroring for the save file if front cam is used
+            if (facingMode === "user") {
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+            }
+
+            // Draw the frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas to a data link and trigger download
+            try {
+                const imageData = canvas.toDataURL("image/png");
+                const downloadLink = document.createElement('a');
+                downloadLink.href = imageData;
+                downloadLink.download = `RandomOS_Photo_${Date.now()}.png`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            } catch (e) {
+                console.error("Save failed", e);
+            }
+        }
 
         function goToPage(num) { document.getElementById('settings-nav').style.transform = `translateX(-${num * 25}%)`; }
 
