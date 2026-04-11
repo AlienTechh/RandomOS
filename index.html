@@ -6,13 +6,13 @@
     <title>RandomOS 1.0 Beta</title>
     <style>
         body {
-            background-color: #050505;
+            background-color: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         /* The Phone Frame */
@@ -23,34 +23,84 @@
             border: 12px solid #1a1a1a;
             border-radius: 55px;
             position: relative;
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.03);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: visible; /* Allow buttons to sit outside */
         }
 
-        /* The Punch Hole Camera */
+        /* Red Power Button */
+        .power-btn {
+            width: 4px;
+            height: 60px;
+            background: #ff3b30;
+            position: absolute;
+            right: -16px;
+            top: 120px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .power-btn:active {
+            transform: translateX(-2px);
+        }
+
         .punch-hole {
             width: 12px;
             height: 12px;
             background: #1a1a1a;
             border-radius: 50%;
             position: absolute;
-            top: 15px; /* Positioned slightly down from the top */
+            top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10;
-            box-shadow: inset 0 0 2px #000; /* Subtle depth for the lens */
+            z-index: 20;
         }
 
-        /* The Pure Black Screen */
+        /* The Screen */
         .screen {
             flex-grow: 1;
             background: #000000;
             position: relative;
+            border-radius: 43px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
         }
 
-        /* The Home Indicator Bar */
+        /* Lockscreen Content (Hidden by default) */
+        #lockscreen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 80px;
+            color: white;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        #time {
+            font-size: 3.5rem;
+            font-weight: 200;
+            margin: 0;
+        }
+
+        #date {
+            font-size: 1rem;
+            color: #888;
+            margin-top: -5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .home-bar {
             width: 110px;
             height: 4px;
@@ -60,17 +110,59 @@
             bottom: 8px;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 20;
         }
     </style>
 </head>
 <body>
 
     <div class="phone-container">
+        <div class="power-btn" onclick="togglePower()"></div>
         <div class="punch-hole"></div>
         <div class="home-bar"></div>
 
-        <div class="screen"></div>
+        <div class="screen" id="main-screen">
+            <div id="lockscreen">
+                <p id="time">00:00</p>
+                <p id="date">Friday, April 11</p>
+            </div>
+        </div>
     </div>
 
+    <script>
+        let isPowerOn = false;
+
+        function togglePower() {
+            const screen = document.getElementById('main-screen');
+            const lockscreen = document.getElementById('lockscreen');
+            
+            isPowerOn = !isPowerOn;
+
+            if (isPowerOn) {
+                // Turn On
+                screen.style.background = "linear-gradient(to bottom, #000000, #1a1a2e)";
+                lockscreen.style.display = "flex";
+                updateClock();
+            } else {
+                // Turn Off
+                screen.style.background = "#000000";
+                lockscreen.style.display = "none";
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('time').textContent = `${hours}:${minutes}`;
+            
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
+        }
+
+        // Keep the clock ticking every second
+        setInterval(updateClock, 1000);
+    </script>
 </body>
 </html>
