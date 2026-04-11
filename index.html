@@ -47,9 +47,11 @@
 
         .wallpaper {
             position: absolute; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
+            background-size: cover;
+            background-position: center;
             transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.8s ease;
-            z-index: 1; background-color: #1a1a1a;
+            z-index: 1;
+            background-color: #1a1a1a;
         }
 
         .wallpaper.app-active {
@@ -198,6 +200,9 @@
                 if (!isUnlocked) {
                     lockWP.style.display = 'block';
                     homeWP.style.display = 'none';
+                } else {
+                    lockWP.style.display = 'none';
+                    homeWP.style.display = 'block';
                 }
                 updateClock();
             } else {
@@ -250,12 +255,12 @@
             }
         }
 
-        // Fixed logic for Home screen application
+        // FIXED: Now applies the home wallpaper immediately on one click
         function applyWP(type) {
             if (type === 'lock') {
-                lockWP.style.backgroundImage = `url(${tempImg})`;
+                lockWP.style.backgroundImage = "url('" + tempImg + "')";
             } else if (type === 'home') {
-                homeWP.style.backgroundImage = `url(${tempImg})`;
+                homeWP.style.backgroundImage = "url('" + tempImg + "')";
             }
             closeModal();
         }
