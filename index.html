@@ -195,8 +195,10 @@
             document.getElementById('home-bar').style.opacity = isPowerOn ? '1' : '0';
             if (isPowerOn) {
                 document.getElementById('lockscreen').style.display = 'flex';
-                lockWP.style.display = 'block';
-                homeWP.style.display = 'none';
+                if (!isUnlocked) {
+                    lockWP.style.display = 'block';
+                    homeWP.style.display = 'none';
+                }
                 updateClock();
             } else {
                 setTimeout(() => {
@@ -248,9 +250,13 @@
             }
         }
 
+        // Fixed logic for Home screen application
         function applyWP(type) {
-            if (type === 'lock') lockWP.style.backgroundImage = `url(${tempImg})`;
-            if (type === 'home') homeWP.style.backgroundImage = `url(${tempImg})`;
+            if (type === 'lock') {
+                lockWP.style.backgroundImage = `url(${tempImg})`;
+            } else if (type === 'home') {
+                homeWP.style.backgroundImage = `url(${tempImg})`;
+            }
             closeModal();
         }
 
