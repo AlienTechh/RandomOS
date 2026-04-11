@@ -14,6 +14,8 @@
             margin: 0;
             font-family: -apple-system, sans-serif;
             user-select: none;
+            /* Removes the blue highlight on click */
+            -webkit-tap-highlight-color: transparent; 
         }
 
         .phone-container {
@@ -50,6 +52,7 @@
             display: none; width: 100%; height: 100%;
             position: absolute; flex-direction: column;
             align-items: center; color: white;
+            border-radius: 43px; /* Matches screen curve */
         }
 
         /* Lockscreen */
@@ -58,7 +61,7 @@
 
         /* Home Screen */
         #homescreen {
-            background: linear-gradient(180deg, #1a1a2e 0%, #000 100%);
+            background: linear-gradient(180deg, #121212 0%, #000 100%);
             padding-top: 60px;
         }
 
@@ -67,37 +70,37 @@
             gap: 20px; padding: 20px;
         }
 
-        .app-container { text-align: center; cursor: pointer; }
+        .app-container { text-align: center; cursor: pointer; border-radius: 12px; }
         .app-icon {
-            width: 55px; height: 55px; border-radius: 12px;
+            width: 55px; height: 55px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
             font-size: 20px; margin-bottom: 5px;
+            background: #2c2c2e;
         }
         .app-label { font-size: 10px; color: white; }
 
-        /* Settings App Window */
+        /* Settings App - Slide Up Animation */
         #settings-app {
             background: #1c1c1e;
             z-index: 40;
-            transform-origin: 50px 100px; /* Zoom starts near the first icon */
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+            transition: transform 0.4s cubic-bezier(0.3, 1, 0.3, 1), opacity 0.2s;
+            transform: translateY(100%); /* Start off-screen at bottom */
             opacity: 0;
-            transform: scale(0);
+            display: flex; /* Always flex, transition handles visibility */
         }
 
         #settings-app.open {
-            display: flex;
+            transform: translateY(0); /* Slide into view */
             opacity: 1;
-            transform: scale(1);
         }
 
         .settings-header {
-            width: 100%; padding: 40px 20px 20px;
-            font-size: 24px; font-weight: bold; border-bottom: 1px solid #333;
+            width: 100%; padding: 50px 20px 20px;
+            font-size: 24px; font-weight: bold; border-bottom: 1px solid #2c2c2e;
         }
 
-        .settings-list { width: 100%; padding: 10px 20px; font-size: 14px; }
-        .settings-item { padding: 15px 0; border-bottom: 1px solid #333; color: #ccc; }
+        .settings-list { width: 100%; padding: 10px 20px; font-size: 14px; box-sizing: border-box;}
+        .settings-item { padding: 18px 0; border-bottom: 1px solid #2c2c2e; color: #eee; }
 
         /* Home Bar */
         #home-bar {
@@ -106,8 +109,6 @@
             left: 50%; transform: translateX(-50%); z-index: 60;
             cursor: pointer; display: none;
         }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -120,13 +121,13 @@
         <div class="screen" id="main-screen">
             <div id="lockscreen" class="view">
                 <p id="time">00:00</p>
-                <p style="font-size: 12px; color: #555; margin-top: 300px;">Tap bar to unlock</p>
+                <p style="font-size: 12px; color: #555; position: absolute; bottom: 50px;">Tap home bar to unlock</p>
             </div>
 
             <div id="homescreen" class="view">
                 <div class="app-grid">
                     <div class="app-container" onclick="openSettings()">
-                        <div class="app-icon" style="background: #8e8e93;">⚙️</div>
+                        <div class="app-icon" style="background: linear-gradient(#444, #222);">⚙️</div>
                         <div class="app-label">Settings</div>
                     </div>
                 </div>
@@ -135,9 +136,9 @@
             <div id="settings-app" class="view">
                 <div class="settings-header">Settings</div>
                 <div class="settings-list">
-                    <div class="settings-item">Wi-Fi: RandomNet_5G</div>
-                    <div class="settings-item">Bluetooth: On</div>
-                    <div class="settings-item">About RandomOS</div>
+                    <div class="settings-item">RandomOS Version: 1.0 Beta</div>
+                    <div class="settings-item">Storage: 99% Random</div>
+                    <div class="settings-item">System Updates</div>
                 </div>
             </div>
         </div>
@@ -157,14 +158,17 @@
 
         function togglePower() {
             isPowerOn = !isPowerOn;
-            isUnlocked = false;
-            isAppSettingsOpen = false;
             
-            // Close everything on power off
-            Object.values(views).forEach(v => v.style.display = 'none');
-            views.settings.classList.remove('open');
-
-            if (isPowerOn) {
+            if (!isPowerOn) {
+                // Shut down logic
+                isUnlocked = false;
+                isAppSettingsOpen = false;
+                views.lock.style.display = 'none';
+                views.home.style.display = 'none';
+                views.settings.classList.remove('open');
+                views.bar.style.display = 'none';
+            } else {
+                // Power on logic
                 views.lock.style.display = 'flex';
                 views.bar.style.display = 'block';
                 updateClock();
@@ -175,23 +179,18 @@
             if (!isPowerOn) return;
             
             if (!isUnlocked) {
-                // Unlock logic
                 isUnlocked = true;
                 views.lock.style.display = 'none';
                 views.home.style.display = 'flex';
             } else if (isAppSettingsOpen) {
-                // Exit app logic
                 isAppSettingsOpen = false;
                 views.settings.classList.remove('open');
-                setTimeout(() => { views.settings.style.display = 'none'; }, 400);
             }
         }
 
         function openSettings() {
             isAppSettingsOpen = true;
-            views.settings.style.display = 'flex';
-            // Small timeout to allow display:flex to register before animation
-            setTimeout(() => { views.settings.classList.add('open'); }, 10);
+            views.settings.classList.add('open');
         }
 
         function updateClock() {
