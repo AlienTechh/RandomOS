@@ -34,7 +34,7 @@
         .punch-hole {
             width: 12px; height: 12px; background: #1a1a1a;
             border-radius: 50%; position: absolute; top: 15px;
-            left: 50%; transform: translateX(-50%); z-index: 50;
+            left: 50%; transform: translateX(-50%); z-index: 90;
         }
 
         .screen {
@@ -43,97 +43,62 @@
             border-radius: 43px; overflow: hidden;
         }
 
+        /* Power Fade Overlay */
+        #power-overlay {
+            position: absolute; width: 100%; height: 100%;
+            background: black; z-index: 80; pointer-events: none;
+            transition: opacity 0.8s ease-in-out;
+            opacity: 1; /* Starts off */
+        }
+
         .view {
             display: none; width: 100%; height: 100%;
             position: absolute; flex-direction: column;
             color: white; border-radius: 43px;
         }
 
-        /* Home Screen */
+        /* Home Screen with Unlock Zoom */
         #homescreen {
             background: linear-gradient(180deg, #121212 0%, #000 100%);
             padding-top: 60px;
-            display: none;
+            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: scale(1.2); /* Zoomed in slightly before unlock */
         }
 
-        .app-grid {
-            display: flex;
-            justify-content: flex-start;
-            padding: 20px;
+        #homescreen.unlocked {
+            transform: scale(1); /* Zooms out to normal size */
         }
 
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-        }
-
+        .app-grid { display: flex; padding: 20px; }
         .app-icon {
             width: 55px; height: 55px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
             font-size: 20px; background: linear-gradient(#444, #222);
         }
 
-        /* Settings App - FIXES APPLIED HERE */
+        /* Settings App */
         #settings-app {
-            display: flex; 
-            background: #000; 
-            z-index: 40;
-            overflow: hidden; /* FIX: Prevents the sub-page from peeking out */
-            transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), 
-                        opacity 0.4s ease;
-            transform: scale(0); 
-            opacity: 0; 
-            pointer-events: none;
+            display: flex; background: #000; z-index: 40;
+            overflow: hidden;
+            transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+            transform: scale(0); opacity: 0; pointer-events: none;
             transform-origin: 40px 100px; 
         }
 
-        #settings-app.open {
-            transform: scale(1);
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #settings-app.open { transform: scale(1); opacity: 1; pointer-events: auto; }
 
-        .settings-content-wrapper {
-            display: flex; 
-            width: 200%; 
-            height: 100%;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
+        .settings-content-wrapper { display: flex; width: 200%; height: 100%; transition: transform 0.5s ease; }
         .settings-page { width: 50%; height: 100%; display: flex; flex-direction: column; }
+        .settings-header { padding: 50px 20px 20px; font-size: 24px; font-weight: bold; }
+        .settings-item { padding: 18px 20px; border-bottom: 1px solid #1c1c1e; display: flex; justify-content: space-between; }
 
-        .settings-header {
-            padding: 50px 20px 20px; font-size: 24px; font-weight: bold;
-            display: flex; align-items: center;
-        }
-
-        .back-btn { font-size: 16px; color: #007aff; cursor: pointer; margin-right: 10px; }
-
-        .settings-list { padding: 10px 20px; }
-        .settings-item { 
-            padding: 18px 0; border-bottom: 1px solid #1c1c1e; color: #eee; 
-            display: flex; justify-content: space-between; cursor: pointer;
-        }
-
-        .about-title {
-            font-size: 28px; font-weight: 800; text-align: center;
-            margin: 40px 0 20px;
-        }
-
-        .info-row {
-            display: flex; justify-content: space-between;
-            padding: 15px 20px; border-bottom: 1px solid #1c1c1e; font-size: 14px;
-        }
-
-        .label { color: #888; }
-
+        /* Home Bar */
         #home-bar {
             width: 110px; height: 4px; background: rgba(255, 255, 255, 0.4);
             border-radius: 10px; position: absolute; bottom: 8px;
-            left: 50%; transform: translateX(-50%); z-index: 60;
-            cursor: pointer; display: none;
+            left: 50%; transform: translateX(-50%); z-index: 100;
+            cursor: pointer; opacity: 0; pointer-events: none;
+            transition: opacity 0.5s;
         }
 
         #lockscreen { padding-top: 80px; align-items: center; }
@@ -148,15 +113,18 @@
         <div id="home-bar" onclick="handleHomeBar()"></div>
 
         <div class="screen" id="main-screen">
+            <div id="power-overlay"></div>
+
             <div id="lockscreen" class="view">
                 <p id="time">00:00</p>
+                <p style="font-size: 12px; color: #444; position: absolute; bottom: 50px;">Unlock</p>
             </div>
 
             <div id="homescreen" class="view">
                 <div class="app-grid">
-                    <div class="app-container" onclick="openSettings()">
+                    <div onclick="openSettings()" style="cursor:pointer">
                         <div class="app-icon">⚙️</div>
-                        <p style="font-size: 10px; margin-top: 5px; color: white;">Settings</p>
+                        <p style="font-size: 10px; text-align: center; color: white;">Settings</p>
                     </div>
                 </div>
             </div>
@@ -165,16 +133,14 @@
                 <div class="settings-content-wrapper" id="settings-nav">
                     <div class="settings-page">
                         <div class="settings-header">Settings</div>
-                        <div class="settings-list">
-                            <div class="settings-item" onclick="goToAbout()">About Phone <span>></span></div>
-                        </div>
+                        <div class="settings-item" onclick="goToAbout()">About Phone <span>></span></div>
                     </div>
                     <div class="settings-page">
-                        <div class="settings-header">
-                            <span class="back-btn" onclick="goBackToSettings()">❮ Back</span>
+                        <div class="settings-header"><span onclick="goBackToSettings()" style="color:#007aff; cursor:pointer">❮ Back</span></div>
+                        <p style="text-align:center; font-size: 24px;">RandomOS 1.0</p>
+                        <div style="padding: 20px; display:flex; justify-content:space-between; font-size:14px;">
+                            <span style="color:#888">Phone Name</span><span>rPhone 1 Pro</span>
                         </div>
-                        <div class="about-title">RandomOS 1.0</div>
-                        <div class="info-row"><span class="label">Phone Name</span><span>rPhone 1 Pro</span></div>
                     </div>
                 </div>
             </div>
@@ -186,49 +152,55 @@
         let isUnlocked = false;
 
         function togglePower() {
-            isPowerOn = !isPowerOn;
-            const settings = document.getElementById('settings-app');
+            const overlay = document.getElementById('power-overlay');
             const homeBar = document.getElementById('home-bar');
             const lock = document.getElementById('lockscreen');
             const home = document.getElementById('homescreen');
+            const settings = document.getElementById('settings-app');
 
-            if (!isPowerOn) {
-                settings.classList.remove('open');
-                lock.style.display = 'none';
-                home.style.display = 'none';
-                homeBar.style.display = 'none';
-                isUnlocked = false;
-                setTimeout(goBackToSettings, 700);
-            } else {
+            isPowerOn = !isPowerOn;
+
+            if (isPowerOn) {
+                overlay.style.opacity = '0';
+                homeBar.style.opacity = '1';
+                homeBar.style.pointerEvents = 'auto';
                 lock.style.display = 'flex';
-                homeBar.style.display = 'block';
                 updateClock();
+            } else {
+                overlay.style.opacity = '1';
+                homeBar.style.opacity = '0';
+                homeBar.style.pointerEvents = 'none';
+                settings.classList.remove('open');
+                // Reset states after fade
+                setTimeout(() => {
+                    lock.style.display = 'none';
+                    home.style.display = 'none';
+                    home.classList.remove('unlocked');
+                    isUnlocked = false;
+                }, 800);
             }
         }
 
         function handleHomeBar() {
             const settings = document.getElementById('settings-app');
+            const lock = document.getElementById('lockscreen');
+            const home = document.getElementById('homescreen');
+
             if (settings.classList.contains('open')) {
                 settings.classList.remove('open');
-                setTimeout(goBackToSettings, 700); 
+                setTimeout(goBackToSettings, 700);
             } else if (isPowerOn && !isUnlocked) {
                 isUnlocked = true;
-                document.getElementById('lockscreen').style.display = 'none';
-                document.getElementById('homescreen').style.display = 'flex';
+                lock.style.display = 'none';
+                home.style.display = 'flex';
+                // Trigger Zoom-Out Animation
+                setTimeout(() => home.classList.add('unlocked'), 10);
             }
         }
 
-        function openSettings() {
-            document.getElementById('settings-app').classList.add('open');
-        }
-
-        function goToAbout() {
-            document.getElementById('settings-nav').style.transform = "translateX(-50%)";
-        }
-
-        function goBackToSettings() {
-            document.getElementById('settings-nav').style.transform = "translateX(0%)";
-        }
+        function openSettings() { document.getElementById('settings-app').classList.add('open'); }
+        function goToAbout() { document.getElementById('settings-nav').style.transform = "translateX(-50%)"; }
+        function goBackToSettings() { document.getElementById('settings-nav').style.transform = "translateX(0%)"; }
 
         function updateClock() {
             const now = new Date();
