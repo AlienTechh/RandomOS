@@ -39,6 +39,12 @@
             left: 50%; transform: translateX(-50%); z-index: 95;
         }
 
+        /* Set up CSS variables for instant mobile updating */
+        :root {
+            --lock-bg: none;
+            --home-bg: none;
+        }
+
         .screen {
             width: 100%; height: 100%;
             background: #000; position: relative;
@@ -54,6 +60,10 @@
             background-color: #1a1a1a;
             pointer-events: none;
         }
+
+        /* Bind the backgrounds to the CSS variables */
+        #lock-wp { background-image: var(--lock-bg); }
+        #home-wp { background-image: var(--home-bg); }
 
         .wallpaper.app-active {
             transform: scale(1.15);
@@ -250,20 +260,20 @@
                 reader.onload = (e) => { 
                     tempImg = e.target.result; 
                     document.getElementById('wallpaper-modal').classList.add('active'); 
+                    // FIX: We must clear the input only AFTER the image is fully loaded
+                    input.value = ""; 
                 };
                 reader.readAsDataURL(input.files[0]);
-                input.value = ""; 
             }
         }
 
         function applyWP(type) {
-            // Immediate style update
-            const target = (type === 'lock') ? lockWP : homeWP;
-            target.style.backgroundImage = `url("${tempImg}")`;
-            
-            // Force browser to realize the background changed
-            target.offsetHeight; 
-            
+            // FIX: Using CSS variables forces mobile browsers to update instantly
+            if (type === 'lock') {
+                document.documentElement.style.setProperty('--lock-bg', `url("${tempImg}")`);
+            } else if (type === 'home') {
+                document.documentElement.style.setProperty('--home-bg', `url("${tempImg}")`);
+            }
             closeModal();
         }
 
