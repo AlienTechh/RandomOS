@@ -125,20 +125,6 @@
         .settings-header { padding: 50px 20px 20px; font-size: 24px; font-weight: bold; }
         .settings-item { padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; cursor: pointer; }
 
-        /* Download App Styles */
-        #download-app {
-            display: flex; background: #1c1c1e; z-index: 45; overflow: hidden;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
-            transform: scale(0); opacity: 0; pointer-events: none;
-            transform-origin: 200px 100px;
-            text-align: center; justify-content: center; align-items: center;
-        }
-        #download-app.open { transform: scale(1); opacity: 1; pointer-events: auto; }
-        .dl-btn {
-            background: #007aff; color: white; border: none; padding: 15px 30px;
-            border-radius: 12px; font-weight: bold; margin-top: 20px; cursor: pointer;
-        }
-
         /* Camera App Styles */
         #camera-app {
             display: flex; background: #000; z-index: 50; overflow: hidden;
@@ -218,20 +204,6 @@
                         <div class="app-icon" style="background: rgba(200, 200, 200, 0.3);">📷</div>
                         <p class="app-label">Camera</p>
                     </div>
-
-                    <div class="app-icon-container" onclick="openDownloadApp()">
-                        <div class="app-icon" style="background: linear-gradient(135deg, #007aff, #00c6ff);">⬇️</div>
-                        <p class="app-label">Download OS</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="download-app" class="view">
-                <div style="padding: 20px;">
-                    <h2 style="margin-top:0">RandomOS Installer</h2>
-                    <p style="color: #888; font-size: 14px;">The app will automatically download the version compatible with your device.</p>
-                    <button class="dl-btn" onclick="triggerOSDownload()">Download Now</button>
-                    <p id="dl-status" style="margin-top:20px; color:#5ac8fa; font-size:12px;"></p>
                 </div>
             </div>
 
@@ -285,7 +257,15 @@
         let currentStream = null;
         let facingMode = "environment"; 
 
+        // --- SOUND EFFECTS CONFIG ---
+        const powerSound = new Audio('https://www.fesliyanstudios.com/play-mp3/6030'); // Mechanical Click
+        const shutterSound = new Audio('https://www.fesliyanstudios.com/play-mp3/589'); // Camera Shutter
+        const unlockSound = new Audio('https://www.fesliyanstudios.com/play-mp3/343'); // Soft Chime
+
         function togglePower() {
+            powerSound.currentTime = 0; // Reset sound to start
+            powerSound.play(); // Play click sound
+            
             isPowerOn = !isPowerOn;
             document.getElementById('power-overlay').style.opacity = isPowerOn ? '0' : '1';
             document.getElementById('home-bar').style.opacity = isPowerOn ? '1' : '0';
@@ -306,7 +286,6 @@
                     document.getElementById('homescreen').classList.remove('unlocked');
                     document.getElementById('settings-app').classList.remove('open');
                     document.getElementById('camera-app').classList.remove('open');
-                    document.getElementById('download-app').classList.remove('open');
                     stopCamera(); 
                     lockWP.classList.remove('app-active');
                     homeWP.classList.remove('app-active');
@@ -319,27 +298,28 @@
         function handleHomeBar() {
             const settings = document.getElementById('settings-app');
             const camera = document.getElementById('camera-app');
-            const download = document.getElementById('download-app');
 
             if (settings.classList.contains('open')) {
                 settings.classList.remove('open');
+                lockWP.classList.remove('app-active');
+                homeWP.classList.remove('app-active');
             } else if (camera.classList.contains('open')) {
                 camera.classList.remove('open');
                 stopCamera(); 
-            } else if (download.classList.contains('open')) {
-                download.classList.remove('open');
+                lockWP.classList.remove('app-active');
+                homeWP.classList.remove('app-active');
             } else if (isPowerOn && !isUnlocked) {
+                // Play Unlock Sound
+                unlockSound.currentTime = 0;
+                unlockSound.play();
+                
                 isUnlocked = true;
                 document.getElementById('lockscreen').style.display = 'none';
                 document.getElementById('homescreen').style.display = 'flex';
                 lockWP.style.display = 'none';
                 homeWP.style.display = 'block';
                 requestAnimationFrame(() => document.getElementById('homescreen').classList.add('unlocked'));
-                return;
             }
-            
-            lockWP.classList.remove('app-active');
-            homeWP.classList.remove('app-active');
         }
 
         function openSettings() { 
@@ -353,12 +333,6 @@
             lockWP.classList.add('app-active');
             homeWP.classList.add('app-active');
             startCamera();
-        }
-
-        function openDownloadApp() {
-            document.getElementById('download-app').classList.add('open');
-            lockWP.classList.add('app-active');
-            homeWP.classList.add('app-active');
         }
 
         async function startCamera() {
@@ -400,9 +374,14 @@
         }
 
         function takePhoto() {
+            // Play Shutter Sound
+            shutterSound.currentTime = 0;
+            shutterSound.play();
+
             const video = document.getElementById('camera-feed');
             const canvas = document.getElementById('camera-canvas');
             const context = canvas.getContext('2d');
+
             const app = document.getElementById('camera-app');
             app.style.opacity = '0.5';
             setTimeout(() => { app.style.opacity = '1'; }, 100);
@@ -430,39 +409,6 @@
             }
         }
 
-        // --- UPDATED DOWNLOAD LOGIC ---
-        function triggerOSDownload() {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const status = document.getElementById('dl-status');
-            
-            // PUT YOUR REAL LINKS HERE:
-            const pcLink = "https://yourwebsite.com/RandomOS_Setup.exe"; 
-            const mobileLink = "https://yourwebsite.com/RandomOS.apk";
-
-            status.textContent = "Connecting to download server...";
-
-            setTimeout(() => {
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                
-                if (isMobile) {
-                    status.textContent = "Downloading RandomOS for Mobile...";
-                    a.href = mobileLink;
-                    a.download = "RandomOS.apk";
-                } else {
-                    status.textContent = "Downloading RandomOS for PC...";
-                    a.href = pcLink;
-                    a.download = "RandomOS_Setup.exe";
-                }
-
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                status.textContent = "Download started! Check your folder.";
-            }, 1000);
-        }
-
         function goToPage(num) { document.getElementById('settings-nav').style.transform = `translateX(-${num * 25}%)`; }
 
         function handleFile(input) {
@@ -481,6 +427,7 @@
                 devActive = true;
                 document.getElementById('dev-opt-item').style.display = 'flex';
                 const toast = document.getElementById('toast');
+                toast.textContent = "developer options activated";
                 toast.style.opacity = '1';
                 setTimeout(() => toast.style.opacity = '0', 2000);
             }
