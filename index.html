@@ -218,6 +218,28 @@
         }
         #camera-app.open { transform: scale(1); opacity: 1; pointer-events: auto; }
 
+        /* NEW: Bootloader & Custom OS Styles */
+        #boot-animation {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: #000; z-index: 200; display: none;
+            justify-content: center; align-items: center; color: white;
+            flex-direction: column;
+        }
+        .boot-text { font-size: 24px; font-weight: bold; letter-spacing: 2px; animate: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        #modal-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8); z-index: 150; display: none;
+            justify-content: center; align-items: center;
+        }
+        .modal-box {
+            background: #1c1c1e; width: 80%; padding: 20px; border-radius: 20px;
+            text-align: center; color: white; border: 1px solid #333;
+        }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+
     </style>
 </head>
 <body>
@@ -227,6 +249,16 @@
         <div class="punch-hole"></div>
         <div id="home-bar" onclick="handleHomeBar()"></div>
         <div id="toast">Developer options activated</div>
+
+        <div id="boot-animation">
+            <div class="boot-text" id="boot-label">RandomOS</div>
+            <div id="boot-subtext" style="font-size: 10px; margin-top: 10px; opacity: 0.6;"></div>
+        </div>
+
+        <div id="modal-overlay">
+            <div class="modal-box" id="modal-content">
+                </div>
+        </div>
 
         <div class="screen">
             <video id="live-wp-video" autoplay loop muted playsinline></video>
@@ -279,6 +311,10 @@
                     </div>
                     <div style="width: 25%;">
                         <div class="settings-header"><span onclick="goToPage(0)" style="color:#ff3b30; cursor:pointer; font-size: 18px;">❮ Back</span></div>
+                        <div class="settings-item" onclick="startUnlockSequence()">
+                            <span>Unlock Bootloader</span>
+                            <span style="color:#ff3b30; font-size: 12px;">UNSAFE</span>
+                        </div>
                         <div class="settings-item">
                             <span>Chaos Mode</span>
                             <label class="switch">
@@ -304,6 +340,7 @@
     <script>
         let isPowerOn = false, isUnlocked = false, clickCount = 0, devActive = false, chaosInterval;
         let audioPrimed = false, usingLiveWP = false;
+        let isCustomOS = false;
 
         const lockWP = document.getElementById('lock-wp'), homeWP = document.getElementById('home-wp');
         const liveWP = document.getElementById('live-wp-video');
@@ -352,6 +389,71 @@
             }
         }
 
+        // --- NEW BOOTLOADER LOGIC ---
+        function startUnlockSequence() {
+            const modal = document.getElementById('modal-overlay');
+            const content = document.getElementById('modal-content');
+            modal.style.display = 'flex';
+            content.innerHTML = `
+                <h3>Are you sure?</h3>
+                <p style="font-size: 13px; opacity:0.8;">If you unlock bootloader it will make device not secured and install custom software.</p>
+                <div class="modal-btns">
+                    <button class="modal-btn" style="background:#333; color:white;" onclick="closeModal()">No</button>
+                    <button class="modal-btn" style="background:#ff3b30; color:white;" onclick="confirmUnlock()">Yes</button>
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        function confirmUnlock() {
+            const content = document.getElementById('modal-content');
+            content.innerHTML = `
+                <h3>Success</h3>
+                <p style="font-size: 13px; opacity:0.8;">Preparing to custom rom...</p>
+                <div class="modal-btns">
+                    <button class="modal-btn" style="background:#ff3b30; color:white; flex:1;" onclick="rebootToCustom()">Restart</button>
+                </div>
+            `;
+        }
+
+        function rebootToCustom() {
+            closeModal();
+            const bootAnim = document.getElementById('boot-animation');
+            const bootLabel = document.getElementById('boot-label');
+            
+            // Turn off screen first
+            document.getElementById('power-overlay').style.opacity = '1';
+            
+            setTimeout(() => {
+                bootAnim.style.display = 'flex';
+                bootLabel.innerText = "CustomOS";
+                document.getElementById('boot-subtext').innerText = "Booting Unlocked Kernel...";
+                
+                setTimeout(() => {
+                    // "Boom" - Custom OS Loaded
+                    isCustomOS = true;
+                    applyCustomOSTheme();
+                    bootAnim.style.display = 'none';
+                    togglePower(); // Fake "Auto-on" after reboot
+                }, 4000);
+            }, 1000);
+        }
+
+        function applyCustomOSTheme() {
+            document.getElementById('os-text').innerText = "CustomOS v1.0 (Unlocked)";
+            // Change colors to indicate Custom OS
+            document.documentElement.style.setProperty('--lock-bg', "linear-gradient(45deg, #000, #400)");
+            document.body.style.background = "linear-gradient(135deg, #2e1a1a 0%, #3e1616 100%)";
+            const toast = document.getElementById('toast');
+            toast.innerText = "Welcome to CustomOS";
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 3000);
+        }
+        // --- END BOOTLOADER LOGIC ---
+
         function updateWallpaperVisibility() {
             if (usingLiveWP) {
                 lockWP.style.display = 'none';
@@ -398,27 +500,17 @@
             }
         }
 
-        // SPATIAL ZOOM FUNCTION
         function openApp(appId, iconElement) {
             const app = document.getElementById(appId);
             const rect = iconElement.getBoundingClientRect();
             const containerRect = document.querySelector('.screen').getBoundingClientRect();
-            
-            // Set zoom origin to where the icon is
             const x = (rect.left + rect.width / 2) - containerRect.left;
             const y = (rect.top + rect.height / 2) - containerRect.top;
-            
             app.style.transformOrigin = `${x}px ${y}px`;
             app.style.display = 'flex';
-            
-            // Short timeout to trigger CSS transition
-            setTimeout(() => {
-                app.classList.add('open');
-            }, 10);
-
+            setTimeout(() => { app.classList.add('open'); }, 10);
             lockWP.classList.add('app-active');
             homeWP.classList.add('app-active');
-            
             if(appId === 'camera-app') startCamera();
         }
 
