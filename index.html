@@ -123,14 +123,19 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
             padding: 25px;
+            position: relative;
+            height: 100%;
         }
 
         .app-icon-container {
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s;
+            position: relative;
+            z-index: 10;
+            touch-action: none;
         }
         .app-icon-container:active { transform: scale(0.85); }
-        .app-icon-container.dragging { opacity: 0.5; transform: scale(1.1); }
+        .app-icon-container.dragging { opacity: 0.8; transform: scale(1.1); z-index: 1000; transition: none; }
 
         .app-icon {
             width: 58px; height: 58px; border-radius: var(--app-radius);
@@ -140,7 +145,7 @@
             border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 8px 15px rgba(0,0,0,0.2);
             transition: border-radius 0.5s ease, background 0.5s ease;
-            pointer-events: none; /* Let the container handle dragging */
+            pointer-events: none; 
         }
 
         .app-label {
@@ -176,14 +181,15 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        #settings-app {
+        #settings-app, #camera-app {
             display: flex; background: rgba(15, 15, 15, 0.85); z-index: 40;
             backdrop-filter: blur(30px); overflow: hidden;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, background 0.5s ease;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
             transform: scale(0); opacity: 0; pointer-events: none;
             border-radius: 48px;
+            transform-origin: center; /* Will be overridden by JS */
         }
-        #settings-app.open { transform: scale(1); opacity: 1; pointer-events: auto; }
+        #settings-app.open, #camera-app.open { transform: scale(1); opacity: 1; pointer-events: auto; }
         
         .settings-header { 
             padding: 60px 25px 20px; 
@@ -237,14 +243,6 @@
             cursor:pointer; margin-bottom: 12px; transition: all 0.3s;
             border: 1px solid rgba(255,255,255,0.05);
         }
-
-        #camera-app {
-            display: flex; background: #000; z-index: 40;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-            transform: scale(0); opacity: 0; pointer-events: none;
-            border-radius: 48px;
-        }
-        #camera-app.open { transform: scale(1); opacity: 1; pointer-events: auto; }
 
         #boot-animation {
             position: absolute; top:0; left:0; width:100%; height:100%;
@@ -329,7 +327,7 @@
                 <p class="setup-desc" data-i18n="look_desc">Choose how your phone looks.</p>
                 <button class="btn-custom" style="color:black; background:#f1f3f4" onclick="document.getElementById('setup-wp').click()" data-i18n="choose_wp">Choose Wallpaper</button>
                 <input type="file" id="setup-wp" hidden accept="image/*" onchange="handleFile(this, 'static')">
-                <button class="setup-btn-next" onclick="nextSetup(3)" data-i18n="use_default">Use Default</button>
+                <button id="setup-personal-next" class="setup-btn-next" onclick="nextSetup(3)" data-i18n="use_default">Use Default</button>
             </div>
             <div id="step-finish" class="setup-step">
                 <h1 class="setup-title" data-i18n="all_set">All set!</h1>
@@ -366,14 +364,14 @@
                 </div>
                 <div class="app-grid" id="main-grid">
                     
-                    <div class="app-icon-container" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="openApp('settings-app', this)">
+                    <div class="app-icon-container" onpointerdown="startDragging(event)" onclick="openApp('settings-app', this)">
                         <div class="app-icon" id="settings-icon-div" style="background: linear-gradient(135deg, #8e8e93, #48484a);">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dynamic-icon"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                         </div>
                         <p class="app-label" data-i18n="settings">Settings</p>
                     </div>
 
-                    <div class="app-icon-container" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="openApp('camera-app', this)">
+                    <div class="app-icon-container" onpointerdown="startDragging(event)" onclick="openApp('camera-app', this)">
                         <div class="app-icon" id="camera-icon-div" style="background: linear-gradient(135deg, #5e5e5e, #1c1c1c);">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dynamic-icon"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                         </div>
@@ -450,7 +448,8 @@
                 about_phone: "About Phone", customization: "Customization", developer_options: "Developer Options",
                 back: "Back", device: "Device", static_wp: "Static Wallpaper", live_wp: "Live Wallpaper",
                 unlock_bootloader: "Unlock Bootloader", chaos_mode: "Chaos Mode", notifications: "Notifications",
-                system_update: "System Update", up_to_date: "Your PixelOS is up to date."
+                system_update: "System Update", up_to_date: "Your PixelOS is up to date.",
+                dev_activated: "Developer options activated", done: "Done"
             },
             ka: {
                 welcome: "მოგესალმებით", setup_desc: "თქვენი ახალი PixelOS-ის მომართვა.", start: "დაწყება",
@@ -461,7 +460,8 @@
                 about_phone: "ტელეფონის შესახებ", customization: "ვიზუალი", developer_options: "დეველოპერის პარამეტრები",
                 back: "უკან", device: "მოწყობილობა", static_wp: "სტატიკური ფონი", live_wp: "ცოცხალი ფონი",
                 unlock_bootloader: "Bootloader-ის განბლოკვა", chaos_mode: "ქაოსის რეჟიმი", notifications: "შეტყობინებები",
-                system_update: "სისტემური განახლება", up_to_date: "PixelOS განახლებულია."
+                system_update: "სისტემური განახლება", up_to_date: "PixelOS განახლებულია.",
+                dev_activated: "დეველოპერის პარამეტრები გააქტიურდა", done: "დასრულება"
             }
         };
 
@@ -471,15 +471,8 @@
 
         let currentStream = null, facingMode = "environment"; 
 
-        // Sound simulation
-        const powerSound = new Audio();
-        const shutterSound = new Audio();
-        const unlockSound = new Audio();
-
         function togglePower() {
-            if (!audioPrimed) {
-                audioPrimed = true;
-            }
+            if (!audioPrimed) { audioPrimed = true; }
             isPowerOn = !isPowerOn;
             document.getElementById('power-overlay').style.opacity = isPowerOn ? '0' : '1';
             
@@ -506,37 +499,151 @@
             }
         }
 
-        // Drag and Drop Logic
-        let draggedItem = null;
+        // NEW: Free-form Drag Logic
+        let activeIcon = null;
+        let initialX, initialY, currentX, currentY, xOffset = 0, yOffset = 0;
 
-        function handleDragStart(e) {
-            draggedItem = e.currentTarget;
-            e.currentTarget.classList.add('dragging');
+        function startDragging(e) {
+            activeIcon = e.currentTarget;
+            activeIcon.classList.add('dragging');
+            
+            // Allow absolute positioning once dragged
+            activeIcon.style.position = "absolute";
+
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - (activeIcon.offsetLeft || 0);
+                initialY = e.clientY - (activeIcon.offsetTop || 0);
+            }
+            
+            document.addEventListener('pointermove', drag);
+            document.addEventListener('pointerup', stopDragging);
         }
 
-        function handleDragOver(e) {
-            e.preventDefault();
-            const overItem = e.currentTarget;
-            if (overItem !== draggedItem) {
-                const allIcons = Array.from(mainGrid.children);
-                const draggedIndex = allIcons.indexOf(draggedItem);
-                const overIndex = allIcons.indexOf(overItem);
-
-                if (draggedIndex < overIndex) {
-                    mainGrid.insertBefore(draggedItem, overItem.nextSibling);
-                } else {
-                    mainGrid.insertBefore(draggedItem, overItem);
-                }
+        function drag(e) {
+            if (activeIcon) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                activeIcon.style.left = currentX + "px";
+                activeIcon.style.top = currentY + "px";
             }
         }
 
-        function handleDrop(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('dragging');
-            draggedItem.classList.remove('dragging');
+        function stopDragging() {
+            if (activeIcon) {
+                activeIcon.classList.remove('dragging');
+                activeIcon = null;
+                document.removeEventListener('pointermove', drag);
+                document.removeEventListener('pointerup', stopDragging);
+            }
         }
 
-        // Notification Shade Logic
+        // IMPROVED: Zoom Animation Logic (Origins from icon)
+        function openApp(appId, iconElement) {
+            if (!isUnlocked) return;
+            const app = document.getElementById(appId);
+            const rect = iconElement.getBoundingClientRect();
+            const phoneRect = document.querySelector('.screen').getBoundingClientRect();
+            
+            // Calculate center of the icon relative to the screen
+            const originX = rect.left + rect.width / 2 - phoneRect.left;
+            const originY = rect.top + rect.height / 2 - phoneRect.top;
+            
+            app.style.transformOrigin = `${originX}px ${originY}px`;
+            app.classList.add('open');
+            homeWP.classList.add('app-active');
+            
+            if (appId === 'camera-app') startCamera();
+        }
+
+        function handleHomeBar() {
+            if (!isPowerOn) return;
+            if (!isUnlocked) {
+                isUnlocked = true;
+                document.getElementById('lockscreen').style.display = 'none';
+                document.getElementById('homescreen').style.display = 'flex';
+                setTimeout(() => document.getElementById('homescreen').classList.add('unlocked'), 10);
+                updateWallpaperVisibility();
+            } else {
+                document.getElementById('settings-app').classList.remove('open');
+                document.getElementById('camera-app').classList.remove('open');
+                homeWP.classList.remove('app-active');
+                stopCamera();
+                goToPage(0);
+            }
+        }
+
+        // FIXED: Developer Options Logic
+        function handleDevClick() {
+            clickCount++;
+            if (clickCount >= 7 && !devActive) {
+                devActive = true;
+                document.getElementById('dev-opt-item').style.display = 'flex';
+                showToast(i18n[currentLang].dev_activated);
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 2500);
+        }
+
+        // FIXED: Setup Wizard done button logic
+        function handleFile(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            
+            if (type === 'static') {
+                document.documentElement.style.setProperty('--home-bg', `url(${url})`);
+                document.documentElement.style.setProperty('--lock-bg', `url(${url})`);
+                homeWP.style.backgroundImage = `url(${url})`;
+                lockWP.style.backgroundImage = `url(${url})`;
+                usingLiveWP = false;
+                liveWP.style.display = 'none';
+                
+                // Fix: Change "Use Default" to "Done"
+                const nextBtn = document.getElementById('setup-personal-next');
+                if(nextBtn) nextBtn.innerText = i18n[currentLang].done;
+
+            } else {
+                liveWP.src = url;
+                liveWP.style.display = 'block';
+                usingLiveWP = true;
+            }
+        }
+
+        // Existing helper functions
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('time').innerText = 
+                String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+
+        function goToPage(index) {
+            document.getElementById('settings-nav').style.transform = `translateX(-${index * 25}%)`;
+        }
+
+        function setLang(l) {
+            currentLang = l;
+            applyTranslations();
+            showToast(i18n[l].lang_toast);
+            nextSetup(2);
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
+            });
+        }
+
         function toggleNotificationShade() {
             if(!isUnlocked) return;
             document.getElementById('notification-shade').classList.toggle('open');
@@ -546,28 +653,11 @@
             document.getElementById('notification-shade').classList.remove('open');
         }
 
-        // Improved Language Logic
-        function setLang(l) {
-            currentLang = l;
-            applyTranslations();
-            const toast = document.getElementById('toast');
-            toast.innerText = i18n[l].lang_toast;
-            toast.style.opacity = '1';
-            setTimeout(() => toast.style.opacity = '0', 2000);
-            nextSetup(2);
+        function updateWallpaperVisibility() {
+            lockWP.style.display = isUnlocked ? 'none' : 'block';
+            homeWP.style.display = isUnlocked ? 'block' : 'none';
         }
 
-        function applyTranslations() {
-            const elements = document.querySelectorAll('[data-i18n]');
-            elements.forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (i18n[currentLang][key]) {
-                    el.innerText = i18n[currentLang][key];
-                }
-            });
-        }
-
-        // SETUP WIZARD LOGIC
         function nextSetup(stepIndex) {
             const steps = document.querySelectorAll('.setup-step');
             steps.forEach(s => s.classList.remove('active'));
@@ -576,185 +666,14 @@
 
         function finishSetup() {
             document.getElementById('setup-wizard').style.display = 'none';
-            applyCustomOSTheme();
             if(!isPowerOn) togglePower();
         }
 
-        function startUnlockSequence() {
-            const modal = document.getElementById('modal-overlay');
-            const content = document.getElementById('modal-content');
-            modal.style.display = 'flex';
-            content.innerHTML = `
-                <h3>Are you sure?</h3>
-                <p style="font-size: 13px; opacity:0.8;">If you unlock bootloader it will make device not secured and install custom software.</p>
-                <div class="modal-btns">
-                    <button class="modal-btn" style="background:#333; color:white;" onclick="closeModal()">No</button>
-                    <button class="modal-btn" style="background:#ff3b30; color:white;" onclick="confirmUnlock()">Yes</button>
-                </div>
-            `;
-        }
-
-        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
-
-        function confirmUnlock() {
-            const content = document.getElementById('modal-content');
-            content.innerHTML = `
-                <h3>Success</h3>
-                <p style="font-size: 13px; opacity:0.8;">Preparing to custom rom...</p>
-                <div class="modal-btns">
-                    <button class="modal-btn" style="background:#ff3b30; color:white; flex:1;" onclick="rebootToCustom()">Restart</button>
-                </div>
-            `;
-        }
-
-        function rebootToCustom() {
-            closeModal();
-            const bootAnim = document.getElementById('boot-animation');
-            const bootLabel = document.getElementById('boot-label');
-            const bootSubtext = document.getElementById('boot-subtext');
-            document.getElementById('power-overlay').style.opacity = '1';
-            
-            setTimeout(() => {
-                bootAnim.style.display = 'flex';
-                bootAnim.style.background = '#000';
-                
-                bootLabel.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; gap: 15px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="60px" height="60px">
-                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                        </svg>
-                        <span style="font-family: 'Segoe UI', Roboto, sans-serif; font-weight: normal; font-size: 24px; color: white;">PixelOS</span>
-                    </div>
-                `;
-                bootSubtext.style.display = 'none';
-                wipeData();
-
-                setTimeout(() => {
-                    bootAnim.style.display = 'none';
-                    document.getElementById('setup-wizard').style.display = 'flex';
-                }, 4000);
-            }, 1000);
-        }
-
-        function wipeData() {
-            devActive = false; clickCount = 0;
-            document.getElementById('dev-opt-item').style.display = 'none';
-            document.getElementById('bootloader-row').style.display = 'none';
-            usingLiveWP = false; liveWP.src = "";
-            document.documentElement.style.setProperty('--lock-bg', "none");
-            document.documentElement.style.setProperty('--home-bg', "none");
-            document.documentElement.style.setProperty('--app-radius', "50%"); 
-            
-            clearInterval(chaosInterval);
-            document.body.style.filter = 'invert(0)';
-            document.getElementById('chaos-toggle').checked = false;
-        }
-
-        function applyCustomOSTheme() {
-            isCustomOS = true;
-            document.body.style.background = "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)";
-            
-            const icons = document.querySelectorAll('.app-icon');
-            icons.forEach(icon => {
-                icon.style.background = "white";
-                icon.style.boxShadow = "0 4px 10px rgba(0,0,0,0.1)";
-            });
-
-            const dynamicIcons = document.querySelectorAll('.dynamic-icon');
-            dynamicIcons.forEach(icon => {
-                icon.setAttribute("stroke", "#1a1c1e"); 
-            });
-
-            const labels = document.querySelectorAll('.app-label');
-            labels.forEach(label => {
-                label.style.color = "#1a1c1e"; label.style.textShadow = "none"; label.style.fontWeight = "600";
-            });
-
-            const settingsApp = document.getElementById('settings-app');
-            settingsApp.style.background = "#f1f3f4"; settingsApp.style.color = "#1a1c1e";
-            
-            document.getElementById('os-text').innerText = "PixelOS";
-            document.getElementById('os-text').style.color = "#1a73e8";
-            document.getElementById('swipe-hint').style.color = "white";
-            document.getElementById('pixel-search').style.display = 'flex';
-
-            if(!document.documentElement.style.getPropertyValue('--home-bg') || document.documentElement.style.getPropertyValue('--home-bg') === "none") {
-                const pixelWP = "url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop')";
-                document.documentElement.style.setProperty('--home-bg', pixelWP);
-                document.documentElement.style.setProperty('--lock-bg', pixelWP);
-                lockWP.style.backgroundImage = pixelWP;
-                homeWP.style.backgroundImage = pixelWP;
-            }
-            applyTranslations();
-        }
-
-        function updateWallpaperVisibility() {
-            if (usingLiveWP) {
-                lockWP.style.display = 'none'; homeWP.style.display = 'none'; liveWP.style.display = 'block';
-            } else {
-                liveWP.style.display = 'none';
-                lockWP.style.display = isUnlocked ? 'none' : 'block';
-                homeWP.style.display = isUnlocked ? 'block' : 'none';
-            }
-        }
-
-        function handleHomeBar() {
-            const settings = document.getElementById('settings-app');
-            const camera = document.getElementById('camera-app');
-            closeNotificationShade();
-
-            if (settings.classList.contains('open') || camera.classList.contains('open')) {
-                settings.classList.remove('open'); camera.classList.remove('open');
-                stopCamera(); 
-                lockWP.classList.remove('app-active'); homeWP.classList.remove('app-active');
-            } else if (isPowerOn && !isUnlocked) {
-                isUnlocked = true;
-                document.getElementById('lockscreen').style.display = 'none';
-                document.getElementById('homescreen').style.display = 'flex';
-                updateWallpaperVisibility();
-                setTimeout(() => document.getElementById('homescreen').classList.add('unlocked'), 50);
-            }
-        }
-
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('time').innerText = timeStr;
-            if(isPowerOn) setTimeout(updateClock, 10000);
-        }
-
-        function openApp(appId, iconElement) {
-            const app = document.getElementById(appId);
-            app.classList.add('open');
-            lockWP.classList.add('app-active');
-            homeWP.classList.add('app-active');
-            if (appId === 'camera-app') startCamera();
-        }
-
-        function goToPage(p) {
-            document.getElementById('settings-nav').style.transform = `translateX(-${p * 25}%)`;
-        }
-
-        function handleDevClick() {
-            clickCount++;
-            if (clickCount >= 5 && !devActive) {
-                devActive = true;
-                document.getElementById('dev-opt-item').style.display = 'flex';
-                const toast = document.getElementById('toast');
-                toast.style.opacity = '1';
-                setTimeout(() => toast.style.opacity = '0', 2000);
-            }
-        }
-
-        function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode } })
-                .then(stream => {
-                    currentStream = stream;
-                    document.getElementById('camera-feed').srcObject = stream;
-                }).catch(() => alert("Camera access denied"));
+        async function startCamera() {
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
+                document.getElementById('camera-feed').srcObject = currentStream;
+            } catch (e) { console.error("Camera error", e); }
         }
 
         function stopCamera() {
@@ -764,38 +683,10 @@
             }
         }
 
-        function handleFile(input, type) {
-            const file = input.files[0];
-            if (!file) return;
-            const url = URL.createObjectURL(file);
-            if (type === 'static') {
-                document.documentElement.style.setProperty('--home-bg', `url(${url})`);
-                document.documentElement.style.setProperty('--lock-bg', `url(${url})`);
-                homeWP.style.backgroundImage = `url(${url})`;
-                lockWP.style.backgroundImage = `url(${url})`;
-                usingLiveWP = false;
-            } else {
-                liveWP.src = url;
-                usingLiveWP = true;
-            }
-            updateWallpaperVisibility();
+        // Initialize setup
+        window.onload = () => {
+            document.getElementById('setup-wizard').style.display = 'flex';
         }
-
-        function toggleChaos(toggle) {
-            if (toggle.checked) {
-                mainGrid.classList.add('chaos-active');
-                chaosInterval = setInterval(() => {
-                    document.body.style.filter = Math.random() > 0.8 ? 'invert(1)' : 'invert(0)';
-                }, 1000);
-            } else {
-                mainGrid.classList.remove('chaos-active');
-                clearInterval(chaosInterval);
-                document.body.style.filter = 'invert(0)';
-            }
-        }
-
-        // Initialize clock
-        updateClock();
     </script>
 </body>
 </html>
