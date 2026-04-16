@@ -136,12 +136,19 @@
         #settings { transform-origin: 16% 15%; background: #f2f2f7; padding: 60px 20px; }
         #tiktok { transform-origin: 38% 15%; background: #000; }
 
-        .tiktok-wrapper {
+        .video-container {
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .status-bar {
@@ -175,6 +182,7 @@
             justify-content: center;
             align-items: center;
             z-index: 700;
+            cursor: ns-resize;
         }
     </style>
 </head>
@@ -212,15 +220,10 @@
                 </div>
 
                 <div id="tiktok" class="app-window">
-                    <div class="tiktok-wrapper">
-                        <iframe 
-                            width="100%" 
-                            height="100%" 
-                            src="https://www.tiktok.com/embed/v2/7628607392866946325?controls=0&rel=0" 
-                            frameborder="0" 
-                            allow="autoplay; encrypted-media" 
-                            allowfullscreen>
-                        </iframe>
+                    <div class="video-container">
+                        <video id="thinkpad-video" loop muted playsinline>
+                            <source src="https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-laptop-on-a-desk-4444-large.mp4" type="video/mp4">
+                        </video>
                     </div>
                 </div>
 
@@ -239,6 +242,7 @@
         const lockscreen = document.getElementById('lockscreen');
         const lockBar = document.getElementById('lock-bar');
         const homeTrigger = document.getElementById('home-trigger');
+        const thinkVideo = document.getElementById('thinkpad-video');
 
         const handleStart = (e, action) => {
             startY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
@@ -265,14 +269,25 @@
         window.addEventListener('touchend', handleEnd);
 
         function unlock() { lockscreen.classList.add('unlocked'); }
-        function goHome() { document.querySelectorAll('.app-window').forEach(w => w.classList.remove('open')); }
-        function openApp(id) { document.getElementById(id).classList.add('open'); }
+        
+        function goHome() { 
+            document.querySelectorAll('.app-window').forEach(w => w.classList.remove('open'));
+            thinkVideo.pause(); // Stop video when closing app
+        }
+        
+        function openApp(id) { 
+            document.getElementById(id).classList.add('open');
+            if(id === 'tiktok') {
+                thinkVideo.play(); // Start video when opening app
+            }
+        }
 
         function togglePower() {
             const device = document.getElementById('device');
             if (isPowerOn) {
                 device.style.opacity = "0";
                 isPowerOn = false;
+                thinkVideo.pause();
             } else {
                 device.style.opacity = "1";
                 lockscreen.classList.remove('unlocked');
