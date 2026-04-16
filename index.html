@@ -97,7 +97,6 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
-            transition: background 0.5s ease;
         }
 
         .app-icon {
@@ -138,24 +137,22 @@
         }
 
         #settings { transform-origin: 16% 15%; padding: 60px 20px; color: #000; }
-        #tiktok { transform-origin: 38% 15%; background: #000; color: white; display: flex; justify-content: center; align-items: center; }
-
-        /* Settings UI */
-        .settings-list {
-            display: flex;
+        
+        /* TikTok App Styling */
+        #tiktok { 
+            transform-origin: 38% 15%; 
+            background: #000; 
+            display: flex; 
             flex-direction: column;
-            gap: 15px;
         }
-        .setting-item {
-            background: #fff;
-            padding: 15px;
-            border-radius: 12px;
+
+        .tiktok-container {
+            width: 100%;
+            height: 100%;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            cursor: pointer;
+            background: #000;
         }
 
         .status-bar {
@@ -189,6 +186,7 @@
             justify-content: center;
             align-items: center;
             z-index: 700;
+            cursor: ns-resize;
         }
     </style>
 </head>
@@ -199,7 +197,7 @@
         <div class="phone" id="device">
             <div class="punch-hole"></div>
             <div class="screen-content">
-                <div class="status-bar" id="status-bar">
+                <div class="status-bar">
                     <span id="clock">09:41</span>
                     <span style="margin-right: 25px;">5G 🔋</span> 
                 </div>
@@ -223,20 +221,21 @@
 
                 <div id="settings" class="app-window">
                     <h2 style="margin-bottom: 20px;">Settings</h2>
-                    <div class="settings-list">
-                        <div class="setting-item" onclick="changeWallpaper()">
-                            <span>Wallpaper</span>
-                            <span style="color: #007aff;">Change ›</span>
-                        </div>
-                        <div class="setting-item" onclick="toggleDarkMode()">
-                            <span>Dark Mode</span>
-                            <span id="dark-status">OFF</span>
-                        </div>
-                    </div>
+                    <p style="opacity: 0.6;">System preferences go here.</p>
                 </div>
 
                 <div id="tiktok" class="app-window">
-                    <div style="font-size: 40px; font-weight: 800;">none</div>
+                    <div class="tiktok-container">
+                        <iframe 
+                            src="https://www.tiktok.com/player/v1/7628607392866946325?music_info=1&description=1" 
+                            width="100%" 
+                            height="100%" 
+                            style="border:none;" 
+                            allow="autoplay; encrypted-media; fullscreen" 
+                            allowfullscreen
+                            loading="lazy">
+                        </iframe>
+                    </div>
                 </div>
 
                 <div class="app-home-trigger" id="home-trigger">
@@ -250,38 +249,11 @@
         let isPowerOn = true;
         let startY = 0;
         let activeAction = null; 
-        let wallIndex = 0;
-        const walls = [
-            'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070',
-            'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070',
-            'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2070'
-        ];
 
         const lockscreen = document.getElementById('lockscreen');
         const lockBar = document.getElementById('lock-bar');
         const homeTrigger = document.getElementById('home-trigger');
 
-        // Settings Logic
-        function changeWallpaper() {
-            wallIndex = (wallIndex + 1) % walls.length;
-            document.getElementById('home-bg').style.backgroundImage = `url('${walls[wallIndex]}')`;
-        }
-
-        function toggleDarkMode() {
-            const status = document.getElementById('dark-status');
-            const settings = document.getElementById('settings');
-            if (status.innerText === "OFF") {
-                settings.style.background = "#1c1c1e";
-                settings.style.color = "#fff";
-                status.innerText = "ON";
-            } else {
-                settings.style.background = "#f2f2f7";
-                settings.style.color = "#000";
-                status.innerText = "OFF";
-            }
-        }
-
-        // Swipe Logic
         const handleStart = (e, action) => {
             startY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
             activeAction = action;
