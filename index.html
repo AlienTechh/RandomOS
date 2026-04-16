@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RandomOS 1.0 Beta</title>
+    <title>unknow file</title>
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -143,12 +143,23 @@
             justify-content: center;
             align-items: center;
             background: #000;
+            position: relative;
         }
 
+        /* Video styling */
         video {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .tiktok-ui-overlay {
+            position: absolute;
+            bottom: 40px;
+            left: 15px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
         }
 
         .status-bar {
@@ -221,9 +232,13 @@
 
                 <div id="tiktok" class="app-window">
                     <div class="video-container">
-                        <video id="thinkpad-video" loop muted playsinline>
-                            <source src="https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-laptop-on-a-desk-4444-large.mp4" type="video/mp4">
+                        <video id="thinkpad-video" loop muted playsinline poster="https://via.placeholder.com/320x660/000000/FFFFFF?text=Loading+ThinkPad...">
+                            <source src="https://v.ftcdn.net/02/92/79/92/700_F_292799271_7X9VfOit2jYl7A5m5v9g69U5Z6r8K7vL_ST.mp4" type="video/mp4">
                         </video>
+                        <div class="tiktok-ui-overlay">
+                            @ThinkPad_User<br>
+                            <span style="font-weight: normal; font-size: 12px;">#thinkpad #tech #hype</span>
+                        </div>
                     </div>
                 </div>
 
@@ -272,13 +287,19 @@
         
         function goHome() { 
             document.querySelectorAll('.app-window').forEach(w => w.classList.remove('open'));
-            thinkVideo.pause(); // Stop video when closing app
+            thinkVideo.pause(); 
         }
         
         function openApp(id) { 
             document.getElementById(id).classList.add('open');
             if(id === 'tiktok') {
-                thinkVideo.play(); // Start video when opening app
+                // We use a promise check because browsers sometimes block autoplay
+                const playPromise = thinkVideo.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Playback failed. User needs to interact first.");
+                    });
+                }
             }
         }
 
