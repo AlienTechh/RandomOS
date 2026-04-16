@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RandomOS 1.0 Beta</title>
+    <title>CleanOS 1.0 Beta</title>
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -228,7 +228,7 @@
 
                 <div id="settings" class="app-window">
                     <h2 style="margin: 20px;">Settings</h2>
-                    <p style="margin: 20px;">RandomOS v1.0 Beta</p>
+                    <p style="margin: 20px;">CleanOS v1.0 Beta</p>
                 </div>
 
                 <div id="tiktok" class="app-window" onclick="document.getElementById('os-video').play()">
@@ -237,8 +237,8 @@
                             <source src="https://cdn.pixabay.com/video/2023/10/24/186358-877703816_large.mp4" type="video/mp4">
                         </video>
                         <div class="tiktok-ui-overlay">
-                            @RandomOS_User<br>
-                            <span style="font-weight: normal; font-size: 12px;">Work in progress... #tech #ui</span>
+                            @CleanOS_User<br>
+                            <span style="font-weight: normal; font-size: 12px;">The future is Clean. #CleanOS #Tech</span>
                         </div>
                     </div>
                 </div>
@@ -295,7 +295,7 @@
             document.getElementById(id).classList.add('open');
             if(id === 'tiktok') {
                 activeVideo.play().catch(() => {
-                    console.log("Autoplay blocked. Tap the screen to play!");
+                    console.log("Autoplay blocked. Tap screen to start video!");
                 });
             }
         }
