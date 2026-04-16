@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RandomOS 1.0 Beta</title>
     <style>
-        /* 1. NATIVE FEEL & RESET */
+        /* 1. NATIVE RESET */
         * {
             -webkit-tap-highlight-color: transparent;
             user-select: none;
@@ -14,9 +14,8 @@
         }
 
         body {
-            background-color: #0b0b0b;
+            background-color: #000; /* Deep black to hide frame when off */
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -25,10 +24,10 @@
             font-family: -apple-system, system-ui, sans-serif;
         }
 
-        /* 2. THE HARDWARE FRAME */
+        /* 2. THE HARDWARE */
         .phone-wrapper {
             position: relative;
-            padding-right: 12px; /* Space for buttons */
+            padding-right: 10px;
         }
 
         .phone {
@@ -36,35 +35,45 @@
             height: 650px;
             background: #000;
             border-radius: 45px;
-            border: 10px solid #222;
+            /* Frame border that disappears */
+            border: 8px solid #1a1a1a; 
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-            transition: opacity 0.3s ease;
+            transition: border-color 0.5s ease, box-shadow 0.5s ease;
+            box-shadow: 0 0 40px rgba(0,0,0,1);
         }
 
-        /* Hardware Power Button */
-        .power-btn {
-            position: absolute;
-            right: 0;
-            top: 140px;
-            width: 5px;
-            height: 60px;
-            background: #333;
-            border-radius: 0 5px 5px 0;
-            cursor: pointer;
-            z-index: 1000;
-        }
-
-        .power-btn:active { background: #444; }
-
-        /* 3. SYSTEM STATES */
+        /* Invisible state when Power is OFF */
         .phone.power-off {
+            border-color: #000; /* Merges frame with background */
+            box-shadow: none;
+        }
+
+        .phone.power-off .screen-content {
             opacity: 0;
             pointer-events: none;
         }
 
-        /* 4. LOCKSCREEN */
+        .power-btn {
+            position: absolute;
+            right: 0;
+            top: 140px;
+            width: 4px;
+            height: 50px;
+            background: #222;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        /* 3. SCREEN & LOCKSCREEN */
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s ease;
+            position: relative;
+        }
+
         #lockscreen {
             position: absolute;
             inset: 0;
@@ -73,50 +82,65 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 60px 20px;
-            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s;
         }
 
-        #lockscreen.unlocked { transform: translateY(-100%); }
+        #lockscreen.unlocked {
+            transform: scale(1.2);
+            opacity: 0;
+            pointer-events: none;
+        }
 
-        /* 5. HOME SCREEN & APPS */
-        .screen {
+        /* 4. HOME SCREEN */
+        .home-grid {
             width: 100%;
             height: 100%;
             background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964') center/cover;
-            padding: 50px 15px;
+            padding: 50px 20px;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            gap: 20px;
         }
 
-        .icon {
-            width: 55px;
-            height: 55px;
-            border-radius: 14px;
+        .app-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(15px);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.1s;
         }
 
-        /* 6. APP WINDOWS (Slide up animation, not center) */
+        .app-icon:active { transform: scale(0.9); }
+
+        /* 5. THE ZOOM ANIMATION */
         .app-window {
             position: absolute;
             inset: 0;
-            background: #f2f2f7;
+            background: #fff;
             z-index: 400;
-            transform: translateY(100%); /* Start from bottom */
-            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-            border-radius: 35px;
+            border-radius: 40px; /* Strong border radius */
+            opacity: 0;
+            pointer-events: none;
+            /* This mimics a zoom from the "bottom-left" where settings usually sits */
+            transform: scale(0.1) translateY(200px); 
+            transform-origin: center bottom;
+            transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
         }
 
-        .app-window.open { transform: translateY(0); }
+        .app-window.open {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
 
-        /* 7. UI ELEMENTS */
+        /* 6. UI ELEMENTS */
         .status-bar {
             position: absolute;
             top: 12px;
@@ -131,17 +155,15 @@
 
         .home-bar {
             position: absolute;
-            bottom: 8px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
+            width: 110px;
             height: 4px;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.4);
             border-radius: 10px;
             z-index: 700;
         }
-
-        .os-tag { margin-top: 20px; color: #444; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -150,32 +172,29 @@
         <div class="power-btn" onclick="togglePower()"></div>
 
         <div class="phone" id="device">
-            <div class="status-bar">
-                <span id="clock">05:14</span>
-                <span>5G 🔋</span>
-            </div>
-
-            <div id="lockscreen" onclick="unlock()">
-                <div style="text-align: center; color: white;">
-                    <h1 style="font-size: 50px; font-weight: 200;" class="clock-display">05:14</h1>
-                    <p>Thursday, Apr 16</p>
-                </div>
-            </div>
-
-            <div class="screen">
-                <div onclick="openApp('settings')">
-                    <div class="icon">⚙️</div>
-                </div>
-            </div>
-
-            <div id="settings" class="app-window">
+            <div class="screen-content">
+                <div class="status-bar">
+                    <span id="clock">05:14</span>
+                    <span>5G 🔋</span>
                 </div>
 
-            <div class="home-bar" onclick="goHome()"></div>
+                <div id="lockscreen" onclick="unlock()">
+                    <div style="text-align: center; color: white;">
+                        <h1 style="font-size: 50px; font-weight: 200;" id="lock-clock">05:14</h1>
+                        <p style="opacity: 0.8;">Thursday, Apr 16</p>
+                    </div>
+                </div>
+
+                <div class="home-grid">
+                    <div class="app-icon" onclick="openApp('settings')">⚙️</div>
+                </div>
+
+                <div id="settings" class="app-window"></div>
+
+                <div class="home-bar" onclick="goHome()"></div>
+            </div>
         </div>
     </div>
-
-    <div class="os-tag">RandomOS 1.0 Beta</div>
 
     <script>
         let isPowerOn = true;
@@ -185,14 +204,12 @@
             const lock = document.getElementById('lockscreen');
             
             if (isPowerOn) {
-                // Turn Off
                 device.classList.add('power-off');
                 isPowerOn = false;
             } else {
-                // Turn On
                 device.classList.remove('power-off');
-                lock.classList.remove('unlocked'); // Reset to Lockscreen
-                goHome(); // Close any open apps
+                lock.classList.remove('unlocked'); // Always boot to lockscreen
+                goHome(); 
                 isPowerOn = true;
             }
         }
@@ -209,13 +226,16 @@
             document.querySelectorAll('.app-window').forEach(w => w.classList.remove('open'));
         }
 
-        // Live Clock
-        setInterval(() => {
+        // Live Clock logic
+        function updateTime() {
             const now = new Date();
             const time = now.getHours().toString().padStart(2, '0') + ":" + 
                          now.getMinutes().toString().padStart(2, '0');
-            document.querySelectorAll('#clock, .clock-display').forEach(el => el.innerText = time);
-        }, 1000);
+            document.getElementById('clock').innerText = time;
+            document.getElementById('lock-clock').innerText = time;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
     </script>
 </body>
 </html>
