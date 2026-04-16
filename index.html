@@ -39,7 +39,6 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(255,255,255,0.05);
-            transition: background 0.3s ease;
         }
 
         .punch-hole {
@@ -51,7 +50,6 @@
             background: #000;
             border-radius: 50%;
             z-index: 1000;
-            box-shadow: inset 0 0 3px #111;
         }
 
         .power-btn {
@@ -70,7 +68,7 @@
         .screen-content {
             width: 100%;
             height: 100%;
-            transition: opacity 0.25s ease;
+            transition: opacity 0.1s ease; /* Faster screen toggle */
             position: relative;
             background: #000;
         }
@@ -84,18 +82,18 @@
             position: absolute;
             inset: 0;
             background: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070') center/cover;
-            z-index: 800; /* Higher than home bar trigger */
+            z-index: 800;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
             padding: 80px 20px 20px;
-            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.4s;
+            /* Ultra-fast unlock swipe */
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         #lockscreen.unlocked {
             transform: translateY(-100%);
-            opacity: 0;
             pointer-events: none;
         }
 
@@ -119,7 +117,11 @@
             justify-content: center;
             cursor: pointer;
             overflow: hidden;
-            /* Liquid glass removed completely */
+            transition: transform 0.1s active; /* Instant visual feedback */
+        }
+
+        .app-icon:active {
+            transform: scale(0.9);
         }
 
         .app-icon img {
@@ -128,7 +130,7 @@
             object-fit: cover;
         }
 
-        /* 5. ZOOM ANIMATION */
+        /* 5. SMOOTHNESS TEST ANIMATION (FAST) */
         .app-window {
             position: absolute;
             inset: 0;
@@ -139,7 +141,8 @@
             pointer-events: none;
             transform-origin: 20% 15%; 
             transform: scale(0);
-            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s;
+            /* Speed bumped to 0.2s for "Fast" test */
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.1s;
         }
 
         .app-window.open {
@@ -169,7 +172,6 @@
             border-radius: 10px;
         }
 
-        /* Container for the home swipe area */
         .app-home-trigger {
             position: absolute;
             bottom: 0;
@@ -207,7 +209,7 @@
                 </div>
 
                 <div class="home-grid">
-                    <div class="app-icon" onclick="openApp('settings')">
+                    <div class="app-icon" onmousedown="openApp('settings')" ontouchstart="openApp('settings')">
                         <img src="https://img.icons8.com/?size=100&id=a8NHl6SmDbn7&format=png&color=000000" alt="Settings">
                     </div>
                 </div>
@@ -228,32 +230,30 @@
         const swipeBar = document.getElementById('swipe-bar');
         const homeTrigger = document.getElementById('home-trigger');
 
-        // UNIVERSAL SWIPE LOGIC (Works for Unlock and Home)
+        // Fast Event Handlers
         const startSwipe = (e) => {
             startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
         };
 
         const endSwipeUnlock = (e) => {
             let endY = e.type.includes('touch') ? e.changedTouches[0].clientY : e.clientY;
-            if (startY - endY > 50) unlock();
+            if (startY - endY > 40) unlock();
         };
 
         const endSwipeHome = (e) => {
             let endY = e.type.includes('touch') ? e.changedTouches[0].clientY : e.clientY;
-            if (startY - endY > 40) goHome();
+            if (startY - endY > 30) goHome();
         };
 
-        // Lockscreen Listeners
         swipeBar.addEventListener('mousedown', startSwipe);
-        swipeBar.addEventListener('mouseup', endSwipeUnlock);
+        window.addEventListener('mouseup', (e) => { if(startY) endSwipeUnlock(e); startY = 0; });
         swipeBar.addEventListener('touchstart', startSwipe);
-        swipeBar.addEventListener('touchend', endSwipeUnlock);
+        window.addEventListener('touchend', endSwipeUnlock);
 
-        // Home Bar Listeners (Swipe to close apps)
         homeTrigger.addEventListener('mousedown', startSwipe);
-        homeTrigger.addEventListener('mouseup', endSwipeHome);
+        window.addEventListener('mouseup', (e) => { if(startY) endSwipeHome(e); startY = 0; });
         homeTrigger.addEventListener('touchstart', startSwipe);
-        homeTrigger.addEventListener('touchend', endSwipeHome);
+        window.addEventListener('touchend', endSwipeHome);
 
         function togglePower() {
             const device = document.getElementById('device');
@@ -274,6 +274,7 @@
         }
 
         function openApp(id) {
+            // Instant class toggle
             document.getElementById(id).classList.add('open');
         }
 
