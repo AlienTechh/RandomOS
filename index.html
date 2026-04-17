@@ -21,7 +21,17 @@
             margin: 0;
             overflow: hidden;
             font-family: -apple-system, system-ui, sans-serif;
+            transition: filter 0.5s ease;
         }
+
+        /* E-INK MODE STYLES */
+        body.eink-mode .phone { filter: grayscale(1) contrast(1.1); }
+        #eink-texture {
+            position: absolute; inset: 0; pointer-events: none; z-index: 2000;
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            opacity: 0; mix-blend-mode: multiply; transition: opacity 0.5s;
+        }
+        body.eink-mode #eink-texture { opacity: 0.4; }
 
         .phone-wrapper {
             position: relative;
@@ -39,6 +49,7 @@
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
+            transition: filter 0.5s ease;
         }
 
         .top-bezel {
@@ -91,7 +102,6 @@
         .cc-tile { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 20px; font-size: 12px; text-align: center; cursor: pointer; transition: background 0.2s, color 0.2s; }
         .cc-tile.active { background: #007aff; }
         
-        /* LOW POWER MODE SPECIFIC STYLES */
         .cc-tile.lpm-active { background: #ffcc00; color: #000; font-weight: bold; }
         body.low-power #control-center { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(15, 15, 15, 0.98); }
         body.low-power #app-drawer { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(0, 0, 0, 0.98); }
@@ -137,12 +147,19 @@
         #settings { background: #f2f2f7; color: #000; }
         .settings-header { padding: 50px 20px 10px; font-size: 28px; font-weight: bold; }
         .settings-list { background: #fff; border-top: 1px solid #ddd; margin-top: 20px; }
-        .settings-item { padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; }
+        .settings-item { padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .back-btn { color: #007aff; cursor: pointer; padding: 10px 20px; font-size: 17px; display: inline-block; }
         .sub-page { position: absolute; inset: 0; background: #f2f2f7; z-index: 10; display: none; }
         .sub-page.active { display: block; }
 
-        /* HOME SCREEN & UNLOCK ANIMATION */
+        /* TOGGLE SWITCH UI */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #34c759; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         .home-screen {
             width: 100%; height: 100%;
             background: url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070') center/cover;
@@ -184,7 +201,6 @@
         .gesture-trigger { position: absolute; bottom: 0; left: 0; width: 100%; height: 50px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 12px; z-index: 1150; }
         .home-bar { width: 80px; height: 4px; background: rgba(255,255,255,0.6); border-radius: 10px; pointer-events: auto; }
 
-        /* BROWSER */
         #browser { background: #fff; color: #000; }
         .browser-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         .browser-none-text { font-size: 48px; font-weight: 900; letter-spacing: -2px; color: #000; }
@@ -195,6 +211,7 @@
     <div class="phone-wrapper">
         <div class="power-btn" onclick="togglePower()"></div>
         <div class="phone">
+            <div id="eink-texture"></div>
             <div class="top-bezel" id="top-bezel"><div class="sensor"></div><div class="sensor"></div></div>
 
             <div class="screen-content" id="screen">
@@ -252,8 +269,15 @@
                     </div>
                     <div id="screen-settings" class="sub-page">
                         <div style="padding-top: 40px;"><div class="back-btn" onclick="hideSubPage('screen-settings')">‹ Settings</div></div>
-                        <div class="settings-header" style="font-size: 22px;">Choose refresh rate</div>
+                        <div class="settings-header" style="font-size: 22px;">Display Options</div>
                         <div class="settings-list">
+                            <div class="settings-item">
+                                <span>E-Ink Mode</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="eink-toggle" onclick="toggleEInk()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
                             <div class="settings-item" onclick="setFPSFromSettings(20)">60Hz (Real 20 FPS)</div>
                             <div class="settings-item" onclick="setFPSFromSettings(60)">120Hz (Real 60 FPS)</div>
                         </div>
@@ -282,8 +306,8 @@
         let startY = 0, isDragging = false, targetFPS = 20, lastFrameTime = 0;
         let swipeStartedOnStatusBar = false;
         
-        // LOW POWER MODE VARIABLES
         let isLowPower = false;
+        let isEInk = false;
         let savedFPS = 20;
         
         const screen = document.getElementById('screen');
@@ -311,7 +335,8 @@
             targetFPS = fps;
             let stepSetting = "cubic-bezier(0.19, 1, 0.22, 1)";
             if (fps === 20) stepSetting = "steps(10)";
-            if (fps === 10) stepSetting = "steps(5)"; // Extra choppy for LPM
+            if (fps === 10) stepSetting = "steps(5)";
+            if (fps === 4) stepSetting = "steps(2)"; // Real choppy for E-Ink
 
             const appWindows = document.querySelectorAll('.app-window');
             appWindows.forEach(w => w.style.transition = `transform 0.4s ${stepSetting}, opacity 0.25s`);
@@ -321,26 +346,38 @@
             homescreen.style.transition = `transform 0.5s ${stepSetting}, opacity 0.5s`;
         }
 
-        // New wrapper function to disable LPM if user manually changes FPS in settings
         function setFPSFromSettings(fps) {
-            if (isLowPower) {
-                toggleLowPower(); // Turns it off first
-            }
+            if (isLowPower) toggleLowPower();
+            if (isEInk) toggleEInk(); // Turn off E-Ink if they pick a standard rate
             savedFPS = fps;
             setFPS(fps);
+        }
+
+        function toggleEInk() {
+            isEInk = !isEInk;
+            document.body.classList.toggle('eink-mode', isEInk);
+            const toggleInput = document.getElementById('eink-toggle');
+            toggleInput.checked = isEInk;
+
+            if (isEInk) {
+                savedFPS = targetFPS;
+                setFPS(4); // Simulated slow E-Ink refresh
+            } else {
+                setFPS(savedFPS);
+            }
         }
 
         function toggleLowPower() {
             isLowPower = !isLowPower;
             if (isLowPower) {
-                savedFPS = targetFPS; // Remember where we were
-                setFPS(10); // Drop to 10 FPS
-                document.body.classList.add('low-power'); // Kills blurs
+                savedFPS = targetFPS;
+                setFPS(10);
+                document.body.classList.add('low-power');
                 lpmBtn.classList.add('lpm-active');
                 lpmBtn.innerText = "Low Power Mode: On";
             } else {
-                setFPS(savedFPS); // Restore previous FPS
-                document.body.classList.remove('low-power'); // Restores blurs
+                setFPS(savedFPS);
+                document.body.classList.remove('low-power');
                 lpmBtn.classList.remove('lpm-active');
                 lpmBtn.innerText = "Low Power Mode: Off";
             }
@@ -391,11 +428,11 @@
             let stepSetting = "cubic-bezier(0.19, 1, 0.22, 1)";
             if (targetFPS === 20) stepSetting = "steps(10)";
             if (targetFPS === 10) stepSetting = "steps(5)";
+            if (targetFPS === 4) stepSetting = "steps(2)";
 
             lockscreen.style.transition = `transform 0.4s ${stepSetting}`;
             homescreen.style.transition = `transform 0.5s ${stepSetting}, opacity 0.5s`;
 
-            // CC Trigger
             if (swipeStartedOnStatusBar && diff < -50 && isUnlocked) {
                 cc.classList.add('open');
                 topBezel.classList.add('cc-active');
@@ -409,7 +446,6 @@
                 return;
             }
 
-            // Unlock Logic
             if (!isUnlocked) {
                 if (diff > 120) { 
                     lockscreen.style.transform = 'translateY(-100%)'; 
