@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HyperOS Pro - Perfect Scale & Bezels</title>
+    <title>HyperOS Pro - Real Bezels Fix</title>
     <style>
         :root {
             --phone-width: 350px; 
@@ -42,7 +42,6 @@
             border-radius: 0 4px 4px 0; cursor: pointer; z-index: 200;
         }
 
-        /* FIXED BEZELS: Moved here so they stay visible when display is off */
         #phone-container {
             width: 87.5%; 
             height: 93.8%;
@@ -52,8 +51,18 @@
             overflow: hidden;
             touch-action: none;
             isolation: isolate;
-            box-shadow: inset 0 0 0 4px #000, inset 0 0 15px rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* FIXED BEZELS: This overlay stays on top of EVERYTHING */
+        .bezel-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: var(--inner-radius);
+            pointer-events: none; /* Allows you to click through to apps */
+            z-index: 1000; /* Highest priority */
+            box-shadow: inset 0 0 0 6px #000, 
+                        inset 0 0 15px rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         #display-content { width: 100%; height: 100%; transition: opacity 0.4s ease; }
@@ -80,7 +89,6 @@
             background-image: url('https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?auto=format&fit=crop&q=80&w=600');
             background-size: cover; background-position: center;
             transition: transform var(--anim-speed) var(--fluid-bezier), filter var(--anim-speed) var(--fluid-bezier);
-            transform: scale(1);
         }
 
         .app-open-active #homescreen-wall {
@@ -117,14 +125,10 @@
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: transform 0.2s;
             border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden; box-sizing: border-box;
+            overflow: hidden;
         }
 
-        /* FIXED: Messages Icon Scale and Background */
-        .app-icon.msg-special { 
-            background: #fff; 
-            padding: 13px; /* More padding to shrink the logo */
-        }
+        .app-icon.msg-special { background: #fff; padding: 13px; }
         .app-icon img { width: 100%; height: 100%; object-fit: contain; }
         .app-icon:active { transform: scale(0.85); }
         .app-label { color: white; font-size: 10px; margin-top: 5px; text-align: center; }
@@ -134,7 +138,7 @@
             z-index: 60; transform: scale(0); opacity: 0;
             border-radius: 80px; pointer-events: none;
             transition: transform var(--anim-speed) var(--fluid-bezier), opacity 0.3s ease, border-radius var(--anim-speed) var(--fluid-bezier);
-            overflow: hidden; background: #fff;
+            background: #fff;
         }
 
         #app-window.open { transform: scale(1); opacity: 1; border-radius: var(--inner-radius); pointer-events: auto; }
@@ -152,6 +156,8 @@
     <div id="phone-wrapper">
         <div class="power-btn" id="pwr-btn"></div>
         <div id="phone-container">
+            <div class="bezel-overlay"></div>
+            
             <div id="display-content">
                 <div class="punch-hole"></div>
                 <div class="status-bar"><span>09:41</span><span>📶 🔋</span></div>
@@ -187,7 +193,7 @@
                 <div id="app-window">
                     <div id="app-content" style="padding: 70px 25px; color:#000;">
                         <h2 id="app-title">Settings</h2>
-                        <p>Refined animations and permanent bezels.</p>
+                        <p>Bezels are now fixed to the top layer.</p>
                     </div>
                 </div>
 
