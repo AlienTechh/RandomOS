@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HyperOS Pro Mockup</title>
+    <title>HyperOS Pro - Smoothness Test Fix</title>
     <style>
         :root {
             --phone-width: 310px;
@@ -11,7 +11,7 @@
             --icon-radius: 14px;
             --fluid-bezier: cubic-bezier(0.32, 0.72, 0, 1);
             --glass: rgba(255, 255, 255, 0.15);
-            --inner-radius: 42px; /* Matches the inner curve of the frame */
+            --inner-radius: 42px;
         }
 
         html, body {
@@ -24,46 +24,34 @@
             font-family: 'Inter', -apple-system, sans-serif;
         }
 
-        /* Power Button - Always Visible */
         .power-btn {
             position: absolute; right: -15px; top: 130px;
             width: 5px; height: 55px; background: #222;
             border-radius: 0 4px 4px 0; cursor: pointer; z-index: 200;
         }
 
-        /* Phone Frame - Always Visible */
         #phone-container {
             width: var(--phone-width); height: var(--phone-height);
             background: #000; border: 12px solid #1a1a1a;
             border-radius: 54px; position: relative; overflow: hidden;
             box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-            touch-action: none;
-            isolation: isolate;
+            touch-action: none; isolation: isolate;
         }
 
-        /* New Display Content Layer for Power Toggle */
-        #display-content {
-            width: 100%; height: 100%;
-            transition: opacity 0.4s ease;
-        }
-
+        #display-content { width: 100%; height: 100%; transition: opacity 0.4s ease; }
         .screen-off { opacity: 0; pointer-events: none; }
 
-        /* Punch Hole & Status Bar */
         .punch-hole {
             position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-            width: 14px; height: 14px; background: #000;
-            border-radius: 50%; z-index: 100;
+            width: 14px; height: 14px; background: #000; border-radius: 50%; z-index: 100;
         }
 
         .status-bar {
             position: absolute; top: 12px; width: 100%;
             padding: 0 25px; display: flex; justify-content: space-between;
-            color: white; font-size: 11px; font-weight: 500; z-index: 90;
-            box-sizing: border-box;
+            color: white; font-size: 11px; font-weight: 500; z-index: 90; box-sizing: border-box;
         }
 
-        /* Layers */
         .layer {
             position: absolute; width: 100%; height: 100%;
             background-size: cover; background-position: center;
@@ -72,8 +60,7 @@
 
         #lockscreen {
             background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600');
-            z-index: 50; display: flex; flex-direction: column; align-items: center;
-            justify-content: center; color: white; text-align: center;
+            z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
 
         #homescreen {
@@ -81,10 +68,7 @@
             z-index: 40; padding: 60px 20px; box-sizing: border-box;
         }
 
-        /* App Grid & Dock */
-        .app-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
-        }
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
         .dock {
             position: absolute; bottom: 15px; left: 15px; right: 15px;
@@ -103,7 +87,6 @@
         .app-icon:active { transform: scale(0.85); }
         .app-label { color: white; font-size: 10px; margin-top: 5px; text-align: center; }
 
-        /* App Window - Border Radius Fixed */
         #app-window {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 60; transform: scale(0); opacity: 0;
@@ -112,28 +95,15 @@
             overflow: hidden; background: #f4f4f4;
         }
 
-        #app-window.open { 
-            transform: scale(1); 
-            opacity: 1; 
-            border-radius: var(--inner-radius); /* Now matches frame inner radius */
-            pointer-events: auto; 
-        }
+        #app-window.open { transform: scale(1); opacity: 1; border-radius: var(--inner-radius); pointer-events: auto; }
 
-        /* Settings View Content */
-        .settings-content {
-            padding: 50px 20px; color: #000; width: 100%;
-        }
-        .settings-item {
-            display: flex; align-items: center; padding: 15px 0;
-            border-bottom: 1px solid #ddd; font-size: 14px;
-        }
+        .settings-content { padding: 50px 20px; color: #000; width: 100%; }
+        .settings-item { display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #ddd; font-size: 14px; }
         .settings-icon { width: 30px; margin-right: 15px; font-size: 18px; }
 
-        /* Swipe UI */
         .nav-handle-container {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 50px;
-            z-index: 150; display: flex; justify-content: center; align-items: flex-end;
-            padding-bottom: 8px; cursor: grab;
+            z-index: 150; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px; cursor: grab;
         }
         .nav-bar { width: 100px; height: 4px; background: rgba(255,255,255,0.6); border-radius: 10px; }
         .dark-bar { background: rgba(0,0,0,0.3); }
@@ -147,48 +117,41 @@
         <div id="phone-container">
             <div id="display-content">
                 <div class="punch-hole"></div>
-                <div class="status-bar">
-                    <span>09:41</span>
-                    <span>📶 🔋</span>
-                </div>
+                <div class="status-bar"><span>09:41</span><span>📶 🔋</span></div>
                 
                 <div id="lockscreen" class="layer">
                     <h1 style="font-size: 3.5rem; margin: 0; font-weight: 200;">09:41</h1>
-                    <p style="opacity: 0.8; font-size: 14px; margin-top: 10px;">Monday, April 20</p>
                 </div>
 
                 <div id="homescreen" class="layer">
                     <div class="app-grid">
                         <div style="display:flex; flex-direction:column; align-items:center;">
-                            <div class="app-icon" data-name="Settings" data-color="#fff" style="background:#eee;">⚙️</div>
+                            <div class="app-icon" data-name="Settings" style="background:#eee;">⚙️</div>
                             <span class="app-label">Settings</span>
                         </div>
                         <div style="display:flex; flex-direction:column; align-items:center;">
-                            <div class="app-icon" data-name="Gallery" data-color="#fff" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">🖼️</div>
+                            <div class="app-icon" data-name="Gallery" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">🖼️</div>
                             <span class="app-label">Gallery</span>
                         </div>
                     </div>
 
                     <div class="dock">
-                        <div class="app-icon" data-name="Phone" data-color="#fff" style="background:#2ecc71;">📞</div>
-                        <div class="app-icon" data-name="Messages" data-color="#fff" style="background:#3498db;">💬</div>
-                        <div class="app-icon" data-name="Browser" data-color="#fff" style="background:#e67e22;">🌐</div>
-                        <div class="app-icon" data-name="Camera" data-color="#fff" style="background:#95a5a6;">📷</div>
+                        <div class="app-icon" data-name="Phone" style="background:#2ecc71;">📞</div>
+                        <div class="app-icon" data-name="Messages" style="background:#3498db;">💬</div>
+                        <div class="app-icon" data-name="Browser" style="background:#e67e22;">🌐</div>
+                        <div class="app-icon" data-name="Camera" style="background:#95a5a6;">📷</div>
                     </div>
                 </div>
 
                 <div id="app-window">
                     <div id="settings-view" class="settings-content" style="display:none;">
-                        <h2 style="margin-bottom: 30px;">Settings</h2>
-                        <div class="settings-item"><span class="settings-icon">📶</span> Wi-Fi</div>
-                        <div class="settings-item"><span class="settings-icon">🌐</span> Bluetooth</div>
-                        <div class="settings-item"><span class="settings-icon">🔔</span> Notifications</div>
-                        <div class="settings-item"><span class="settings-icon">🔋</span> Battery</div>
-                        <div class="settings-item"><span class="settings-icon">📱</span> About Phone</div>
+                        <h2>Settings</h2>
+                        <div class="settings-item"><span>📶</span> Wi-Fi</div>
+                        <div class="settings-item"><span>📱</span> About Phone</div>
                     </div>
                     <div id="generic-view" style="display:none; padding: 50px; text-align:center;">
                         <h2 id="app-title">App</h2>
-                        <p>HyperOS Experience</p>
+                        <p>Infinite Smoothness Enabled</p>
                     </div>
                 </div>
 
@@ -212,14 +175,15 @@
         let startY = 0;
         let isDragging = false;
 
-        // --- INSTANT APP LOGIC FIXED FOR DOCK ---
+        // FIXED: Universal listener for Grid AND Dock icons
         document.querySelectorAll('.app-icon').forEach(icon => {
             icon.addEventListener('pointerdown', (e) => {
                 if (!isPowerOn || !lockscreen.classList.contains('hidden_ls')) return;
                 
+                // CRITICAL: Instant Reset for Smoothness Test
                 appWindow.style.transition = 'none';
                 appWindow.classList.remove('open');
-                void appWindow.offsetWidth;
+                void appWindow.offsetWidth; // Force Reflow
 
                 const name = icon.getAttribute('data-name');
                 const rect = icon.getBoundingClientRect();
@@ -278,7 +242,7 @@
             if (isPowerOn) {
                 appWindow.classList.remove('open');
                 lockscreen.classList.remove('hidden_ls');
-                display.classList.add('screen-off'); // Now hides only display, keeps phone
+                display.classList.add('screen-off');
                 visualBar.classList.remove('dark-bar');
                 isPowerOn = false;
             } else {
