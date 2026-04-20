@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HyperWeb3</title>
+    <title>HyperOS Pro - Fluid Spam Fix</title>
     <style>
         :root {
             --phone-width: 350px; 
@@ -170,12 +170,9 @@
             z-index: 60; transform: scale(0); opacity: 0;
             border-radius: var(--inner-radius);
             pointer-events: none; 
-            transition: transform var(--anim-speed) var(--fluid-bezier), opacity 0.3s ease, border-radius var(--anim-speed) var(--fluid-bezier);
             background: #fff;
             overflow: hidden;
         }
-
-        #app-window.open { transform: scale(1); opacity: 1; border-radius: calc(var(--inner-radius) - 8px); pointer-events: auto; }
 
         .settings-container { 
             width: 100%; height: 100%; position: absolute; inset: 0; 
@@ -268,6 +265,9 @@
                             <div class="spec-line"><span class="spec-label">Android Version</span><span class="spec-value">16</span></div>
                         </div>
                     </div>
+                    <div id="gallery-ui" class="settings-container" style="background:#fff; display:flex; align-items:center; justify-content:center;">
+                        <h2 style="color:#888;">No Photos</h2>
+                    </div>
                 </div>
 
                 <div class="nav-handle-container" id="nav-trigger">
@@ -298,6 +298,12 @@
         const phone = document.getElementById('phone-container');
         const display = document.getElementById('display-content');
         const settingsUI = document.getElementById('settings-ui');
+        const galleryUI = document.getElementById('gallery-ui');
+
+        let isPowerOn = true;
+        let startY = 0;
+        let isDragging = false;
+        let activeAnim = null;
 
         document.getElementById('about-phone-trigger').addEventListener('click', () => {
             document.getElementById('main-settings').classList.replace('fade-in', 'fade-out');
@@ -308,29 +314,20 @@
             document.getElementById('about-phone-page').classList.replace('fade-in', 'fade-out');
             document.getElementById('main-settings').classList.replace('fade-out', 'fade-in');
         });
-        
-        let isPowerOn = true;
-        let startY = 0;
-        let isDragging = false;
 
         document.querySelectorAll('.app-icon').forEach(icon => {
             icon.addEventListener('pointerdown', (e) => {
-                e.preventDefault();
                 if (!isPowerOn || !lockscreen.classList.contains('unlocked-anim')) return;
                 
                 const appName = icon.getAttribute('data-name');
                 
-                // NO MORE FORCED REFLOW HERE. The browser handles mid-transition reversals flawlessly.
+                // KILL current animation if user spams
+                if (activeAnim) activeAnim.cancel();
 
-                if (appName === "Settings") {
-                    settingsUI.classList.add('active');
-                    document.getElementById('main-settings').classList.add('fade-in');
-                    document.getElementById('main-settings').classList.remove('fade-out');
-                    document.getElementById('about-phone-page').classList.add('fade-out');
-                    document.getElementById('about-phone-page').classList.remove('fade-in');
-                } else {
-                    settingsUI.classList.remove('active');
-                }
+                // Toggle content
+                [settingsUI, galleryUI].forEach(ui => ui.classList.remove('active'));
+                if (appName === "Settings") settingsUI.classList.add('active');
+                if (appName === "Gallery") galleryUI.classList.add('active');
 
                 const rect = icon.getBoundingClientRect();
                 const phoneRect = phone.getBoundingClientRect();
@@ -338,21 +335,23 @@
                 const y = ((rect.top + rect.height/2) - phoneRect.top) / phoneRect.height * 100;
                 
                 appWindow.style.transformOrigin = `${x}% ${y}%`;
+                appWindow.style.pointerEvents = 'auto';
+                phone.classList.add('app-open-active');
+                visualBar.classList.add('dark-bar');
 
-                // requestAnimationFrame ensures the transform origin is updated before the class triggers
-                requestAnimationFrame(() => {
-                    appWindow.classList.add('open');
-                    phone.classList.add('app-open-active');
-                    visualBar.classList.add('dark-bar');
+                activeAnim = appWindow.animate([
+                    { transform: 'scale(0)', opacity: 0, borderRadius: '34px' },
+                    { transform: 'scale(1)', opacity: 1, borderRadius: '26px' }
+                ], {
+                    duration: 500,
+                    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    fill: 'forwards'
                 });
             });
         });
 
         trigger.addEventListener('pointerdown', (e) => { 
-            if (isPowerOn) { 
-                isDragging = true; 
-                startY = e.clientY; 
-            } 
+            if (isPowerOn) { isDragging = true; startY = e.clientY; } 
         });
 
         window.addEventListener('pointerup', (e) => {
@@ -363,15 +362,23 @@
                     homescreen.classList.add('unlocked-ready');
                     visualBar.classList.add('dark-bar');
                 } else {
-                    appWindow.classList.remove('open');
+                    if (activeAnim) activeAnim.cancel();
                     phone.classList.remove('app-open-active');
                     
-                    setTimeout(() => {
-                        if (!appWindow.classList.contains('open')) {
-                            document.getElementById('about-phone-page').classList.replace('fade-in', 'fade-out');
-                            document.getElementById('main-settings').classList.replace('fade-out', 'fade-in');
-                        }
-                    }, 400);
+                    activeAnim = appWindow.animate([
+                        { transform: 'scale(1)', opacity: 1, borderRadius: '26px' },
+                        { transform: 'scale(0)', opacity: 0, borderRadius: '34px' }
+                    ], {
+                        duration: 400,
+                        easing: 'cubic-bezier(0.25, 1, 0.3, 1)',
+                        fill: 'forwards'
+                    });
+
+                    activeAnim.onfinish = () => {
+                        appWindow.style.pointerEvents = 'none';
+                        document.getElementById('about-phone-page').classList.replace('fade-in', 'fade-out');
+                        document.getElementById('main-settings').classList.replace('fade-out', 'fade-in');
+                    };
                 }
             }
             isDragging = false;
@@ -379,12 +386,14 @@
 
         pwrBtn.addEventListener('click', () => {
             if (isPowerOn) {
-                appWindow.classList.remove('open');
+                if (activeAnim) activeAnim.cancel();
                 phone.classList.remove('app-open-active');
                 lockscreen.classList.remove('unlocked-anim');
                 homescreen.classList.remove('unlocked-ready');
                 display.classList.add('screen-off');
                 visualBar.classList.remove('dark-bar');
+                appWindow.style.opacity = "0";
+                appWindow.style.transform = "scale(0)";
                 isPowerOn = false;
             } else {
                 display.classList.remove('screen-off');
