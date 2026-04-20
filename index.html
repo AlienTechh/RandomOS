@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HyperOS Pro - True Bezel & Icon Fix</title>
+    <title>HyperOS Pro - Fluid Reopen Fix</title>
     <style>
         :root {
             --phone-width: 350px; 
@@ -169,7 +169,7 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 60; transform: scale(0); opacity: 0;
             border-radius: var(--inner-radius);
-            pointer-events: none; /* Handled via JS to allow interruptions */
+            pointer-events: none; 
             transition: transform var(--anim-speed) var(--fluid-bezier), opacity 0.3s ease, border-radius var(--anim-speed) var(--fluid-bezier);
             background: #fff;
             overflow: hidden;
@@ -195,7 +195,6 @@
         .spec-label { font-size: 12px; color: #888; }
         .spec-value { font-size: 14px; font-weight: 600; }
 
-        /* NAV BAR FIX: Increased Z-index and removed potential blocking */
         .nav-handle-container {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 40px;
             z-index: 5000; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px;
@@ -314,16 +313,16 @@
                 
                 const appName = icon.getAttribute('data-name');
                 
+                // FORCE RESET: Remove 'open' class immediately so transition can restart
+                appWindow.classList.remove('open');
+                // Trigger a "reflow" to make the browser realize the app is gone
+                void appWindow.offsetWidth; 
+
                 if (appName === "Settings") {
                     settingsUI.style.display = "block";
                 } else {
                     settingsUI.style.display = "none";
                 }
-
-                appWindow.style.transition = 'none';
-                appWindow.classList.remove('open');
-                phone.classList.remove('app-open-active');
-                void appWindow.offsetWidth;
 
                 const rect = icon.getBoundingClientRect();
                 const phoneRect = phone.getBoundingClientRect();
@@ -332,16 +331,13 @@
                 
                 appWindow.style.transformOrigin = `${x}% ${y}%`;
 
-                requestAnimationFrame(() => {
-                    appWindow.style.transition = ''; 
-                    appWindow.classList.add('open');
-                    phone.classList.add('app-open-active');
-                    visualBar.classList.add('dark-bar');
-                });
+                // Re-open instantly
+                appWindow.classList.add('open');
+                phone.classList.add('app-open-active');
+                visualBar.classList.add('dark-bar');
             });
         });
 
-        // INTERRUPTIBLE CLOSING LOGIC
         trigger.addEventListener('pointerdown', (e) => { 
             if (isPowerOn) { 
                 isDragging = true; 
@@ -351,19 +347,19 @@
 
         window.addEventListener('pointerup', (e) => {
             if (!isDragging) return;
-            // Catching the swipe even during opening transition
             if (startY - e.clientY > 30) { 
                 if (!lockscreen.classList.contains('unlocked-anim')) {
                     lockscreen.classList.add('unlocked-anim');
                     homescreen.classList.add('unlocked-ready');
                     visualBar.classList.add('dark-bar');
                 } else {
-                    // Close the window immediately even if still opening
                     appWindow.classList.remove('open');
                     phone.classList.remove('app-open-active');
                     setTimeout(() => {
-                        document.getElementById('about-phone-page').classList.replace('fade-in', 'fade-out');
-                        document.getElementById('main-settings').classList.replace('fade-out', 'fade-in');
+                        if(!appWindow.classList.contains('open')) {
+                            document.getElementById('about-phone-page').classList.replace('fade-in', 'fade-out');
+                            document.getElementById('main-settings').classList.replace('fade-out', 'fade-in');
+                        }
                     }, 400);
                 }
             }
