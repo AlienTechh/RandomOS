@@ -9,7 +9,7 @@
         .overlay {
             position: absolute; width: 100%; height: 100%; 
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 100; background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.9) 100%); color: white;
+            z-index: 1000; background: radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.9) 100%); color: white;
         }
         #menu { display: flex; }
         #gui { position: absolute; top: 20px; right: 20px; color: #f6ca2d; text-shadow: 3px 3px #000; z-index: 10; pointer-events: none; display: none; }
@@ -18,19 +18,20 @@
         #loader-fill { width: 0%; height: 100%; background: #f6ca2d; }
 
         /* Mobile Controls */
-        .joystick-zone { position: absolute; bottom: 0; width: 50%; height: 60%; z-index: 50; display: none; }
+        .joystick-zone { position: absolute; bottom: 0; width: 50%; height: 60%; z-index: 500; display: none; }
         #left-zone { left: 0; }
         #right-zone { right: 0; }
-        /* Visible bases added here */
-        .stick-base { position: absolute; width: 100px; height: 100px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; display: none; transform: translate(-50%, -50%); pointer-events: none; }
-        .stick-knob { position: absolute; width: 40px; height: 40px; background: #f6ca2d; border-radius: 50%; top: 30px; left: 30px; opacity: 0.8; }
+        
+        /* Fixed: Made stick base visible with higher z-index */
+        .stick-base { position: absolute; width: 100px; height: 100px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; display: none; transform: translate(-50%, -50%); pointer-events: none; }
+        .stick-knob { position: absolute; width: 40px; height: 40px; background: #f6ca2d; border-radius: 50%; top: 30px; left: 30px; opacity: 0.9; }
 
-        /* NEW: Mobile Menu Button Style */
+        /* Fixed: Higher z-index and forced display when game starts */
         #mobile-pause-btn {
-            position: absolute; top: 20px; left: 20px; width: 50px; height: 50px;
-            background: rgba(255,255,255,0.2); border: 2px solid white; border-radius: 10px;
-            color: white; font-size: 30px; display: none; align-items: center; justify-content: center;
-            z-index: 101; cursor: pointer;
+            position: absolute; top: 20px; left: 20px; width: 60px; height: 60px;
+            background: rgba(0,0,0,0.5); border: 2px solid #f6ca2d; border-radius: 12px;
+            color: #f6ca2d; font-size: 35px; display: none; align-items: center; justify-content: center;
+            z-index: 2000; cursor: pointer; -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -79,12 +80,12 @@
         import * as THREE from 'three';
 
         let returnTarget = 'menu';
-        const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+        const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent) || (window.innerWidth < 800);
 
-        // NEW: Function to trigger pause on mobile
         window.pauseGameMobile = () => {
             isPlaying = false;
             document.getElementById('pause-overlay').style.display = 'flex';
+            document.getElementById('mobile-pause-btn').style.display = 'none';
         };
 
         window.startGame = () => {
@@ -100,8 +101,10 @@
                     clearInterval(iv); 
                     document.getElementById('loading').style.display='none'; 
                     document.getElementById('gui').style.display='block'; 
+                    // Forced display for mobile controls
                     if(isMobile) {
-                        document.querySelectorAll('.joystick-zone').forEach(z => z.style.display = 'block');
+                        document.getElementById('left-zone').style.display = 'block';
+                        document.getElementById('right-zone').style.display = 'block';
                         document.getElementById('mobile-pause-btn').style.display = 'flex';
                     }
                     window.resumeGame(); 
@@ -111,8 +114,22 @@
 
         window.openSettings = (t) => { returnTarget = t; document.querySelectorAll('.overlay').forEach(e=>e.style.display='none'); document.getElementById('settings-menu').style.display='flex'; };
         window.closeSettings = () => { document.getElementById('settings-menu').style.display='none'; document.getElementById(returnTarget==='menu'?'menu':'pause-overlay').style.display='flex'; sensitivity = document.getElementById('sens-slider').value * 0.0004; };
-        window.resumeGame = () => { if(!isMobile) document.body.requestPointerLock(); document.getElementById('pause-overlay').style.display='none'; isPlaying = true; };
-        window.quitToMenu = () => { isPlaying = false; document.getElementById('pause-overlay').style.display='none'; document.getElementById('gui').style.display='none'; document.getElementById('menu').style.display='flex'; if(isMobile) document.getElementById('mobile-pause-btn').style.display = 'none'; if(isMobile && document.exitFullscreen) document.exitFullscreen().catch(()=>{}); };
+        
+        window.resumeGame = () => { 
+            if(!isMobile) document.body.requestPointerLock(); 
+            document.getElementById('pause-overlay').style.display='none'; 
+            if(isMobile) document.getElementById('mobile-pause-btn').style.display = 'flex';
+            isPlaying = true; 
+        };
+
+        window.quitToMenu = () => { 
+            isPlaying = false; 
+            document.getElementById('pause-overlay').style.display='none'; 
+            document.getElementById('gui').style.display='none'; 
+            document.getElementById('menu').style.display='flex'; 
+            document.getElementById('mobile-pause-btn').style.display = 'none';
+            if(isMobile && document.exitFullscreen) document.exitFullscreen().catch(()=>{}); 
+        };
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x7ec0ee);
@@ -178,11 +195,30 @@
             const zone = document.getElementById(zoneId);
             const stick = document.getElementById(stickId);
             const knob = stick.querySelector('.stick-knob');
-            zone.addEventListener('touchstart', (e) => { const t = e.touches[0]; stick.style.display = 'block'; stick.style.left = t.clientX + 'px'; stick.style.top = t.clientY + 'px'; stick.dataset.ox = t.clientX; stick.dataset.oy = t.clientY; });
-            zone.addEventListener('touchmove', (e) => { e.preventDefault(); const t = Array.from(e.touches).find(touch => touch.target.closest('#' + zoneId)); if(!t) return; const dx = t.clientX - stick.dataset.ox, dy = t.clientY - stick.dataset.oy; const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40), angle = Math.atan2(dy, dx); const lx = Math.cos(angle) * dist, ly = Math.sin(angle) * dist; knob.style.transform = `translate(${lx}px, ${ly}px)`; callback(lx/40, ly/40); });
+            zone.addEventListener('touchstart', (e) => { 
+                const t = e.touches[0]; 
+                stick.style.display = 'block'; 
+                stick.style.left = t.clientX + 'px'; 
+                stick.style.top = t.clientY + 'px'; 
+                stick.dataset.ox = t.clientX; 
+                stick.dataset.oy = t.clientY; 
+            });
+            zone.addEventListener('touchmove', (e) => { 
+                e.preventDefault(); 
+                const t = Array.from(e.touches).find(touch => touch.target.closest('#' + zoneId)); 
+                if(!t) return; 
+                const dx = t.clientX - stick.dataset.ox, dy = t.clientY - stick.dataset.oy; 
+                const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40), angle = Math.atan2(dy, dx); 
+                const lx = Math.cos(angle) * dist, ly = Math.sin(angle) * dist; 
+                knob.style.transform = `translate(${lx}px, ${ly}px)`; 
+                callback(lx/40, ly/40); 
+            });
             zone.addEventListener('touchend', () => { stick.style.display = 'none'; callback(0, 0); });
         }
-        if(isMobile) { initJoystick('left-zone', 'move-stick', (x, y) => { touchMove.x = x; touchMove.y = y; }); initJoystick('right-zone', 'look-stick', (x, y) => { touchLook.x = x; touchLook.y = y; }); }
+        
+        // Initialize joysticks regardless of strict mobile check for testing
+        initJoystick('left-zone', 'move-stick', (x, y) => { touchMove.x = x; touchMove.y = y; }); 
+        initJoystick('right-zone', 'look-stick', (x, y) => { touchLook.x = x; touchLook.y = y; });
 
         const blurScene = new THREE.Scene();
         const blurMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.15 }));
@@ -194,12 +230,14 @@
                 const speed = 0.4;
                 const dx = Math.sin(yaw), dz = Math.cos(yaw);
                 
+                // Movement logic (Fixed W=Front, S=Back)
                 const moveForward = (keys.w ? -1 : 0) + (keys.s ? 1 : 0) + touchMove.y;
                 const moveRight = (keys.d ? 1 : 0) - (keys.a ? 1 : 0) + touchMove.x;
 
                 let nx = kvatia.position.x + (dx * moveForward * speed) + (dz * moveRight * speed);
                 let nz = kvatia.position.z + (dz * moveForward * speed) - (dx * moveRight * speed);
 
+                // Camera rotation via right joystick/touch
                 yaw -= touchLook.x * 0.05;
                 pitch = Math.max(0.1, Math.min(1.4, pitch + touchLook.y * 0.05));
 
